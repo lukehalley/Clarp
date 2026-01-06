@@ -19,6 +19,8 @@ const ASCII_LOGO = `
 ╚██████╗███████╗██║  ██║██║  ██║██║
  ╚═════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝`;
 
+const ASCII_LOGO_MOBILE = `$CLARP`;
+
 const PRODUCTS = [
   {
     name: 'clarp terminal',
@@ -159,6 +161,7 @@ export default function Home() {
   const [phase, setPhase] = useState<AnimationPhase>('typing');
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [showSmoke, setShowSmoke] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const terminalRef = useRef<HTMLDivElement>(null);
 
   const totalLines = 7; // command + empty + 4 lines + info
@@ -214,35 +217,88 @@ export default function Home() {
 
       {/* navigation */}
       <nav className="sticky top-0 z-50 bg-ivory-light/95 backdrop-blur-sm border-b-2 border-slate-dark">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Clarp size={32} />
-            <span className="font-mono text-xl font-bold text-slate-dark">$clarp</span>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Clarp size={28} className="sm:w-8 sm:h-8" />
+            <span className="font-mono text-lg sm:text-xl font-bold text-slate-dark">$clarp</span>
           </div>
-          <div className="flex items-center gap-6">
+
+          {/* Desktop nav */}
+          <div className="hidden md:flex items-center gap-6">
             <a href="#products" className="text-sm text-slate-light hover:text-danger-orange transition-colors">products</a>
             <a href="#docs" className="text-sm text-slate-light hover:text-danger-orange transition-colors">docs</a>
             <a href="#victims" className="text-sm text-slate-light hover:text-danger-orange transition-colors">hall of shame</a>
             <button className="btn-secondary text-sm px-4 py-2" onClick={() => setShowWalletModal(true)}>connect wallet</button>
           </div>
+
+          {/* Mobile hamburger */}
+          <button
+            className="md:hidden p-2 text-slate-dark"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            <div className="w-6 h-5 flex flex-col justify-between">
+              <span className={`block h-0.5 bg-slate-dark transition-transform ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`} />
+              <span className={`block h-0.5 bg-slate-dark transition-opacity ${mobileMenuOpen ? 'opacity-0' : ''}`} />
+              <span className={`block h-0.5 bg-slate-dark transition-transform ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
+            </div>
+          </button>
         </div>
+
+        {/* Mobile menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-slate-dark/20 bg-ivory-light">
+            <div className="px-4 py-4 space-y-3">
+              <a
+                href="#products"
+                className="block py-2 text-slate-light hover:text-danger-orange transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                products
+              </a>
+              <a
+                href="#docs"
+                className="block py-2 text-slate-light hover:text-danger-orange transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                docs
+              </a>
+              <a
+                href="#victims"
+                className="block py-2 text-slate-light hover:text-danger-orange transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                hall of shame
+              </a>
+              <button
+                className="w-full btn-secondary text-sm px-4 py-2 mt-2"
+                onClick={() => { setShowWalletModal(true); setMobileMenuOpen(false); }}
+              >
+                connect wallet
+              </button>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* hero section */}
-      <section className="relative py-24 px-6 overflow-hidden">
+      <section className="relative py-12 sm:py-16 lg:py-24 px-4 sm:px-6 overflow-hidden">
         {/* background grid */}
         <div className="absolute inset-0 bg-grid bg-grid opacity-30" />
 
         <div className="max-w-6xl mx-auto relative">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* left: terminal */}
             <div className="order-2 lg:order-1">
               <Terminal title="clarp">
                 <div
                   ref={terminalRef}
-                  className="h-[320px] overflow-y-auto overflow-x-hidden scrollbar-hide"
+                  className="h-[280px] sm:h-[320px] overflow-y-auto overflow-x-hidden scrollbar-hide"
                 >
-                  <pre className="ascii-art text-danger-orange mb-6">{ASCII_LOGO}</pre>
+                  {/* Mobile: simple text logo */}
+                  <pre className="ascii-art text-danger-orange mb-6 md:hidden text-2xl font-bold">{ASCII_LOGO_MOBILE}</pre>
+                  {/* Desktop: full ASCII art */}
+                  <pre className="ascii-art text-danger-orange mb-6 hidden md:block">{ASCII_LOGO}</pre>
                   <div className="space-y-1">
                     {/* Command line */}
                     {visibleLines >= 1 && (
@@ -284,23 +340,23 @@ export default function Home() {
 
             {/* right: hero copy */}
             <div className="order-1 lg:order-2 text-center lg:text-left">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-dark leading-tight mb-6 font-display">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-dark leading-tight mb-4 sm:mb-6 font-display">
                 $clarp
               </h1>
 
-              <p className="text-xl md:text-2xl text-slate-light mb-4">
+              <p className="text-lg sm:text-xl md:text-2xl text-slate-light mb-2 sm:mb-4">
                 "i'll build your revolutionary infrastructure"
               </p>
-              <p className="text-lg text-danger-orange font-mono mb-8 font-bold">
+              <p className="text-base sm:text-lg text-danger-orange font-mono mb-6 sm:mb-8 font-bold">
                 (no)
               </p>
 
-              <p className="text-slate-light mb-8 max-w-md">
+              <p className="text-sm sm:text-base text-slate-light mb-6 sm:mb-8 max-w-md mx-auto lg:mx-0">
                 chatgpt wrapper + cron job + vc money = "ai agent."
                 you bought the top. again. absolute clown behavior.
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start mb-6 sm:mb-8">
                 <div className="relative">
                   <button className="btn-primary relative overflow-hidden group" onClick={(e) => {
                     const btn = e.currentTarget;
@@ -339,21 +395,21 @@ export default function Home() {
       </section>
 
       {/* stats section */}
-      <section className="py-16 px-6 bg-slate-dark text-ivory-light border-y-4 border-danger-orange">
+      <section className="py-10 sm:py-16 px-4 sm:px-6 bg-slate-dark text-ivory-light border-y-4 border-danger-orange">
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
             {[
-              { label: 'ai16z market cap', value: '$400m', sublabel: '(for a fucking parody)' },
+              { label: 'ai16z market cap', value: '$400m', sublabel: '(for a parody)' },
               { label: 'pump.fun death rate', value: '97%', sublabel: '(you\'re in this stat)' },
               { label: 'goat codebase', value: '0', sublabel: '(zero lines. $300m mc.)' },
-              { label: 'zerebro "ml"', value: 'if-else', sublabel: '($180m. literally if-else.)' },
+              { label: 'zerebro "ml"', value: 'if-else', sublabel: '($180m. literally.)' },
             ].map((stat, i) => (
-              <div key={i} className="text-center">
-                <div className="text-3xl md:text-4xl font-mono font-bold text-danger-orange mb-1">
+              <div key={i} className="text-center p-2 sm:p-0">
+                <div className="text-2xl sm:text-3xl md:text-4xl font-mono font-bold text-danger-orange mb-1">
                   {stat.value}
                 </div>
-                <div className="text-sm font-medium text-ivory-light">{stat.label}</div>
-                <div className="text-xs text-ivory-light/50">{stat.sublabel}</div>
+                <div className="text-xs sm:text-sm font-medium text-ivory-light">{stat.label}</div>
+                <div className="text-[10px] sm:text-xs text-ivory-light/50">{stat.sublabel}</div>
               </div>
             ))}
           </div>
@@ -361,19 +417,19 @@ export default function Home() {
       </section>
 
       {/* products section */}
-      <section id="products" className="py-24 px-6">
+      <section id="products" className="py-16 sm:py-24 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-dark mb-4 font-display">
+          <div className="text-center mb-10 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-dark mb-3 sm:mb-4 font-display">
               products that don't exist
             </h2>
-            <p className="text-slate-light max-w-2xl mx-auto">
+            <p className="text-sm sm:text-base text-slate-light max-w-2xl mx-auto px-2">
               same as everything else you've aped into.
               at least these names slap harder than your -90% bags.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
             {PRODUCTS.map((product, i) => (
               <ProductCard
                 key={i}
@@ -386,36 +442,38 @@ export default function Home() {
       </section>
 
       {/* mascot section */}
-      <section className="py-24 px-6 bg-slate-dark text-ivory-light overflow-hidden relative">
+      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-dark text-ivory-light overflow-hidden relative">
         <div className="construction-stripe h-1 absolute top-0 left-0 right-0" />
         <div className="max-w-6xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <span className="badge badge-error mb-6">the mascot</span>
-              <h2 className="text-3xl md:text-4xl font-bold mb-6 font-display">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            <div className="text-center lg:text-left">
+              <span className="badge badge-error mb-4 sm:mb-6">the mascot</span>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6 font-display">
                 meet <span className="text-danger-orange">clarp</span>
               </h2>
-              <p className="text-ivory-light/70 mb-6">
+              <p className="text-sm sm:text-base text-ivory-light/70 mb-4 sm:mb-6">
                 broken, confused, perpetually under construction.
                 still outperforming your portfolio.
               </p>
-              <ul className="space-y-3 mb-8">
+              <ul className="space-y-2 sm:space-y-3 mb-6 sm:mb-8 text-left">
                 {[
                   'shipped exactly as much as ai16z (nothing)',
                   'virtuals "on-chain agents" = aws + cope',
                   'arc framework: "few if any independent builders"',
                   'empty repo. full send.',
                 ].map((item, i) => (
-                  <li key={i} className="flex items-center gap-3 text-ivory-light/80">
-                    <span className="text-danger-orange">▸</span>
+                  <li key={i} className="flex items-start gap-2 sm:gap-3 text-xs sm:text-sm text-ivory-light/80">
+                    <span className="text-danger-orange shrink-0">▸</span>
                     {item}
                   </li>
                 ))}
               </ul>
-              <button className="btn-outline">read whitepaper (it's blank)</button>
+              <button className="btn-outline text-sm sm:text-base">read whitepaper (it's blank)</button>
             </div>
-            <div className="flex justify-center">
-              <Mascot />
+            <div className="flex justify-center order-first lg:order-last">
+              <div className="scale-75 sm:scale-100">
+                <Mascot />
+              </div>
             </div>
           </div>
         </div>
@@ -423,24 +481,24 @@ export default function Home() {
       </section>
 
       {/* documentation section */}
-      <section id="docs" className="py-24 px-6">
+      <section id="docs" className="py-16 sm:py-24 px-4 sm:px-6">
         <DocsSection />
       </section>
 
       {/* roadmap section */}
-      <section id="victims" className="py-24 px-6 bg-ivory-medium border-y-2 border-slate-dark">
+      <section id="victims" className="py-16 sm:py-24 px-4 sm:px-6 bg-ivory-medium border-y-2 border-slate-dark">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
-            <span className="badge badge-error mb-4">roadmap</span>
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-dark mb-4 font-display">
+          <div className="text-center mb-10 sm:mb-16">
+            <span className="badge badge-error mb-3 sm:mb-4">roadmap</span>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-dark mb-3 sm:mb-4 font-display">
               roadmap to absolutely nothing
             </h2>
-            <p className="text-slate-light">
+            <p className="text-sm sm:text-base text-slate-light">
               still more detailed than whatever you're bagholding.
             </p>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {[
               { phase: 'q1 2025', title: 'genesis (theft)', items: ['ctrl+c ai16z. call it innovation.', 'change 3 colors. "original vision."', '"stealth mode" = nothing exists'], status: 'complete' },
               { phase: 'q2 2025', title: 'grift escalation', items: ['tweet daily until brain damage', 'spaces with fellow scammers', '"ecosystem" = telegram group'], status: 'current' },
@@ -449,7 +507,7 @@ export default function Home() {
             ].map((phase, i) => (
               <div
                 key={i}
-                className={`p-6 border-2 ${
+                className={`p-4 sm:p-6 border-2 ${
                   phase.status === 'complete'
                     ? 'bg-larp-green/5 border-larp-green'
                     : phase.status === 'current'
@@ -460,10 +518,10 @@ export default function Home() {
                 }`}
                 style={{ boxShadow: '4px 4px 0 var(--slate-dark)' }}
               >
-                <div className="flex items-start justify-between mb-4">
+                <div className="flex items-start justify-between mb-3 sm:mb-4 gap-2">
                   <div>
-                    <span className="text-xs font-mono text-slate-light">{phase.phase}</span>
-                    <h3 className="text-xl font-bold text-slate-dark">{phase.title}</h3>
+                    <span className="text-[10px] sm:text-xs font-mono text-slate-light">{phase.phase}</span>
+                    <h3 className="text-lg sm:text-xl font-bold text-slate-dark">{phase.title}</h3>
                   </div>
                   <Badge
                     variant={
@@ -477,13 +535,13 @@ export default function Home() {
                      phase.status === 'never' ? 'never' : 'copium'}
                   </Badge>
                 </div>
-                <ul className="space-y-2">
+                <ul className="space-y-1.5 sm:space-y-2">
                   {phase.items.map((item, j) => (
-                    <li key={j} className="flex items-center gap-2 text-slate-light">
-                      <span className={
+                    <li key={j} className="flex items-start gap-2 text-xs sm:text-sm text-slate-light">
+                      <span className={`shrink-0 ${
                         phase.status === 'complete' ? 'text-larp-green' :
                         phase.status === 'never' ? 'text-larp-red' : 'text-cloud-medium'
-                      }>
+                      }`}>
                         {phase.status === 'complete' ? '✓' : phase.status === 'never' ? '✗' : '○'}
                       </span>
                       {item}
@@ -502,18 +560,18 @@ export default function Home() {
       </section>
 
       {/* cta section */}
-      <section className="py-24 px-6 relative">
+      <section className="py-16 sm:py-24 px-4 sm:px-6 relative">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-slate-dark mb-6 font-display">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-dark mb-4 sm:mb-6 font-display">
             anyway
           </h2>
-          <p className="text-xl text-slate-light mb-4">
+          <p className="text-base sm:text-xl text-slate-light mb-2 sm:mb-4">
             chatgpt + cron job + vc money = "ai agent"
           </p>
-          <p className="text-lg text-danger-orange mb-8 font-mono font-bold">
+          <p className="text-sm sm:text-lg text-danger-orange mb-6 sm:mb-8 font-mono font-bold">
             you know it. you'll ape anyway. clown.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
             <button className="btn-primary">
               ape in
             </button>

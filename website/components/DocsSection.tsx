@@ -141,25 +141,25 @@ export default function DocsSection() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="text-center mb-12">
-        <span className="badge badge-error mb-4">documentation</span>
-        <h2 className="text-3xl md:text-4xl font-bold text-slate-dark mb-4 font-display">
+      <div className="text-center mb-8 sm:mb-12">
+        <span className="badge badge-error mb-3 sm:mb-4">documentation</span>
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-dark mb-3 sm:mb-4 font-display">
           how the sausage gets made
         </h2>
-        <p className="text-slate-light max-w-2xl mx-auto">
+        <p className="text-sm sm:text-base text-slate-light max-w-2xl mx-auto px-2">
           a brutally honest guide to "ai agent" development.
           more educational than any whitepaper you've read.
         </p>
       </div>
 
-      <div className="bg-ivory-medium border-2 border-slate-dark overflow-hidden" style={{ boxShadow: '6px 6px 0 var(--slate-dark)' }}>
+      <div className="bg-ivory-medium border-2 border-slate-dark overflow-hidden" style={{ boxShadow: '4px 4px 0 var(--slate-dark)' }}>
         {/* tabs */}
-        <div className="flex border-b-2 border-slate-dark overflow-x-auto">
+        <div className="flex border-b-2 border-slate-dark overflow-x-auto scrollbar-hide">
           {DOCS_TABS.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-6 py-4 text-sm font-mono whitespace-nowrap transition-colors ${
+              className={`px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-mono whitespace-nowrap transition-colors ${
                 activeTab === tab.id
                   ? 'text-danger-orange border-b-2 border-danger-orange bg-ivory-light -mb-[2px]'
                   : 'text-slate-light hover:text-slate-dark hover:bg-ivory-light/50'
@@ -172,25 +172,25 @@ export default function DocsSection() {
 
         {/* content */}
         {activeContent && (
-          <div className="p-8">
-            <div className="grid lg:grid-cols-2 gap-8">
+          <div className="p-4 sm:p-6 lg:p-8">
+            <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
               {/* left: description */}
               <div>
-                <h3 className="text-2xl font-bold text-slate-dark mb-4">
+                <h3 className="text-xl sm:text-2xl font-bold text-slate-dark mb-3 sm:mb-4">
                   {activeContent.title}
                 </h3>
-                <p className="text-slate-light mb-6">
+                <p className="text-sm sm:text-base text-slate-light mb-4 sm:mb-6">
                   {activeContent.description}
                 </p>
 
                 {/* notes */}
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   {activeContent.notes.map((note, i) => (
                     <div
                       key={i}
-                      className="flex items-start gap-2 text-sm text-slate-dark bg-larp-red/10 px-4 py-2 border-l-4 border-larp-red"
+                      className="flex items-start gap-2 text-xs sm:text-sm text-slate-dark bg-larp-red/10 px-3 sm:px-4 py-2 border-l-4 border-larp-red"
                     >
-                      <span className="text-larp-red font-bold">→</span>
+                      <span className="text-larp-red font-bold shrink-0">→</span>
                       {note}
                     </div>
                   ))}
@@ -198,9 +198,9 @@ export default function DocsSection() {
               </div>
 
               {/* right: code */}
-              <div>
+              <div className="order-first lg:order-last">
                 <Terminal title={`the-truth.js`}>
-                  <pre className="text-xs text-ivory-light/90 whitespace-pre-wrap">
+                  <pre className="text-[10px] sm:text-xs text-ivory-light/90 whitespace-pre-wrap overflow-x-auto">
                     {activeContent.code}
                   </pre>
                 </Terminal>

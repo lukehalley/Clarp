@@ -69,7 +69,7 @@
   }
 
   .terminal-body {
-    @apply p-6 overflow-x-auto;
+    @apply p-4 sm:p-6 overflow-x-auto;
     background-image:
       repeating-linear-gradient(
         0deg,
@@ -154,7 +154,7 @@
 
   /* Satirical card - harsh edges */
   .larp-card {
-    @apply relative p-6 bg-ivory-medium border-2 border-slate-dark;
+    @apply relative bg-ivory-medium border-2 border-slate-dark;
     @apply transition-all duration-300;
     box-shadow: 4px 4px 0 var(--slate-dark);
   }
@@ -201,7 +201,7 @@
 
   /* ASCII art container */
   .ascii-art {
-    @apply font-mono text-xs leading-none whitespace-pre;
+    @apply font-mono text-[10px] sm:text-xs leading-none whitespace-pre;
     text-shadow: 0 0 15px rgba(255, 107, 53, 0.5);
   }
 
@@ -219,7 +219,7 @@
 
   /* Harsh button styles */
   .btn-primary {
-    @apply px-6 py-3 bg-danger-orange text-black font-mono font-bold;
+    @apply px-4 sm:px-6 py-2.5 sm:py-3 bg-danger-orange text-black font-mono font-bold text-sm sm:text-base;
     @apply border-2 border-black transition-all duration-150;
     box-shadow: 4px 4px 0 black;
     text-transform: lowercase;
@@ -236,7 +236,7 @@
   }
 
   .btn-secondary {
-    @apply px-6 py-3 bg-transparent text-slate-dark font-mono;
+    @apply px-4 sm:px-6 py-2.5 sm:py-3 bg-transparent text-slate-dark font-mono text-sm sm:text-base;
     @apply border-2 border-slate-dark transition-all duration-150;
     box-shadow: 4px 4px 0 var(--slate-dark);
     text-transform: lowercase;
@@ -249,7 +249,7 @@
   }
 
   .btn-outline {
-    @apply px-6 py-3 bg-transparent text-danger-orange font-mono;
+    @apply px-4 sm:px-6 py-2.5 sm:py-3 bg-transparent text-danger-orange font-mono text-sm sm:text-base;
     @apply border-2 border-danger-orange transition-all duration-150;
     text-transform: lowercase;
   }

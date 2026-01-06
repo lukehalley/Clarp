@@ -34,19 +34,19 @@ export default function Mascot() {
         </div>
 
         {/* Label */}
-        <div className="text-center mt-6">
-          <div className="font-mono text-danger-orange text-2xl font-bold tracking-widest">
+        <div className="text-center mt-4 sm:mt-6">
+          <div className="font-mono text-danger-orange text-lg sm:text-2xl font-bold tracking-widest">
             C L A R P
           </div>
         </div>
       </div>
 
       {/* Warning barriers */}
-      <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 flex gap-1">
+      <div className="absolute -bottom-6 sm:-bottom-8 left-1/2 -translate-x-1/2 flex gap-0.5 sm:gap-1">
         {[...Array(7)].map((_, i) => (
           <div
             key={i}
-            className="w-3 h-5 construction-stripe rounded-sm opacity-90"
+            className="w-2 sm:w-3 h-4 sm:h-5 construction-stripe rounded-sm opacity-90"
           />
         ))}
       </div>

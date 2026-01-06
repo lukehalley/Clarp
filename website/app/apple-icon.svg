@@ -1,0 +1,25 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- CLARP apple-touch-icon -->
+  <rect width="180" height="180" fill="#D97757"/>
+
+  <!-- Left ear void -->
+  <rect x="22" y="48" width="11" height="17" fill="#0a0a09"/>
+
+  <!-- Body void -->
+  <rect x="33" y="34" width="114" height="68" fill="#0a0a09"/>
+
+  <!-- Right ear void -->
+  <rect x="147" y="48" width="11" height="17" fill="#0a0a09"/>
+
+  <!-- Left eye -->
+  <rect x="56" y="54" width="17" height="28" fill="#D97757"/>
+
+  <!-- Right eye -->
+  <rect x="107" y="54" width="17" height="28" fill="#D97757"/>
+
+  <!-- Legs -->
+  <rect x="39" y="102" width="23" height="45" fill="#0a0a09"/>
+  <rect x="73" y="102" width="17" height="45" fill="#0a0a09"/>
+  <rect x="90" y="102" width="17" height="45" fill="#0a0a09"/>
+  <rect x="118" y="102" width="23" height="45" fill="#0a0a09"/>
+</svg>

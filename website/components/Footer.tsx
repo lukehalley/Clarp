@@ -6,18 +6,18 @@ export default function Footer() {
       {/* Construction stripe */}
       <div className="construction-stripe h-1" />
 
-      <div className="max-w-6xl mx-auto px-6 py-16">
-        <div className="grid md:grid-cols-4 gap-12 mb-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12 mb-8 sm:mb-12">
           {/* Brand */}
-          <div className="md:col-span-2">
-            <div className="font-mono text-2xl font-bold mb-4">
+          <div className="sm:col-span-2">
+            <div className="font-mono text-xl sm:text-2xl font-bold mb-3 sm:mb-4">
               <span className="text-danger-orange">$</span>clarp
             </div>
-            <p className="text-ivory-light/60 mb-6 max-w-sm">
+            <p className="text-sm sm:text-base text-ivory-light/60 mb-4 sm:mb-6 max-w-sm">
               a middle finger to the vaporware industrial complex.
               $400m for if-else statements. absolute degeneracy.
             </p>
-            <div className="flex gap-4">
+            <div className="flex gap-3 sm:gap-4">
               <a
                 href="#"
                 className="w-10 h-10 bg-slate-medium flex items-center justify-center text-ivory-light/60 hover:text-danger-orange hover:bg-slate-light/20 transition-colors border border-slate-light/20"
@@ -41,8 +41,8 @@ export default function Footer() {
 
           {/* Links */}
           <div>
-            <h4 className="font-mono text-sm text-danger-orange mb-4">vaporware</h4>
-            <ul className="space-y-3">
+            <h4 className="font-mono text-xs sm:text-sm text-danger-orange mb-3 sm:mb-4">vaporware</h4>
+            <ul className="space-y-2 sm:space-y-3">
               {[
                 { name: 'clarp terminal', note: 'never' },
                 { name: 'larpscan', note: 'no' },
@@ -63,8 +63,8 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="font-mono text-sm text-danger-orange mb-4">honesty</h4>
-            <ul className="space-y-3">
+            <h4 className="font-mono text-xs sm:text-sm text-danger-orange mb-3 sm:mb-4">honesty</h4>
+            <ul className="space-y-2 sm:space-y-3">
               {[
                 { label: 'docs', note: 'you\'re looking at it' },
                 { label: 'whitepaper', note: 'blank like ai16z\'s' },
@@ -86,20 +86,20 @@ export default function Footer() {
         </div>
 
         {/* Bottom */}
-        <div className="pt-8 border-t border-slate-light/20">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-ivory-light/40 text-center md:text-left">
+        <div className="pt-6 sm:pt-8 border-t border-slate-light/20">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4">
+            <p className="text-[10px] sm:text-xs text-ivory-light/40 text-center md:text-left">
               © 2025 clarp. no rights reserved. it's a shitpost.
             </p>
-            <p className="text-xs text-ivory-light/40 font-mono">
+            <p className="text-[10px] sm:text-xs text-ivory-light/40 font-mono text-center md:text-right">
               <span className="text-larp-red">×</span> not financial advice. don't buy this. you'll lose it all anyway.
             </p>
           </div>
         </div>
 
-        {/* Easter egg */}
-        <div className="mt-12 text-center">
-          <pre className="inline-block text-[8px] text-ivory-light/20 font-mono leading-tight">
+        {/* Easter egg - hidden on mobile */}
+        <div className="mt-8 sm:mt-12 text-center hidden sm:block">
+          <pre className="inline-block text-[6px] sm:text-[8px] text-ivory-light/20 font-mono leading-tight">
 {`
     ╭───────────────────────────────────────╮
     │  you scrolled all the way down?       │
