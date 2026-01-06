@@ -1,6 +1,10 @@
 <div align="center">
 
-<img src="marketing-assets/og-image.svg" alt="$CLARP - vaporware-as-a-service" width="600" />
+<img src="marketing-assets/ticker-icon.svg" alt="$CLARP" width="128" />
+
+# $CLARP
+
+**vaporware-as-a-service**
 
 <br>
 
@@ -24,12 +28,9 @@
 
 ## wtf is this
 
-a middle finger to the vaporware industrial complex.
+they raised $400m. shipped a landing page. we did the same thing for free.
 
-while they raised **$400m** for if-else statements, we raised **$0** for the same thing.
-somehow we're the honest ones.
-
-$CLARP is the world's first **self-aware vaporware token**. we don't pretend to have a product. we don't pretend the roadmap means anything. we just... exist. like your bags after a soft rug.
+$CLARP is self-aware vaporware. no product. no roadmap. just vibes and a token.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐

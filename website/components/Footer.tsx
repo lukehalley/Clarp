@@ -67,8 +67,7 @@ export default function Footer() {
               <span className="text-danger-orange">$</span>clarp
             </div>
             <p className="text-sm sm:text-base text-ivory-light/60 mb-4 sm:mb-6 max-w-sm">
-              a middle finger to the vaporware industrial complex.
-              $400m for if-else statements. absolute degeneracy.
+              self-aware vaporware. no product. just vibes.
             </p>
             <div className="flex gap-3 sm:gap-4">
               <button
