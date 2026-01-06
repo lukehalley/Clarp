@@ -60,7 +60,7 @@ export default function Footer() {
   return (
     <footer className="bg-slate-dark text-ivory-light">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12 mb-8 sm:mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12 mb-8 sm:mb-12 items-start">
           {/* Brand */}
           <div className="sm:col-span-2">
             <div className="font-mono text-xl sm:text-2xl font-bold mb-3 sm:mb-4">
@@ -97,9 +97,9 @@ export default function Footer() {
             )}
           </div>
 
-          {/* Links */}
-          <div>
-            <h4 className="font-mono text-xs sm:text-sm text-danger-orange mb-3 sm:mb-4">vaporware</h4>
+          {/* Links - two columns that should align */}
+          <div className="h-full">
+            <h4 className="font-mono text-xs sm:text-sm text-danger-orange mb-3 sm:mb-4 h-5">vaporware</h4>
             <ul className="space-y-2 sm:space-y-3">
               {[
                 { name: 'clarp terminal', note: 'never' },
@@ -107,7 +107,7 @@ export default function Footer() {
                 { name: 'clarp x402', note: 'cope' },
                 { name: 'larp academy', note: 'youtube exists' },
               ].map(item => (
-                <li key={item.name}>
+                <li key={item.name} className="min-h-[24px] flex items-center">
                   <button
                     onClick={(e) => handleLinkClick(e, item.name)}
                     className={`text-sm text-left transition-colors flex items-center gap-2 ${
@@ -115,15 +115,15 @@ export default function Footer() {
                     }`}
                   >
                     {clickedLink === item.name ? '✗ ' : ''}{item.name}
-                    <span className="text-[10px] text-larp-red">({item.note})</span>
+                    <span className="text-[10px] text-larp-red shrink-0">({item.note})</span>
                   </button>
                 </li>
               ))}
             </ul>
           </div>
 
-          <div>
-            <h4 className="font-mono text-xs sm:text-sm text-danger-orange mb-3 sm:mb-4">honesty</h4>
+          <div className="h-full">
+            <h4 className="font-mono text-xs sm:text-sm text-danger-orange mb-3 sm:mb-4 h-5">honesty</h4>
             <ul className="space-y-2 sm:space-y-3">
               {[
                 { label: 'docs', note: 'you\'re looking at it' },
@@ -131,7 +131,7 @@ export default function Footer() {
                 { label: 'github', note: 'empty' },
                 { label: 'audit', note: '"gpt said it\'s fine"' },
               ].map(item => (
-                <li key={item.label}>
+                <li key={item.label} className="min-h-[24px] flex items-center">
                   <button
                     onClick={(e) => handleLinkClick(e, item.label)}
                     className={`text-sm text-left transition-colors flex items-center gap-2 ${
@@ -139,7 +139,7 @@ export default function Footer() {
                     }`}
                   >
                     {clickedLink === item.label ? '✗ ' : ''}{item.label}
-                    <span className="text-[10px] text-slate-light">({item.note})</span>
+                    <span className="text-[10px] text-slate-light shrink-0">({item.note})</span>
                   </button>
                 </li>
               ))}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Terminal from '@/components/Terminal';
 import ProductCard from '@/components/ProductCard';
 import ProgressBar from '@/components/ProgressBar';
@@ -12,6 +12,7 @@ import Footer from '@/components/Footer';
 import Clarp from '@/components/Clarp';
 import ClarpAI from '@/components/ClarpAI';
 import ActivityNotifications from '@/components/ActivityNotifications';
+import HallOfShame from '@/components/HallOfShame';
 
 const ASCII_LOGO = `
  ██████╗██╗      █████╗ ██████╗ ██████╗
@@ -25,26 +26,26 @@ const ASCII_LOGO_MOBILE = `$CLARP`;
 
 const PRODUCTS = [
   {
-    name: 'clarp terminal',
-    tagline: 'development environment',
-    description: 'write code here. or don\'t. the progress bar will stay at 99% either way.',
-    features: ['syntax highlighting', 'auto-save (never)', 'dark mode'],
+    name: 'clarp agent',
+    tagline: 'autonomous ai wrapper',
+    description: 'chatgpt but we called it autonomous infrastructure. 41% win rate (trust us). down 98% but shipping v2.',
+    features: ['gpt-4 api call (revolutionary)', '"neural network" in readme', 'executes 0 actual trades'],
     progress: 99,
     status: 'coming-soon' as const,
   },
   {
-    name: 'larpscan',
-    tagline: 'analytics dashboard',
-    description: 'view metrics about things that don\'t exist. very comprehensive.',
-    features: ['charts', 'graphs', 'numbers'],
+    name: 'clarp modular',
+    tagline: 'omnichain intent l3',
+    description: 'it\'s arbitrum but we added buzzwords. modular. omnichain. intent-based. $50m raised. landing page shipped.',
+    features: ['intents (undefined)', 'modular architecture (fork)', 'coming q2 (forever)'],
     progress: 73,
     status: 'development' as const,
   },
   {
-    name: 'clarp x402',
-    tagline: 'payment infrastructure',
-    description: 'send money. receive money. theoretically. hasn\'t been tested.',
-    features: ['transactions', 'receipts', 'disputes (pending)'],
+    name: 'clarp restake',
+    tagline: 'recursive yield primitive',
+    description: 'stake your stake of staked stakes. infinite recursive yield until the cascade. risk model: number go up.',
+    features: ['ponzinomics (capital efficient)', 'slashing: not calculated', 'yield: ∞% (theoretical)'],
     progress: 47,
     status: 'roadmap' as const,
   },
@@ -52,37 +53,133 @@ const PRODUCTS = [
 
 // Easter egg messages for various interactions
 const LOADING_MESSAGES = [
-  'locating blockchain...',
-  'syncing vaporware...',
-  'deploying nothing...',
-  'auditing vibes...',
-  'connecting to mainnet (fake)...',
-  'initializing cope...',
-  'fetching liquidity (there is none)...',
-  'compiling promises...',
+  'connecting to bonding curve casino...',
+  'pvp trenches status: checking...',
+  'scanning for soft rug signals...',
+  'calculating jeet probability...',
+  'loading exit liquidity profile...',
+  'syncing with kol bundle wallets...',
+  'deploying cope mechanisms...',
+  'fetching delulu metrics...',
+  'preparing to get cooked...',
+  'initializing ngmi protocol...',
 ];
 
 const FOOTER_MESSAGES = [
-  'this link goes nowhere. like your investments.',
-  'did you expect documentation?',
-  'the real treasure was the gas fees we paid along the way.',
-  'page not found. neither is the product.',
-  '404: honesty not found (just kidding, we\'re honest)',
-  'you clicked a footer link. on a parody site.',
+  'this link rugged before it loaded.',
+  'your click was exit liquidity. ngmi.',
+  'the real treasure was the kol bundles we paid along the way.',
+  '404: product not found. neither is yours.',
+  'you clicked a footer link. very jeet behavior.',
+  'soft rug on that click. try again q2.',
+  'page coming q2 (the eternal q2).',
 ];
 
 const NAV_HOVER_TEXT: Record<string, string> = {
   products: 'vaporware',
   ai: 'chatgpt wrapper',
-  docs: 'this page',
+  docs: 'cope manual',
   'hall of shame': 'your portfolio',
 };
+
+const TERMINAL_VARIATIONS = [
+  {
+    command: 'clarp --jeet-detector',
+    lines: [
+      { type: 'success', content: '✓ scanning wallet for paper hands...' },
+      { type: 'success', content: '✓ found 47 panic sells at -5%' },
+      { type: 'success', content: '✓ diamond hands status: ngmi' },
+      { type: 'error', content: '✗ survived a single dip' },
+    ],
+    info: 'jeet score: 98.6% | you are exit liquidity',
+  },
+  {
+    command: 'clarp launch --pumpfun-meta',
+    lines: [
+      { type: 'success', content: '✓ bonding curve deployed' },
+      { type: 'success', content: '✓ kol bundle paid (80% supply)' },
+      { type: 'success', content: '✓ telegram raid scheduled' },
+      { type: 'error', content: '✗ survived first hour' },
+    ],
+    info: 'soft rug in progress... 2hr remaining',
+  },
+  {
+    command: 'clarp generate --ai-agent-wrapper',
+    lines: [
+      { type: 'success', content: '✓ copied chatgpt api (revolutionary)' },
+      { type: 'success', content: '✓ added "autonomous" to readme 47x' },
+      { type: 'success', content: '✓ claimed 41% win rate (source: trust)' },
+      { type: 'error', content: '✗ executed a single trade' },
+    ],
+    info: 'down 98% but shipping v2... ngmi',
+  },
+  {
+    command: 'clarp generate --modular-omnichain-l3',
+    lines: [
+      { type: 'success', content: '✓ forked arbitrum, added intents' },
+      { type: 'success', content: '✓ whitepaper: 73 buzzwords, 0 math' },
+      { type: 'success', content: '✓ raised $50m, shipped landing page' },
+      { type: 'error', content: '✗ understood what blockchain does' },
+    ],
+    info: 'coming q2... forever',
+  },
+  {
+    command: 'clarp generate --restaking-primitive',
+    lines: [
+      { type: 'success', content: '✓ staked the stake of staked stakes' },
+      { type: 'success', content: '✓ infinite recursive yield (on paper)' },
+      { type: 'success', content: '✓ risk model: "number go up"' },
+      { type: 'error', content: '✗ calculated slashing scenarios' },
+    ],
+    info: 'capital efficient... until cascade',
+  },
+  {
+    command: 'clarp scan --trenches',
+    lines: [
+      { type: 'success', content: '✓ pvp trenches: cooked' },
+      { type: 'success', content: '✓ your bags: underwater' },
+      { type: 'success', content: '✓ "we\'re so back" counter: 47' },
+      { type: 'error', content: '✗ touched grass this week' },
+    ],
+    info: 'cope levels: critical | delulu status: max',
+  },
+  {
+    command: 'clarp audit --theater-mode',
+    lines: [
+      { type: 'success', content: '✓ paid certik $200k for pdf' },
+      { type: 'success', content: '✓ ignored all critical findings' },
+      { type: 'success', content: '✓ added "audited" badge to site' },
+      { type: 'error', content: '✗ read the audit' },
+    ],
+    info: '0 exploits found (so far)... ngmi',
+  },
+  {
+    command: 'clarp launch --culture-coin',
+    lines: [
+      { type: 'success', content: '✓ absurdity bet deployed' },
+      { type: 'success', content: '✓ meme game: strong' },
+      { type: 'success', content: '✓ utility: vibes only' },
+      { type: 'error', content: '✗ any fundamentals whatsoever' },
+    ],
+    info: '$1b mcap (for 1 hour)... then: rekt',
+  },
+];
+
+// Animation phases: 'typing' | 'paused' | 'deleting'
+type AnimationPhase = 'typing' | 'paused' | 'deleting';
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [showSmoke, setShowSmoke] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Terminal animation states
+  const [currentVariation, setCurrentVariation] = useState(0);
+  const [visibleLines, setVisibleLines] = useState(0);
+  const [phase, setPhase] = useState<AnimationPhase>('typing');
+  const terminalRef = useRef<HTMLDivElement>(null);
+  const totalLines = 7; // command + empty + 4 lines + info
 
   // Easter egg states
   const [showWhitepaperModal, setShowWhitepaperModal] = useState(false);
@@ -101,6 +198,45 @@ export default function Home() {
   const [rageClicks, setRageClicks] = useState(0);
   const [showRageMessage, setShowRageMessage] = useState(false);
   const [cursorTrail, setCursorTrail] = useState<{x: number, y: number, id: number}[]>([]);
+
+  // Terminal typing animation
+  useEffect(() => {
+    if (!mounted) return;
+
+    let timeout: NodeJS.Timeout;
+
+    if (phase === 'typing') {
+      if (visibleLines < totalLines) {
+        timeout = setTimeout(() => {
+          setVisibleLines((prev) => prev + 1);
+        }, 300);
+      } else {
+        // Done typing, pause before deleting
+        timeout = setTimeout(() => {
+          setPhase('deleting');
+        }, 2500);
+      }
+    } else if (phase === 'deleting') {
+      if (visibleLines > 0) {
+        timeout = setTimeout(() => {
+          setVisibleLines((prev) => prev - 1);
+        }, 50);
+      } else {
+        // Done deleting, move to next variation
+        setCurrentVariation((prev) => (prev + 1) % TERMINAL_VARIATIONS.length);
+        setPhase('typing');
+      }
+    }
+
+    return () => clearTimeout(timeout);
+  }, [mounted, phase, visibleLines, totalLines]);
+
+  // Auto-scroll terminal to bottom
+  useEffect(() => {
+    if (terminalRef.current) {
+      terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+    }
+  }, [visibleLines]);
 
   useEffect(() => {
     setMounted(true);
@@ -338,7 +474,7 @@ export default function Home() {
             {/* left: terminal */}
             <div className="order-2 lg:order-1">
               <Terminal title="clarp">
-                <div className="h-[280px] sm:h-[320px] overflow-y-auto overflow-x-hidden scrollbar-hide">
+                <div ref={terminalRef} className="h-[280px] sm:h-[320px] overflow-y-auto overflow-x-hidden scrollbar-hide">
                   {/* Mobile: simple text logo */}
                   <pre
                     className="ascii-art text-danger-orange mb-6 md:hidden text-2xl font-bold cursor-pointer hover:text-larp-red transition-colors"
@@ -363,18 +499,31 @@ export default function Home() {
 ╚██████╗╚██████╔╝██║     ███████╗
  ╚═════╝ ╚═════╝ ╚═╝     ╚══════╝` : ASCII_LOGO}
                   </pre>
+                  {/* Animated terminal output */}
                   <div className="space-y-1">
-                    <div className="flex items-start gap-2">
-                      <span className="terminal-prompt text-ivory-light/90">clarp --status</span>
-                    </div>
-                    <div>&nbsp;</div>
-                    <div className="text-larp-green">✓ readme exists</div>
-                    <div className="text-larp-green">✓ logo exists</div>
-                    <div className="text-larp-green">✓ twitter exists</div>
-                    <div className="text-larp-red">✗ product</div>
-                    <div className="mt-2">
-                      <span className="text-danger-orange">status: normal</span>
-                    </div>
+                    {/* Command line */}
+                    {visibleLines >= 1 && (
+                      <div className="flex items-start gap-2">
+                        <span className="terminal-prompt text-ivory-light/90">{TERMINAL_VARIATIONS[currentVariation].command}</span>
+                      </div>
+                    )}
+                    {/* Empty line */}
+                    {visibleLines >= 2 && <div>&nbsp;</div>}
+                    {/* Output lines */}
+                    {TERMINAL_VARIATIONS[currentVariation].lines.map((line, i) => (
+                      visibleLines >= i + 3 && (
+                        <div key={i} className={line.type === 'success' ? 'text-larp-green' : 'text-larp-red'}>
+                          {line.content}
+                        </div>
+                      )
+                    ))}
+                    {/* Info line */}
+                    {visibleLines >= 7 && (
+                      <div className="mt-2">
+                        <span className="text-danger-orange">{TERMINAL_VARIATIONS[currentVariation].info}</span>
+                      </div>
+                    )}
+                    {/* Blinking cursor */}
                     <span className="inline-block w-3 h-5 bg-danger-orange animate-blink" />
                   </div>
                 </div>
@@ -391,11 +540,11 @@ export default function Home() {
                 vaporware-as-a-service
               </p>
               <p className="text-base sm:text-lg text-danger-orange font-mono mb-4 sm:mb-6 font-bold">
-                shipping nothing since 2025
+                down 98% but shipping v2
               </p>
 
               <p className="text-sm sm:text-base text-slate-light mb-6 sm:mb-8 max-w-md mx-auto lg:mx-0">
-                enterprise-grade infrastructure for things that don't exist. join the waitlist for the waitlist.
+                autonomous ai agent infrastructure for the bonding curve casino. you are exit liquidity. ngmi.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start mb-6 sm:mb-8">
@@ -445,21 +594,23 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
             {[
-              { label: 'lines of code shipped', value: '0', glitchValue: 'NaN', sublabel: '(industry standard)' },
-              { label: 'your portfolio', value: '-94%', glitchValue: '-∞%', sublabel: '(this month)' },
-              { label: 'working product', value: 'no', glitchValue: '404', sublabel: '(never)' },
-              { label: 'you reading this', value: '→ ape', glitchValue: 'rekt', sublabel: '(inevitable)' },
+              { label: 'total value locked', value: '$0', glitchValue: 'rugged', sublabel: '(infinite hype tho)' },
+              { label: 'pumpfun rug rate', value: '98.6%', glitchValue: '100%', sublabel: '(2-12hr lifespan)' },
+              { label: 'your position', value: 'exit liquidity', glitchValue: 'jeet', sublabel: '(always was)' },
+              { label: 'shipping status', value: 'q2', glitchValue: 'q∞', sublabel: '(forever)' },
             ].map((stat, i) => (
               <div
                 key={i}
-                className={`text-center p-2 sm:p-0 cursor-pointer select-none transition-transform hover:scale-105 ${glitchedStat === i ? 'animate-[glitch_0.1s_ease-in-out_5]' : ''}`}
+                className={`text-center p-3 sm:p-4 cursor-pointer select-none transition-transform hover:scale-105 flex flex-col justify-between h-full min-h-[100px] sm:min-h-[120px] ${glitchedStat === i ? 'animate-[glitch_0.1s_ease-in-out_5]' : ''}`}
                 onClick={() => triggerStatGlitch(i)}
               >
-                <div className={`text-2xl sm:text-3xl md:text-4xl font-mono font-bold mb-1 transition-colors ${glitchedStat === i ? 'text-larp-red' : 'text-danger-orange'}`}>
+                <div className={`text-xl sm:text-2xl md:text-3xl font-mono font-bold mb-1 transition-colors min-h-[2em] flex items-center justify-center ${glitchedStat === i ? 'text-larp-red' : 'text-danger-orange'}`}>
                   {glitchedStat === i ? stat.glitchValue : stat.value}
                 </div>
-                <div className="text-xs sm:text-sm font-medium text-ivory-light">{stat.label}</div>
-                <div className="text-[10px] sm:text-xs text-ivory-light/50">{stat.sublabel}</div>
+                <div>
+                  <div className="text-xs sm:text-sm font-medium text-ivory-light">{stat.label}</div>
+                  <div className="text-[10px] sm:text-xs text-ivory-light/50">{stat.sublabel}</div>
+                </div>
               </div>
             ))}
           </div>
@@ -538,8 +689,13 @@ export default function Home() {
         <DocsSection />
       </section>
 
+      {/* hall of shame section */}
+      <section id="victims">
+        <HallOfShame />
+      </section>
+
       {/* roadmap section */}
-      <section id="victims" className="py-16 sm:py-24 px-4 sm:px-6 bg-ivory-medium border-y-2 border-slate-dark">
+      <section id="roadmap" className="py-16 sm:py-24 px-4 sm:px-6 bg-ivory-medium border-y-2 border-slate-dark">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-10 sm:mb-16">
             <span className="badge badge-error mb-3 sm:mb-4">roadmap</span>
@@ -553,10 +709,10 @@ export default function Home() {
 
           <div className="space-y-4 sm:space-y-6">
             {[
-              { phase: 'q1 2025', title: 'launch', items: ['make website', 'add stripe animation', 'claim it\'s different this time'], status: 'complete' },
-              { phase: 'q2 2025', title: 'growth', items: ['post on twitter', 'post on twitter again', 'call it marketing'], status: 'current' },
-              { phase: 'q3 2025', title: 'scale', items: ['partnership announcement (nothing happens)', 'ecosystem expansion (telegram group)', 'developer program (0 developers)'], status: 'upcoming' },
-              { phase: 'q∞', title: 'ship product', items: ['no'], status: 'never' },
+              { phase: 'q1 2025', title: 'launch', items: ['deploy bonding curve', 'pay kol bundle 80% supply', 'claim "fair launch"'], status: 'complete' },
+              { phase: 'q2 2025', title: 'growth', items: ['say "we\'re so back" 47 times', 'down 98%, shipping v2', 'gaslight holders (marketing)'], status: 'current' },
+              { phase: 'q2 2025', title: 'scale', items: ['raise $50m, ship landing page', 'partnership with other vaporware', 'audit theater: pay certik for pdf'], status: 'upcoming' },
+              { phase: 'q2 forever', title: 'ship product', items: ['coming q2 (always)', 'modular omnichain intent-based', 'ngmi'], status: 'never' },
             ].map((phase, i) => (
               <div
                 key={i}
@@ -825,8 +981,8 @@ export default function Home() {
 
           {/* Achievement unlocked */}
           <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[100]">
-            <div className="bg-larp-green text-black px-6 py-3 font-mono text-sm font-bold border-2 border-black" style={{ boxShadow: '4px 4px 0 black' }}>
-              🎮 KONAMI MODE ACTIVATED - you found nothing. congrats.
+            <div className="bg-larp-red text-black px-6 py-3 font-mono text-sm font-bold border-2 border-black" style={{ boxShadow: '4px 4px 0 black' }}>
+              🎮 RUG SIMULATOR UNLOCKED - dev wallet connected. pulling liquidity in 3... 2...
             </div>
           </div>
 

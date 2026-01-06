@@ -9,67 +9,80 @@ const DOCS_TABS = [
     id: 'quickstart',
     label: 'quick start',
     content: {
-      title: 'installation',
-      description: 'npm install nothing. that\'s it. that\'s the tutorial.',
-      code: `$ npm install @clarp/sdk
+      title: 'bonding curve casino',
+      description: 'step 1: ape. step 2: cope. there is no step 3.',
+      code: `$ clarp launch --pumpfun
 
-npm ERR! 404 '@clarp/sdk' is not in the npm registry
+> deploying bonding curve...
+> kol bundle: 80% allocated
+> telegram raid: scheduled
+> product: none
 
-$ npm install @clarp/core
+WARN: 98.6% of tokens rug within 2-12hrs
+WARN: you are exit liquidity
+WARN: ser this is a casino
 
-npm ERR! 404
+$ clarp --jeet-status
 
-$ npm install literally-anything-from-clarp
-
-npm ERR! have you tried buying the token instead`,
+> checking paper hands...
+> your sell threshold: -5%
+> recommendation: ngmi`,
       notes: [
-        'there\'s nothing to install',
-        'there never was',
-        'thanks for checking though',
+        'bonding curve = casino with extra steps',
+        'soft rug in progress (always)',
+        'at least we told you',
       ],
     },
   },
   {
     id: 'api',
-    label: 'api reference',
+    label: 'audit theater',
     content: {
-      title: 'endpoints',
-      description: 'all available api endpoints are listed below.',
-      code: `// endpoints:
+      title: 'security',
+      description: 'we paid $200k for a pdf. it says we\'re fine.',
+      code: `// CERTIK AUDIT RESULTS v1.0.0
 
+CRITICAL: 7 findings
+HIGH: 12 findings
+MEDIUM: 23 findings
+LOW: 47 findings
 
+STATUS: all ignored
 
+// CERTIK SCORE: 87/100
+// (score sponsored by project treasury)
 
-
-// end of documentation`,
+// see also: nothing changed
+// see also: we shipped anyway`,
       notes: [
-        'this page is intentionally blank',
-        'like most whitepapers',
-        'but at least we\'re honest about it',
+        'audited ≠ safe',
+        'badge goes on website regardless',
+        '0 exploits found (so far)',
       ],
     },
   },
   {
     id: 'examples',
-    label: 'examples',
+    label: 'tokenomics',
     content: {
-      title: 'code samples',
-      description: 'real working examples from our production codebase.',
-      code: `// example 1: basic setup
-// [this section intentionally left blank]
+      title: 'supply distribution',
+      description: 'fair launch* (*terms and conditions apply)',
+      code: `// $CLARP TOKENOMICS
 
-// example 2: advanced usage
-// [this section intentionally left blank]
+team:        20% (vested until rug)
+kol bundle:  30% (instant unlock)
+treasury:    25% ("ecosystem growth")
+liquidity:   15% (locked 7 days lol)
+community:   10% (you are here)
 
-// example 3: production deployment
-// [this section intentionally left blank]
-
-// example 4: the actual code
-console.log("coming soon");`,
+// vesting schedule:
+// - team: unlocks when you stop watching
+// - advisor: already dumped
+// - community: permanent liquidity`,
       notes: [
-        'console.log is production-ready',
-        'trust the process',
-        'shipping q4 2087',
+        'you are the 10%',
+        'they are the 90%',
+        'math checks out',
       ],
     },
   },
@@ -77,30 +90,30 @@ console.log("coming soon");`,
     id: 'faq',
     label: 'faq',
     content: {
-      title: 'frequently asked',
+      title: 'frequently coped',
       description: 'questions and their answers.',
       code: `q: when launch?
-a: soon
+a: q2 (the q2 that never ends)
 
-q: when actually?
-a: soon
+q: wen product?
+a: vibes only. roadmap: vibes only.
 
-q: is this real?
-a: define real
-
-q: should i buy?
-a: this is not financial advice
-
-q: is that a no?
-a: this is not financial advice
-
-q: what does clarp actually do?
+q: is this a rug?
 a: it's vaporware-as-a-service
-   (that's the whole product)`,
+   (technically different)
+
+q: dev do something?
+a: *becomes exit liquidity*
+
+q: why am i down 98%?
+a: shipping v2. we're so back.
+
+q: ngmi?
+a: correct.`,
       notes: [
         'these are all the questions',
-        'and all the answers',
-        'thank you for your interest in clarp',
+        'these are all the answers',
+        'cope accordingly',
       ],
     },
   },
@@ -118,7 +131,7 @@ export default function DocsSection() {
           documentation
         </h2>
         <p className="text-sm sm:text-base text-slate-light max-w-2xl mx-auto px-2">
-          everything you need to get started with clarp.
+          everything you need to get rekt with clarp.
         </p>
       </div>
 
@@ -143,9 +156,9 @@ export default function DocsSection() {
         {/* content */}
         {activeContent && (
           <div className="p-4 sm:p-6 lg:p-8">
-            <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
+            <div className="grid lg:grid-cols-2 gap-6 lg:gap-8 items-start">
               {/* left: description */}
-              <div>
+              <div className="flex flex-col min-h-[280px] sm:min-h-[320px]">
                 <h3 className="text-xl sm:text-2xl font-bold text-slate-dark mb-3 sm:mb-4">
                   {activeContent.title}
                 </h3>
@@ -153,8 +166,8 @@ export default function DocsSection() {
                   {activeContent.description}
                 </p>
 
-                {/* notes */}
-                <div className="space-y-2 sm:space-y-3">
+                {/* notes - pushed to bottom */}
+                <div className="space-y-2 sm:space-y-3 mt-auto">
                   {activeContent.notes.map((note, i) => (
                     <div
                       key={i}
@@ -168,11 +181,13 @@ export default function DocsSection() {
               </div>
 
               {/* right: code */}
-              <div className="order-first lg:order-last">
-                <Terminal title={`the-truth.js`}>
-                  <pre className="text-[10px] sm:text-xs text-ivory-light/90 whitespace-pre-wrap overflow-x-auto">
-                    {activeContent.code}
-                  </pre>
+              <div className="order-first lg:order-last h-[280px] sm:h-[320px]">
+                <Terminal title={`the-truth.js`} className="h-full flex flex-col">
+                  <div className="flex-1 overflow-y-auto scrollbar-hide">
+                    <pre className="text-[10px] sm:text-xs text-ivory-light/90 whitespace-pre-wrap">
+                      {activeContent.code}
+                    </pre>
+                  </div>
                 </Terminal>
               </div>
             </div>

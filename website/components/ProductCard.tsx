@@ -6,14 +6,16 @@ import ProgressBar from './ProgressBar';
 import Button from './Button';
 
 const LOADING_EXCUSES = [
-  'fetching data from blockchain (lie)...',
-  'connecting to smart contract (probably fine)...',
-  'loading documentation (there is none)...',
-  'initializing dashboard (static image)...',
-  'syncing with mainnet (localhost)...',
-  'verifying your bag (empty)...',
-  'calculating returns (negative)...',
-  'compiling typescript (forever)...',
+  'connecting to bonding curve (casino)...',
+  'loading ai wrapper (it\'s chatgpt)...',
+  'calculating jeet probability (high)...',
+  'syncing with kol bundle wallets...',
+  'fetching your exit liquidity status...',
+  'deploying cope mechanisms...',
+  'checking soft rug timeline...',
+  'preparing q2 (the eternal q2)...',
+  'verifying ngmi status: confirmed...',
+  'loading modular intent omnichain...',
 ];
 
 interface ProductCardProps {
@@ -72,7 +74,7 @@ export default function ProductCard({
 
   return (
     <div
-      className="larp-card animate-slide-up p-4 sm:p-6"
+      className="larp-card animate-slide-up p-4 sm:p-6 h-full flex flex-col"
       style={{ animationDelay: `${delay}ms` }}
     >
       {/* Status badge */}
@@ -87,8 +89,8 @@ export default function ProductCard({
       {/* Description */}
       <p className="text-slate-light text-xs sm:text-sm mb-4 sm:mb-6">{description}</p>
 
-      {/* Features */}
-      <ul className="space-y-1.5 sm:space-y-2 mb-4 sm:mb-6">
+      {/* Features - grows to fill available space */}
+      <ul className="space-y-1.5 sm:space-y-2 mb-4 sm:mb-6 flex-grow">
         {features.map((feature, i) => (
           <li key={i} className="flex items-center gap-2 text-xs sm:text-sm text-slate-light">
             <span className="text-cloud-medium shrink-0">▸</span>
@@ -97,8 +99,10 @@ export default function ProductCard({
         ))}
       </ul>
 
-      {/* Progress */}
-      <ProgressBar progress={progress} label="Development Progress" showPercent interactive />
+      {/* Progress - pushed to bottom */}
+      <div className="mt-auto">
+        <ProgressBar progress={progress} label="Development Progress" showPercent interactive />
+      </div>
 
       {/* CTA */}
       <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-cloud-light">
