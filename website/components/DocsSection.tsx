@@ -11,10 +11,10 @@ const DOCS_TABS = [
     content: {
       title: 'how to build nothing',
       description: 'follow these steps to create your own "ai agent" and raise $10m from vcs who don\'t know what docker is.',
-      code: `$ npm install @cla/bullshit
+      code: `$ npm install @clarp/bullshit
 
 # initialize your "revolutionary infrastructure"
-$ cla init --mode=scam
+$ clarp init --mode=scam
 
 generating vaporware...
 ✓ copied ai16z's readme
@@ -28,7 +28,7 @@ time to announce your $5m raise.`,
       notes: [
         'this is literally how your bags were built',
         'not joking. go check the repos. absolute state of crypto.',
-        'some 17yo did this yesterday and hit $30m mc. ngmi.',
+        'some 17yo did this yesterday and hit $30m mc.',
       ],
     },
   },
@@ -129,7 +129,7 @@ a: yes. quote from one (deleted): "i didn't
       notes: [
         'follow @larry0x, @kelvinfichter, @punk6529 for more blackpills',
         'every figure here is real. go verify. do your own fucking research.',
-        'ngmi but at least you\'ll understand why',
+        'at least you\'ll understand why',
       ],
     },
   },

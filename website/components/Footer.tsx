@@ -11,7 +11,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="md:col-span-2">
             <div className="font-mono text-2xl font-bold mb-4">
-              <span className="text-danger-orange">$</span>cla
+              <span className="text-danger-orange">$</span>clarp
             </div>
             <p className="text-ivory-light/60 mb-6 max-w-sm">
               a middle finger to the vaporware industrial complex.
@@ -44,9 +44,9 @@ export default function Footer() {
             <h4 className="font-mono text-sm text-danger-orange mb-4">vaporware</h4>
             <ul className="space-y-3">
               {[
-                { name: 'cla terminal', note: 'never' },
-                { name: 'larpscan', note: 'lol no' },
-                { name: 'cla x402', note: 'cope' },
+                { name: 'clarp terminal', note: 'never' },
+                { name: 'larpscan', note: 'no' },
+                { name: 'clarp x402', note: 'cope' },
                 { name: 'larp academy', note: 'youtube exists' },
               ].map(item => (
                 <li key={item.name}>
@@ -89,7 +89,7 @@ export default function Footer() {
         <div className="pt-8 border-t border-slate-light/20">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-xs text-ivory-light/40 text-center md:text-left">
-              © 2025 claude larp agent. no rights reserved. it's a shitpost.
+              © 2025 clarp. no rights reserved. it's a shitpost.
             </p>
             <p className="text-xs text-ivory-light/40 font-mono">
               <span className="text-larp-red">×</span> not financial advice. don't buy this. you'll lose it all anyway.
@@ -106,8 +106,8 @@ export default function Footer() {
     │  just like checking "ai agent" repos  │
     │  and finding nothing but readmes.     │
     │                                       │
-    │  wagmi                                │
-    │  (lmao ngmi)                          │
+    │  anyway                               │
+    │                                       │
     ╰───────────────────────────────────────╯
 `}
           </pre>

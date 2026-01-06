@@ -1,46 +1,73 @@
-# Claude LARP Agent - Design Guide
+# Clarp - Design Guide
 
 ## Brand Overview
 
-**Claude LARP Agent ($CLA)** parodies Claude Code - satirizing the AI agent LARP meta by being a "coding assistant that exclusively generates vaporware."
+**Clarp ($CLARP)** satirizes the AI agent LARP meta by being a "coding assistant that exclusively generates vaporware."
 
 ---
 
 ## Moodboard Reference
 
 See `/moodboard/` folder for reference images:
-- `1-medium.png` - "CLAUDE CODE" pixel block typography
-- `2-profile.jpg` - Clawd mascot walking scene (light bg)
-- `3-twitter-thumb.jpg` - Clawd mascot solo (dark bg)
+- `1-medium.png` - "CLARP" pixel block typography
+- `2-profile.jpg` - Clarp mascot walking scene (light bg)
+- `3-twitter-thumb.jpg` - Clarp mascot solo (dark bg)
 - `4-twitter-banner.jpg` - Full banner with terminal window
-- `5-clawd-mascot.png` - Clawd variant
+- `5-clarp-mascot.png` - Clarp variant
 
-### The "Clawd" Character
-The official Claude Code mascot is a pixel art creature called "Clawd":
+### The "Clarp" Character
+The official Clarp mascot is a pixel art creature called "Clarp":
 - Simple 4-legged boxy body
 - Two dark rectangular eyes
 - Terracotta/clay color
 - Minimal, cute, memorable
 - Retro game aesthetic
 
-**For $CLA**: Create a "corrupted" or "LARP" version of Clawd - same base design but with satirical elements (construction hat, "coming soon" sign, broken pixel, etc.)
+### Official $CLARP Mascot: "Clarp Void"
+
+**File:** `/images/clarp-void.svg`
+
+The official $CLARP mascot is an inverted design - a terracotta background with the creature cut out as a black void. This represents:
+- **Emptiness** - The void where shipped products should be
+- **Inverse** - Everything is backwards in LARP land
+- **Negative space** - What remains when you remove the substance
+- **The shape of promises** - You can see where the product *should* be
+
+The void Clarp is the perfect mascot for a project that ships nothing - you can literally see through it.
+
+```
+┌─────────────────────────────────┐
+│  ████████████████████████████   │
+│  ████████▀▀▀▀▀▀▀▀▀▀████████    │
+│  ████▀▀              ▀▀████    │
+│  ██▀▀   ██        ██   ▀▀██    │
+│  ██▀▀   ██        ██   ▀▀██    │
+│  ████████████████████████████   │
+│  ████  ▀▀██  ▀▀██  ▀▀██  ████   │
+│  ████    ██    ██    ██  ████   │
+│  ████████████████████████████   │
+└─────────────────────────────────┘
+        clarp-void.svg
+```
+
+**Archived variants:** See `/images/old/` for 90+ alternative Clarp variations including melting, glitch, outline, and satirical versions.
 
 ---
 
 ## Logo Generation
 
 ### Tool: oh-my-logo
-Generate Claude Code style ASCII art logos with:
+Generate Clarp style ASCII art logos with:
 
 ```bash
 # Install/run with npx
 npx oh-my-logo "YOUR TEXT" --palette-colors '["#D97757", "#C6613F"]' --filled
 
 # Stacked multi-line
-npx oh-my-logo "CLAUDE\nLARP\nAGENT" --palette-colors '["#D97757", "#C6613F", "#5E5D59"]' --filled
+npx oh-my-logo "CLARP" --palette-colors '["#D97757", "#C6613F", "#5E5D59"]' --filled
 
 # Chrome style (minimal shadows)
-npx oh-my-logo "CLA" --palette-colors '["#D97757", "#FAF9F5"]' --filled --block-font chrome
+npx oh-my-logo "CLARP" --palette-colors '["#D97757", "#FAF9F5"]' --filled --block-font chrome
 ```
 
 See `/logos/` folder for generated assets.
@@ -49,10 +76,10 @@ See `/logos/` folder for generated assets.
 
 | File | Content |
 |------|---------|
-| `logo-full.txt` | "CLAUDE LARP AGENT" full horizontal |
-| `logo-stacked.txt` | Stacked 3-line version |
-| `logo-ticker.txt` | "$CLA" ticker |
-| `logo-cla-chrome.txt` | Minimal "CLA" |
+| `logo-full.txt` | "CLARP" full horizontal |
+| `logo-stacked.txt` | Stacked version |
+| `logo-ticker.txt` | "$CLARP" ticker |
+| `logo-clarp-chrome.txt` | Minimal "CLARP" |
 
 ---
 
@@ -132,9 +159,9 @@ font-family: Georgia, "Times New Roman", serif;
 
 ## Logo Concepts
 
-### Primary Logo: "Corrupted Claude"
+### Primary Logo: "Corrupted Clarp"
 
-The Claude icon (sparkle/asterisk shape) but:
+The Clarp icon (sparkle/asterisk shape) but:
 - Glitched/pixelated edges
 - One arm "broken" or "under construction"
 - Optional: caution tape across it
@@ -143,7 +170,7 @@ The Claude icon (sparkle/asterisk shape) but:
 
 ```
 ┌─────────────────────────────────────┐
-│  CLAUDE LARP AGENT                  │
+│  CLARP                              │
 │  ░░░░░░░░░░░░░░░░░░░                │
 │  "I'll build your infrastructure"   │
 │  (I won't)                          │
@@ -154,10 +181,10 @@ The Claude icon (sparkle/asterisk shape) but:
 
 | Variant | Description | Use Case |
 |---------|-------------|----------|
-| **Full** | Icon + "Claude LARP Agent" | Website, docs |
-| **Icon Only** | Corrupted Claude sparkle | Avatar, favicon |
+| **Full** | Icon + "Clarp" | Website, docs |
+| **Icon Only** | Corrupted Clarp sparkle | Avatar, favicon |
 | **Terminal** | ASCII art version | CLI output, tweets |
-| **Badge** | "$CLA" in terminal style | Price displays |
+| **Badge** | "$CLARP" in terminal style | Price displays |
 
 ---
 
@@ -180,7 +207,7 @@ The Claude icon (sparkle/asterisk shape) but:
 | **Loading states** | "Loading revolutionary features..." (never completes) |
 | **Buttons** | "Coming Soon" instead of "Get Started" |
 | **Badges** | "Verified Vaporware", "Certified LARP" |
-| **Terminal prompts** | `$ claude-larp generate --roadmap` |
+| **Terminal prompts** | `$ clarp generate --roadmap` |
 
 ### Iconography Style
 
@@ -252,7 +279,7 @@ The Claude icon (sparkle/asterisk shape) but:
 
 ### Example Copy
 
-| Context | Real Claude Code | Claude LARP Agent |
+| Context | Real AI Agents | Clarp |
 |---------|-----------------|-------------------|
 | Hero | "Code faster with AI" | "Build nothing faster with AI" |
 | CTA | "Get Started" | "Get Started (Coming Soon)" |
@@ -264,7 +291,7 @@ The Claude icon (sparkle/asterisk shape) but:
 - "I'll build your revolutionary infrastructure (I won't)"
 - "Now shipping nothing to production"
 - "Your AI that ships roadmaps, not code"
-- "Claude Code, but for vibes"
+- "AI agents, but for vibes"
 
 ---
 
@@ -275,13 +302,13 @@ The Claude icon (sparkle/asterisk shape) but:
 ```
 ┌─────────────────────────────────────────────────────┐
 │                                                     │
-│     CLAUDE LARP AGENT                               │
+│     CLARP                                           │
 │     ═══════════════════                             │
 │                                                     │
 │     The AI coding assistant that                    │
 │     exclusively generates vaporware                 │
 │                                                     │
-│     $CLA                                            │
+│     $CLARP                                          │
 │                                                     │
 └─────────────────────────────────────────────────────┘
 ```
@@ -290,7 +317,7 @@ The Claude icon (sparkle/asterisk shape) but:
 
 ```
 [terminal prompt]
-$ claude-larp generate --project
+$ clarp generate --project
 
 [output]
 ✓ Created landing page
@@ -298,12 +325,12 @@ $ claude-larp generate --project
 ✓ Added "coming soon" badge
 ✗ Wrote actual code
 
-$CLA
+$CLARP
 ```
 
 ### Profile Picture
 
-- Glitched/corrupted Claude icon
+- Glitched/corrupted Clarp icon
 - Terminal green or clay orange accent
 - Clean circle crop
 
@@ -316,9 +343,9 @@ $CLA
 ```
 ┌─────────────────────────────────────────────────────┐
 │                                                     │
-│  $ claude-larp --help                               │
+│  $ clarp --help                                     │
 │                                                     │
-│  CLAUDE LARP AGENT                                  │
+│  CLARP                                              │
 │  ═══════════════════                                │
 │                                                     │
 │  The AI coding assistant that exclusively           │
@@ -334,9 +361,9 @@ $CLA
 ### Features Section
 
 Grid of "products" that don't exist:
-- CLA Terminal
+- Clarp Terminal
 - LARPscan
-- CLA x402
+- Clarp x402
 - LARP Academy
 
 ### Documentation Section
@@ -386,10 +413,10 @@ Professional-looking docs for non-existent features (satirical ZAUTH-style)
 
 ## Reference Links
 
-### Anthropic Brand (for parody accuracy)
-- anthropic.com
-- claude.ai
-- docs.anthropic.com
+### AI Agent Landing Pages (for parody accuracy)
+- ai16z.ai
+- virtuals.io
+- typical crypto "infrastructure" projects
 
 ### Inspiration
 - Terminal aesthetics
@@ -399,4 +426,4 @@ Professional-looking docs for non-existent features (satirical ZAUTH-style)
 
 ---
 
-*This guide ensures Claude LARP Agent looks premium enough to be taken seriously while being obviously satirical to anyone who reads the copy.*
+*This guide ensures Clarp looks premium enough to be taken seriously while being obviously satirical to anyone who reads the copy.*

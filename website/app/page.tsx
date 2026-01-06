@@ -9,18 +9,19 @@ import Button from '@/components/Button';
 import Mascot from '@/components/Mascot';
 import DocsSection from '@/components/DocsSection';
 import Footer from '@/components/Footer';
+import Clarp from '@/components/Clarp';
 
 const ASCII_LOGO = `
- ██████╗██╗      █████╗
-██╔════╝██║     ██╔══██╗
-██║     ██║     ███████║
-██║     ██║     ██╔══██║
-╚██████╗███████╗██║  ██║
- ╚═════╝╚══════╝╚═╝  ╚═╝`;
+ ██████╗██╗      █████╗ ██████╗ ██████╗
+██╔════╝██║     ██╔══██╗██╔══██╗██╔══██╗
+██║     ██║     ███████║██████╔╝██████╔╝
+██║     ██║     ██╔══██║██╔══██╗██╔═══╝
+╚██████╗███████╗██║  ██║██║  ██║██║
+ ╚═════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝`;
 
 const PRODUCTS = [
   {
-    name: 'cla terminal',
+    name: 'clarp terminal',
     tagline: 'ide for shipping fuck all',
     description: 'auto-generates "coming soon" pages. 97% of pump.fun projects die in 24 hours using this exact strategy. you bought those too.',
     features: ['readme-only mode', '// TODO injection', 'private repo until rug'],
@@ -31,12 +32,12 @@ const PRODUCTS = [
     name: 'larpscan',
     tagline: 'detector for the bullshit you ape',
     description: 'scans "ai agent" repos for actual code. there isn\'t any. zerebro\'s $180m "trading agent" was if-else. you\'re holding that bag.',
-    features: ['detects code (lol)', 'bundle % scanner', 'rug probability: yes'],
+    features: ['detects code (rare)', 'bundle % scanner', 'rug probability: yes'],
     progress: 73,
     status: 'development' as const,
   },
   {
-    name: 'cla x402',
+    name: 'clarp x402',
     tagline: 'invoicing for shit that doesn\'t exist',
     description: '"interesting plumbing, nowhere near production" - actual devs. vcs can\'t read code anyway, they just read pitch decks and lose money.',
     features: ['vaporware invoicing', 'milestone theater', '"directionally real"'],
@@ -47,7 +48,7 @@ const PRODUCTS = [
 
 const TERMINAL_VARIATIONS = [
   {
-    command: 'claude-larp generate --revolutionary-infrastructure',
+    command: 'clarp generate --revolutionary-infrastructure',
     lines: [
       { type: 'success', content: '✓ copied chatgpt api wrapper' },
       { type: 'success', content: '✓ added "autonomous" to readme 47 times' },
@@ -57,7 +58,7 @@ const TERMINAL_VARIATIONS = [
     info: 'shipping nothing... $50m fdv incoming',
   },
   {
-    command: 'claude-larp generate --decentralized-future',
+    command: 'clarp generate --decentralized-future',
     lines: [
       { type: 'success', content: '✓ forked uniswap, changed colors' },
       { type: 'success', content: '✓ wrote whitepaper with 73 buzzwords' },
@@ -67,7 +68,7 @@ const TERMINAL_VARIATIONS = [
     info: 'roadmap: vibes only... $120m mcap loading',
   },
   {
-    command: 'claude-larp generate --ai-powered-defi',
+    command: 'clarp generate --ai-powered-defi',
     lines: [
       { type: 'success', content: '✓ wrapped openai endpoint in nextjs' },
       { type: 'success', content: '✓ called it "neural network protocol"' },
@@ -77,7 +78,7 @@ const TERMINAL_VARIATIONS = [
     info: 'gasless launch... your money vanishing soon',
   },
   {
-    command: 'claude-larp generate --web3-ecosystem',
+    command: 'clarp generate --web3-ecosystem',
     lines: [
       { type: 'success', content: '✓ deployed 47 smart contracts (all ownable)' },
       { type: 'success', content: '✓ locked liquidity (for 7 days)' },
@@ -87,7 +88,7 @@ const TERMINAL_VARIATIONS = [
     info: 'community-driven rug... pulling shortly',
   },
   {
-    command: 'claude-larp generate --modular-stack',
+    command: 'clarp generate --modular-stack',
     lines: [
       { type: 'success', content: '✓ made landing page with particles.js' },
       { type: 'success', content: '✓ added waitlist for vaporware' },
@@ -97,7 +98,7 @@ const TERMINAL_VARIATIONS = [
     info: '"coming Q2"... since Q2 2022',
   },
   {
-    command: 'claude-larp generate --intent-based-architecture',
+    command: 'clarp generate --intent-based-architecture',
     lines: [
       { type: 'success', content: '✓ renamed transactions to "intents"' },
       { type: 'success', content: '✓ added solver that\'s just a mempool' },
@@ -107,7 +108,7 @@ const TERMINAL_VARIATIONS = [
     info: 'series A secured... still no users',
   },
   {
-    command: 'claude-larp generate --institutional-grade',
+    command: 'clarp generate --institutional-grade',
     lines: [
       { type: 'success', content: '✓ slapped permissioned on top of ethereum' },
       { type: 'success', content: '✓ compliance theater: 9 dashboard buttons' },
@@ -117,7 +118,7 @@ const TERMINAL_VARIATIONS = [
     info: 'b2b pivot... selling shovels to shovel salesmen',
   },
   {
-    command: 'claude-larp generate --omnichain-solution',
+    command: 'clarp generate --omnichain-solution',
     lines: [
       { type: 'success', content: '✓ bridged 14 chains no one uses' },
       { type: 'success', content: '✓ created token that wraps tokens wrapping tokens' },
@@ -127,7 +128,7 @@ const TERMINAL_VARIATIONS = [
     info: 'trustless bridge... trust us bro',
   },
   {
-    command: 'claude-larp generate --social-fi-protocol',
+    command: 'clarp generate --social-fi-protocol',
     lines: [
       { type: 'success', content: '✓ put posts onchain (the whole post, gas = $47)' },
       { type: 'success', content: '✓ tokenized friendships with bonding curves' },
@@ -137,7 +138,7 @@ const TERMINAL_VARIATIONS = [
     info: 'creator economy... where creators create exit liquidity',
   },
   {
-    command: 'claude-larp generate --restaking-primitive',
+    command: 'clarp generate --restaking-primitive',
     lines: [
       { type: 'success', content: '✓ staked the stake of staked stakes' },
       { type: 'success', content: '✓ infinite recursive yield (on paper)' },
@@ -215,6 +216,7 @@ export default function Home() {
       <nav className="sticky top-0 z-50 bg-ivory-light/95 backdrop-blur-sm border-b-2 border-slate-dark">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
+            <Clarp size={32} />
             <span className="font-mono text-xl font-bold text-slate-dark">$clarp</span>
           </div>
           <div className="flex items-center gap-6">
@@ -235,7 +237,7 @@ export default function Home() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* left: terminal */}
             <div className="order-2 lg:order-1">
-              <Terminal title="claude-larp">
+              <Terminal title="clarp">
                 <div
                   ref={terminalRef}
                   className="h-[320px] overflow-y-auto overflow-x-hidden scrollbar-hide"
@@ -283,14 +285,14 @@ export default function Home() {
             {/* right: hero copy */}
             <div className="order-1 lg:order-2 text-center lg:text-left">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-dark leading-tight mb-6 font-display">
-                claude larp agent
+                $clarp
               </h1>
 
               <p className="text-xl md:text-2xl text-slate-light mb-4">
                 "i'll build your revolutionary infrastructure"
               </p>
               <p className="text-lg text-danger-orange font-mono mb-8 font-bold">
-                (lmao no)
+                (no)
               </p>
 
               <p className="text-slate-light mb-8 max-w-md">
@@ -391,7 +393,7 @@ export default function Home() {
             <div>
               <span className="badge badge-error mb-6">the mascot</span>
               <h2 className="text-3xl md:text-4xl font-bold mb-6 font-display">
-                meet <span className="text-danger-orange">clawd</span>
+                meet <span className="text-danger-orange">clarp</span>
               </h2>
               <p className="text-ivory-light/70 mb-6">
                 broken, confused, perpetually under construction.
@@ -402,7 +404,7 @@ export default function Home() {
                   'shipped exactly as much as ai16z (nothing)',
                   'virtuals "on-chain agents" = aws + cope',
                   'arc framework: "few if any independent builders"',
-                  'empty repo. full send. ngmi.',
+                  'empty repo. full send.',
                 ].map((item, i) => (
                   <li key={i} className="flex items-center gap-3 text-ivory-light/80">
                     <span className="text-danger-orange">▸</span>
@@ -441,9 +443,9 @@ export default function Home() {
           <div className="space-y-6">
             {[
               { phase: 'q1 2025', title: 'genesis (theft)', items: ['ctrl+c ai16z. call it innovation.', 'change 3 colors. "original vision."', '"stealth mode" = nothing exists'], status: 'complete' },
-              { phase: 'q2 2025', title: 'grift escalation', items: ['tweet "gm" until brain damage', 'spaces with fellow scammers', '"ecosystem" = telegram group'], status: 'current' },
+              { phase: 'q2 2025', title: 'grift escalation', items: ['tweet daily until brain damage', 'spaces with fellow scammers', '"ecosystem" = telegram group'], status: 'current' },
               { phase: 'q3 2025', title: 'hopium distribution', items: ['"big news soon" (nothing)', 'rebrand after getting called out', 'community call (mute the fud)'], status: 'upcoming' },
-              { phase: 'q∞', title: 'ship anything', items: ['lmfao', 'absolutely not', 'you\'ll ape anyway'], status: 'never' },
+              { phase: 'q∞', title: 'ship anything', items: ['no', 'absolutely not', 'you\'ll ape anyway'], status: 'never' },
             ].map((phase, i) => (
               <div
                 key={i}
@@ -503,17 +505,17 @@ export default function Home() {
       <section className="py-24 px-6 relative">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-slate-dark mb-6 font-display">
-            ngmi
+            anyway
           </h2>
           <p className="text-xl text-slate-light mb-4">
-            claude + cron job + vc money = "ai agent"
+            chatgpt + cron job + vc money = "ai agent"
           </p>
           <p className="text-lg text-danger-orange mb-8 font-mono font-bold">
             you know it. you'll ape anyway. clown.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button className="btn-primary">
-              ape in (ngmi)
+              ape in
             </button>
             <button className="btn-secondary">
               follow the cope

@@ -2,18 +2,18 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Claude LARP Agent ($CLA) - Building Nothing, Together',
+  title: 'Clarp ($CLARP) - Building Nothing, Together',
   description: 'The AI coding assistant that exclusively generates vaporware. Now shipping nothing to production.',
-  keywords: ['claude', 'ai agent', 'satire', 'crypto', 'solana', 'memecoin', 'vaporware'],
+  keywords: ['clarp', 'ai agent', 'satire', 'crypto', 'solana', 'memecoin', 'vaporware'],
   openGraph: {
-    title: 'Claude LARP Agent ($CLA)',
+    title: 'Clarp ($CLARP)',
     description: 'The AI coding assistant that exclusively generates vaporware.',
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Claude LARP Agent ($CLA)',
+    title: 'Clarp ($CLARP)',
     description: 'The AI coding assistant that exclusively generates vaporware.',
   },
 };
