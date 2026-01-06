@@ -430,9 +430,10 @@ export default function Home() {
                 </button>
               </div>
 
-              <div className="font-mono text-sm text-slate-light">
-                <span className="text-cloud-medium">ca:</span>{' '}
-                <span className="text-slate-dark">doesn't matter. you don't read contracts anyway.</span>
+              {/* CA Box */}
+              <div className="bg-black px-4 py-2 font-mono text-xs sm:text-sm inline-flex items-center gap-2">
+                <span className="text-larp-green">ca:</span>
+                <span className="text-ivory-light/70">doesn't matter. you don't read contracts anyway.</span>
               </div>
             </div>
           </div>
@@ -682,13 +683,9 @@ export default function Home() {
 
             {/* content */}
             <div className="text-center">
-              <div className="text-5xl mb-4 font-mono text-danger-orange font-bold">.</div>
               <h3 className="text-3xl md:text-4xl font-bold text-slate-dark mb-4 font-mono">
                 there is no wallet
               </h3>
-              <p className="text-slate-light mb-2 font-mono text-sm">
-                there is no token. there is no contract.
-              </p>
               <p className="text-slate-light mb-6 font-mono text-sm">
                 you clicked "connect wallet" on a parody website.
               </p>
@@ -716,8 +713,11 @@ export default function Home() {
         >
           <div className="absolute inset-0 bg-slate-dark/95 backdrop-blur-sm" />
           <div
-            className="relative bg-ivory-light border-4 border-slate-dark p-12 max-w-2xl w-full mx-4 min-h-[400px] flex flex-col items-center justify-center"
-            style={{ boxShadow: '8px 8px 0 #0a0a09' }}
+            className="relative bg-ivory-light border-4 border-slate-dark p-8 sm:p-12 w-[90vw] sm:w-[70vw] md:w-[50vw] max-w-[600px] flex flex-col items-center justify-center"
+            style={{
+              boxShadow: '8px 8px 0 #0a0a09',
+              aspectRatio: '1 / 1.414'
+            }}
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -728,13 +728,13 @@ export default function Home() {
               ✗
             </button>
 
-            <div className="text-center">
-              <h3 className="text-2xl font-mono text-slate-light/40 mb-8">$clarp whitepaper v1.0</h3>
-              <div className="text-9xl font-mono text-slate-dark mb-8">.</div>
-              <p className="text-slate-light/40 font-mono text-sm">
+            <div className="text-center flex flex-col items-center justify-center h-full">
+              <h3 className="text-lg sm:text-2xl font-mono text-slate-light/40 mb-6 sm:mb-8">$clarp whitepaper v1.0</h3>
+              <div className="text-7xl sm:text-9xl font-mono text-slate-dark mb-6 sm:mb-8">.</div>
+              <p className="text-slate-light/40 font-mono text-xs sm:text-sm">
                 [this page intentionally left blank]
               </p>
-              <p className="text-slate-light/30 font-mono text-xs mt-4">
+              <p className="text-slate-light/30 font-mono text-[10px] sm:text-xs mt-3 sm:mt-4">
                 like most whitepapers, but at least we're honest.
               </p>
             </div>

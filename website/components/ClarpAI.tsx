@@ -142,7 +142,7 @@ export default function ClarpAI() {
     <>
       {/* Chat window */}
       <div
-        className={`fixed bottom-20 right-4 sm:right-6 z-[90] transition-all duration-300 ${
+        className={`fixed bottom-4 right-4 sm:right-6 z-[90] transition-all duration-300 ${
           isOpen
             ? 'opacity-100 translate-y-0 pointer-events-auto'
             : 'opacity-0 translate-y-4 pointer-events-none'

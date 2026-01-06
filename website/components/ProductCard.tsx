@@ -7,7 +7,7 @@ import Button from './Button';
 
 const LOADING_EXCUSES = [
   'fetching data from blockchain (lie)...',
-  'connecting to smart contract (nonexistent)...',
+  'connecting to smart contract (probably fine)...',
   'loading documentation (there is none)...',
   'initializing dashboard (static image)...',
   'syncing with mainnet (localhost)...',
