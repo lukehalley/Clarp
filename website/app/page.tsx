@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Terminal from '@/components/Terminal';
 import ProductCard from '@/components/ProductCard';
 import ProgressBar from '@/components/ProgressBar';
@@ -21,58 +21,188 @@ const ASCII_LOGO = `
 const PRODUCTS = [
   {
     name: 'cla terminal',
-    tagline: 'the ide for shipping absolutely nothing',
-    description: 'auto-generates "coming soon" pages. literally what 97% of pump.fun projects use before dying in 24 hours. you\'ll fit right in.',
+    tagline: 'ide for shipping fuck all',
+    description: 'auto-generates "coming soon" pages. 97% of pump.fun projects die in 24 hours using this exact strategy. you bought those too.',
     features: ['readme-only mode', '// TODO injection', 'private repo until rug'],
     progress: 99,
     status: 'coming-soon' as const,
   },
   {
     name: 'larpscan',
-    tagline: 'exposes the bullshit you fell for',
-    description: 'scans "ai agent" repos for actual code. spoiler: there isn\'t any. zerebro\'s $180m "trading agent" was if-else. you bought that.',
+    tagline: 'detector for the bullshit you ape',
+    description: 'scans "ai agent" repos for actual code. there isn\'t any. zerebro\'s $180m "trading agent" was if-else. you\'re holding that bag.',
     features: ['detects code (lol)', 'bundle % scanner', 'rug probability: yes'],
     progress: 73,
     status: 'development' as const,
   },
   {
     name: 'cla x402',
-    tagline: 'invoice for vaporware',
-    description: '"interesting plumbing, nowhere near production" - actual devs on x402. but vcs don\'t read code, they read pitch decks.',
+    tagline: 'invoicing for shit that doesn\'t exist',
+    description: '"interesting plumbing, nowhere near production" - actual devs. vcs can\'t read code anyway, they just read pitch decks and lose money.',
     features: ['vaporware invoicing', 'milestone theater', '"directionally real"'],
     progress: 47,
     status: 'roadmap' as const,
   },
 ];
 
-const TERMINAL_LINES = [
-  { type: 'command', content: 'claude-larp generate --revolutionary-infrastructure' },
-  { type: 'output', content: '' },
-  { type: 'success', content: '✓ copied chatgpt api wrapper' },
-  { type: 'success', content: '✓ added "autonomous" to readme 47 times' },
-  { type: 'success', content: '✓ bundled 80% supply to insider wallets' },
-  { type: 'error', content: '✗ wrote a single fucking line of real code' },
-  { type: 'output', content: '' },
-  { type: 'info', content: 'shipping nothing... $50m fdv incoming' },
+const TERMINAL_VARIATIONS = [
+  {
+    command: 'claude-larp generate --revolutionary-infrastructure',
+    lines: [
+      { type: 'success', content: '✓ copied chatgpt api wrapper' },
+      { type: 'success', content: '✓ added "autonomous" to readme 47 times' },
+      { type: 'success', content: '✓ bundled 80% supply to insider wallets' },
+      { type: 'error', content: '✗ wrote a single fucking line of real code' },
+    ],
+    info: 'shipping nothing... $50m fdv incoming',
+  },
+  {
+    command: 'claude-larp generate --decentralized-future',
+    lines: [
+      { type: 'success', content: '✓ forked uniswap, changed colors' },
+      { type: 'success', content: '✓ wrote whitepaper with 73 buzzwords' },
+      { type: 'success', content: '✓ created 12 telegram groups, 0 developers' },
+      { type: 'error', content: '✗ understood what blockchain actually does' },
+    ],
+    info: 'roadmap: vibes only... $120m mcap loading',
+  },
+  {
+    command: 'claude-larp generate --ai-powered-defi',
+    lines: [
+      { type: 'success', content: '✓ wrapped openai endpoint in nextjs' },
+      { type: 'success', content: '✓ called it "neural network protocol"' },
+      { type: 'success', content: '✓ paid influencers, forgot about product' },
+      { type: 'error', content: '✗ trained a single model' },
+    ],
+    info: 'gasless launch... your money vanishing soon',
+  },
+  {
+    command: 'claude-larp generate --web3-ecosystem',
+    lines: [
+      { type: 'success', content: '✓ deployed 47 smart contracts (all ownable)' },
+      { type: 'success', content: '✓ locked liquidity (for 7 days)' },
+      { type: 'success', content: '✓ "doxxed" team: stock photo linkedin profiles' },
+      { type: 'error', content: '✗ passed a basic audit' },
+    ],
+    info: 'community-driven rug... pulling shortly',
+  },
+  {
+    command: 'claude-larp generate --modular-stack',
+    lines: [
+      { type: 'success', content: '✓ made landing page with particles.js' },
+      { type: 'success', content: '✓ added waitlist for vaporware' },
+      { type: 'success', content: '✓ raised seed round from other vaporware' },
+      { type: 'error', content: '✗ shipped anything to mainnet' },
+    ],
+    info: '"coming Q2"... since Q2 2022',
+  },
+  {
+    command: 'claude-larp generate --intent-based-architecture',
+    lines: [
+      { type: 'success', content: '✓ renamed transactions to "intents"' },
+      { type: 'success', content: '✓ added solver that\'s just a mempool' },
+      { type: 'success', content: '✓ trademarked existing technology' },
+      { type: 'error', content: '✗ improved on anything' },
+    ],
+    info: 'series A secured... still no users',
+  },
+  {
+    command: 'claude-larp generate --institutional-grade',
+    lines: [
+      { type: 'success', content: '✓ slapped permissioned on top of ethereum' },
+      { type: 'success', content: '✓ compliance theater: 9 dashboard buttons' },
+      { type: 'success', content: '✓ enterprise sales to other crypto companies' },
+      { type: 'error', content: '✗ onboarded a single tradfi client' },
+    ],
+    info: 'b2b pivot... selling shovels to shovel salesmen',
+  },
+  {
+    command: 'claude-larp generate --omnichain-solution',
+    lines: [
+      { type: 'success', content: '✓ bridged 14 chains no one uses' },
+      { type: 'success', content: '✓ created token that wraps tokens wrapping tokens' },
+      { type: 'success', content: '✓ "interoperability" = one multisig' },
+      { type: 'error', content: '✗ secured more than the bug bounty' },
+    ],
+    info: 'trustless bridge... trust us bro',
+  },
+  {
+    command: 'claude-larp generate --social-fi-protocol',
+    lines: [
+      { type: 'success', content: '✓ put posts onchain (the whole post, gas = $47)' },
+      { type: 'success', content: '✓ tokenized friendships with bonding curves' },
+      { type: 'success', content: '✓ ponzinomics disguised as engagement metrics' },
+      { type: 'error', content: '✗ asked if anyone wanted this' },
+    ],
+    info: 'creator economy... where creators create exit liquidity',
+  },
+  {
+    command: 'claude-larp generate --restaking-primitive',
+    lines: [
+      { type: 'success', content: '✓ staked the stake of staked stakes' },
+      { type: 'success', content: '✓ infinite recursive yield (on paper)' },
+      { type: 'success', content: '✓ risk model: "number go up"' },
+      { type: 'error', content: '✗ calculated actual slashing scenarios' },
+    ],
+    info: 'capital efficient... until it isn\'t',
+  },
 ];
+
+// Animation phases: 'typing' | 'paused' | 'deleting'
+type AnimationPhase = 'typing' | 'paused' | 'deleting';
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
+  const [currentVariation, setCurrentVariation] = useState(0);
   const [visibleLines, setVisibleLines] = useState(0);
+  const [phase, setPhase] = useState<AnimationPhase>('typing');
+  const [showWalletModal, setShowWalletModal] = useState(false);
+  const [showSmoke, setShowSmoke] = useState(false);
+  const terminalRef = useRef<HTMLDivElement>(null);
+
+  const totalLines = 7; // command + empty + 4 lines + info
 
   useEffect(() => {
     setMounted(true);
-    const interval = setInterval(() => {
-      setVisibleLines((prev) => {
-        if (prev >= TERMINAL_LINES.length) {
-          clearInterval(interval);
-          return prev;
-        }
-        return prev + 1;
-      });
-    }, 400);
-    return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+
+    let timeout: NodeJS.Timeout;
+
+    if (phase === 'typing') {
+      if (visibleLines < totalLines) {
+        timeout = setTimeout(() => {
+          setVisibleLines((prev) => prev + 1);
+        }, 300);
+      } else {
+        // Done typing, pause before deleting
+        timeout = setTimeout(() => {
+          setPhase('deleting');
+        }, 2500);
+      }
+    } else if (phase === 'deleting') {
+      if (visibleLines > 0) {
+        timeout = setTimeout(() => {
+          setVisibleLines((prev) => prev - 1);
+        }, 50);
+      } else {
+        // Done deleting, move to next variation
+        setCurrentVariation((prev) => (prev + 1) % TERMINAL_VARIATIONS.length);
+        setPhase('typing');
+      }
+    }
+
+    return () => clearTimeout(timeout);
+  }, [mounted, phase, visibleLines]);
+
+  // Auto-scroll terminal to bottom when lines change
+  useEffect(() => {
+    if (terminalRef.current) {
+      terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+    }
+  }, [visibleLines]);
 
   if (!mounted) return null;
 
@@ -92,7 +222,7 @@ export default function Home() {
             <a href="#products" className="text-sm text-slate-light hover:text-danger-orange transition-colors">products</a>
             <a href="#docs" className="text-sm text-slate-light hover:text-danger-orange transition-colors">docs</a>
             <a href="#victims" className="text-sm text-slate-light hover:text-danger-orange transition-colors">hall of shame</a>
-            <button className="btn-secondary text-sm px-4 py-2">connect wallet</button>
+            <button className="btn-secondary text-sm px-4 py-2" onClick={() => setShowWalletModal(true)}>connect wallet</button>
           </div>
         </div>
       </nav>
@@ -107,28 +237,46 @@ export default function Home() {
             {/* left: terminal */}
             <div className="order-2 lg:order-1">
               <Terminal title="claude-larp">
-                <pre className="ascii-art text-danger-orange mb-6">{ASCII_LOGO}</pre>
-                <div className="space-y-1">
-                  {TERMINAL_LINES.slice(0, visibleLines).map((line, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      {line.type === 'command' && (
-                        <span className="terminal-prompt text-ivory-light/90">{line.content}</span>
-                      )}
-                      {line.type === 'success' && (
-                        <span className="text-larp-green">{line.content}</span>
-                      )}
-                      {line.type === 'error' && (
-                        <span className="text-larp-red">{line.content}</span>
-                      )}
-                      {line.type === 'info' && (
-                        <span className="text-danger-orange flicker">{line.content}</span>
-                      )}
-                      {line.type === 'output' && <span>&nbsp;</span>}
-                    </div>
-                  ))}
-                  {visibleLines >= TERMINAL_LINES.length && (
+                <div
+                  ref={terminalRef}
+                  className="h-[320px] overflow-y-auto overflow-x-hidden scrollbar-hide"
+                >
+                  <pre className="ascii-art text-danger-orange mb-6">{ASCII_LOGO}</pre>
+                  <div className="space-y-1">
+                    {/* Command line */}
+                    {visibleLines >= 1 && (
+                      <div className="flex items-start gap-2">
+                        <span className="terminal-prompt text-ivory-light/90">
+                          {TERMINAL_VARIATIONS[currentVariation].command}
+                        </span>
+                      </div>
+                    )}
+                    {/* Empty line */}
+                    {visibleLines >= 2 && <div>&nbsp;</div>}
+                    {/* Success/error lines */}
+                    {TERMINAL_VARIATIONS[currentVariation].lines.map((line, i) => (
+                      visibleLines >= i + 3 && (
+                        <div key={i} className="flex items-start gap-2">
+                          {line.type === 'success' && (
+                            <span className="text-larp-green">{line.content}</span>
+                          )}
+                          {line.type === 'error' && (
+                            <span className="text-larp-red">{line.content}</span>
+                          )}
+                        </div>
+                      )
+                    ))}
+                    {/* Info line */}
+                    {visibleLines >= 7 && (
+                      <div className="flex items-start gap-2 mt-2">
+                        <span className="text-danger-orange flicker">
+                          {TERMINAL_VARIATIONS[currentVariation].info}
+                        </span>
+                      </div>
+                    )}
+                    {/* Blinking cursor */}
                     <span className="inline-block w-3 h-5 bg-danger-orange animate-blink" />
-                  )}
+                  </div>
                 </div>
               </Terminal>
             </div>
@@ -143,16 +291,38 @@ export default function Home() {
                 "i'll build your revolutionary infrastructure"
               </p>
               <p className="text-lg text-danger-orange font-mono mb-8 font-bold">
-                (i fucking won't)
+                (lmao no)
               </p>
 
               <p className="text-slate-light mb-8 max-w-md">
-                the only ai agent honest about what ai agents actually do:
-                wrap chatgpt, post cringe, and rug retail.
+                chatgpt wrapper + cron job + vc money = "ai agent."
+                you bought the top. again. absolute clown behavior.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
-                <button className="btn-primary">view roadmap (lol)</button>
+                <div className="relative">
+                  <button className="btn-primary relative overflow-hidden group" onClick={(e) => {
+                    const btn = e.currentTarget;
+                    btn.classList.add('animate-[glitch_0.05s_ease-in-out_5]');
+                    setTimeout(() => btn.classList.remove('animate-[glitch_0.05s_ease-in-out_5]'), 300);
+                    setShowSmoke(true);
+                    setTimeout(() => setShowSmoke(false), 800);
+                  }}>
+                    <span className="group-active:opacity-0 transition-opacity">view roadmap</span>
+                    <span className="absolute inset-0 flex items-center justify-center opacity-0 group-active:opacity-100 text-black font-mono text-xs tracking-widest">░░░░░░░</span>
+                  </button>
+                  {showSmoke && (
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                      <span className="absolute smoke-particle smoke-1 text-slate-dark/70 font-mono text-sm">░░</span>
+                      <span className="absolute smoke-particle smoke-2 text-slate-dark/60 font-mono text-xs">░░░</span>
+                      <span className="absolute smoke-particle smoke-3 text-danger-orange/50 font-mono text-sm">░</span>
+                      <span className="absolute smoke-particle smoke-4 text-slate-dark/50 font-mono text-xs">░░</span>
+                      <span className="absolute smoke-particle smoke-5 text-danger-orange/40 font-mono text-lg">░</span>
+                      <span className="absolute smoke-particle smoke-6 text-slate-dark/60 font-mono text-xs">░░░</span>
+                      <span className="absolute smoke-particle smoke-7 text-slate-dark/50 font-mono text-sm">░░</span>
+                    </div>
+                  )}
+                </div>
                 <button className="btn-secondary opacity-50 cursor-not-allowed">
                   get started (never)
                 </button>
@@ -172,10 +342,10 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
-              { label: 'ai16z market cap', value: '$400m', sublabel: '(vcs are fucking idiots)' },
-              { label: 'pump.fun death rate', value: '97%', sublabel: '(skill issue, ngmi)' },
-              { label: 'goat\'s codebase', value: 'lmao', sublabel: '(tweets = $300m apparently)' },
-              { label: 'zerebro\'s "ml"', value: 'if-else', sublabel: '(cope harder nerds)' },
+              { label: 'ai16z market cap', value: '$400m', sublabel: '(for a fucking parody)' },
+              { label: 'pump.fun death rate', value: '97%', sublabel: '(you\'re in this stat)' },
+              { label: 'goat codebase', value: '0', sublabel: '(zero lines. $300m mc.)' },
+              { label: 'zerebro "ml"', value: 'if-else', sublabel: '($180m. literally if-else.)' },
             ].map((stat, i) => (
               <div key={i} className="text-center">
                 <div className="text-3xl md:text-4xl font-mono font-bold text-danger-orange mb-1">
@@ -193,13 +363,12 @@ export default function Home() {
       <section id="products" className="py-24 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <span className="badge badge-error mb-4">⚠ vaporware suite</span>
             <h2 className="text-3xl md:text-4xl font-bold text-slate-dark mb-4 font-display">
               products that don't exist
             </h2>
             <p className="text-slate-light max-w-2xl mx-auto">
-              just like every other "ai infrastructure" in your portfolio.
-              difference is we're not lying about it.
+              same as everything else you've aped into.
+              at least these names slap harder than your -90% bags.
             </p>
           </div>
 
@@ -227,14 +396,14 @@ export default function Home() {
               </h2>
               <p className="text-ivory-light/70 mb-6">
                 broken, confused, perpetually under construction.
-                more honest than anything in your portfolio.
+                still outperforming your portfolio.
               </p>
               <ul className="space-y-3 mb-8">
                 {[
-                  'shipped exactly as much as ai16z\'s "$400m fund" (nothing)',
-                  'virtuals\' "on-chain agents" crash when aws goes down lmao',
-                  'arc framework has "few if any independent builders" - go check',
-                  'we admit the repo is empty. they won\'t.',
+                  'shipped exactly as much as ai16z (nothing)',
+                  'virtuals "on-chain agents" = aws + cope',
+                  'arc framework: "few if any independent builders"',
+                  'empty repo. full send. ngmi.',
                 ].map((item, i) => (
                   <li key={i} className="flex items-center gap-3 text-ivory-light/80">
                     <span className="text-danger-orange">▸</span>
@@ -263,19 +432,19 @@ export default function Home() {
           <div className="text-center mb-16">
             <span className="badge badge-error mb-4">roadmap</span>
             <h2 className="text-3xl md:text-4xl font-bold text-slate-dark mb-4 font-display">
-              the path to absolutely fucking nothing
+              roadmap to absolutely nothing
             </h2>
             <p className="text-slate-light">
-              more detailed than most "ai agent" roadmaps. and equally meaningless.
+              still more detailed than whatever you're bagholding.
             </p>
           </div>
 
           <div className="space-y-6">
             {[
-              { phase: 'q1 2025', title: 'genesis (theft)', items: ['ctrl+c ai16z\'s entire approach', 'change 3 colors, call it original', 'announce "stealth mode" (we have nothing)'], status: 'complete' },
-              { phase: 'q2 2025', title: 'the grift continues', items: ['tweet "gm" 47 times', 'spaces with other grifters (cross-promo)', '"ecosystem" = new telegram group'], status: 'current' },
-              { phase: 'q3 2025', title: 'hopium distribution', items: ['anon tweets "big news soon"', 'rebrand when called out', 'community call (mute everyone)'], status: 'upcoming' },
-              { phase: 'q∞', title: 'ship literally anything', items: ['hahahaha', 'no seriously never', 'buy anyway lmao'], status: 'never' },
+              { phase: 'q1 2025', title: 'genesis (theft)', items: ['ctrl+c ai16z. call it innovation.', 'change 3 colors. "original vision."', '"stealth mode" = nothing exists'], status: 'complete' },
+              { phase: 'q2 2025', title: 'grift escalation', items: ['tweet "gm" until brain damage', 'spaces with fellow scammers', '"ecosystem" = telegram group'], status: 'current' },
+              { phase: 'q3 2025', title: 'hopium distribution', items: ['"big news soon" (nothing)', 'rebrand after getting called out', 'community call (mute the fud)'], status: 'upcoming' },
+              { phase: 'q∞', title: 'ship anything', items: ['lmfao', 'absolutely not', 'you\'ll ape anyway'], status: 'never' },
             ].map((phase, i) => (
               <div
                 key={i}
@@ -335,13 +504,13 @@ export default function Home() {
       <section className="py-24 px-6 relative">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-slate-dark mb-6 font-display">
-            stop coping. start admitting.
+            ngmi
           </h2>
           <p className="text-xl text-slate-light mb-4">
-            every "ai agent" is just claude with a cron job and venture funding.
+            claude + cron job + vc money = "ai agent"
           </p>
           <p className="text-lg text-danger-orange mb-8 font-mono font-bold">
-            we're the only ones not lying to your face about it.
+            you know it. you'll ape anyway. clown.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button className="btn-primary">
@@ -355,6 +524,61 @@ export default function Home() {
       </section>
 
       <Footer />
+
+      {/* wallet modal */}
+      {showWalletModal && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center"
+          onClick={() => setShowWalletModal(false)}
+        >
+          {/* backdrop */}
+          <div className="absolute inset-0 bg-slate-dark/90 backdrop-blur-sm" />
+
+          {/* modal */}
+          <div
+            className="relative bg-ivory-light border-4 border-danger-orange p-8 max-w-md w-full mx-4 animate-[glitch_0.1s_ease-in-out_3]"
+            style={{ boxShadow: '8px 8px 0 #0a0a09, 12px 12px 0 #FF6B35' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* danger stripe top */}
+            <div className="construction-stripe h-2 absolute -top-2 left-0 right-0" />
+
+            {/* close button */}
+            <button
+              className="absolute -top-4 -right-4 w-10 h-10 bg-larp-red text-black font-mono font-bold text-xl flex items-center justify-center border-2 border-black hover:bg-danger-orange transition-colors"
+              style={{ boxShadow: '3px 3px 0 black' }}
+              onClick={() => setShowWalletModal(false)}
+            >
+              ✗
+            </button>
+
+            {/* content */}
+            <div className="text-center">
+              <div className="text-5xl mb-4 font-mono text-danger-orange font-bold">?!</div>
+              <h3 className="text-4xl md:text-5xl font-bold text-slate-dark mb-4 font-mono">
+                seriously?
+              </h3>
+              <p className="text-slate-light mb-6 font-mono text-sm">
+                you saw all this and still tried to connect?
+              </p>
+              <div className="space-y-3">
+                <button
+                  className="w-full btn-primary"
+                  onClick={() => setShowWalletModal(false)}
+                >
+                  close
+                </button>
+                <p className="text-xs text-slate-light/60 font-mono">
+                  there's nothing to connect to. go outside.
+                </p>
+              </div>
+            </div>
+
+            {/* danger stripe bottom */}
+            <div className="construction-stripe h-2 absolute -bottom-2 left-0 right-0" />
+          </div>
+        </div>
+      )}
     </main>
   );
 }
