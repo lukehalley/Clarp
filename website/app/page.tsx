@@ -345,15 +345,17 @@ export default function Home() {
               </h1>
 
               <p className="text-lg sm:text-xl md:text-2xl text-slate-light mb-2 sm:mb-4">
-                "i'll build your revolutionary infrastructure"
+                "autonomous ai agent framework"
               </p>
-              <p className="text-base sm:text-lg text-danger-orange font-mono mb-6 sm:mb-8 font-bold">
-                (no)
+              <p className="text-base sm:text-lg text-danger-orange font-mono mb-4 sm:mb-6 font-bold">
+                it's a cron job.
               </p>
 
+              <p className="text-sm sm:text-base text-slate-light mb-2 max-w-md mx-auto lg:mx-0">
+                openai api call. if-else statement. setTimeout.
+              </p>
               <p className="text-sm sm:text-base text-slate-light mb-6 sm:mb-8 max-w-md mx-auto lg:mx-0">
-                chatgpt wrapper + cron job + vc money = "ai agent."
-                you bought the top. again. absolute clown behavior.
+                $50m valuation. you bought it.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start mb-6 sm:mb-8">

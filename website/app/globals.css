@@ -214,7 +214,8 @@
       #0a0a09 10px,
       #0a0a09 20px
     );
-    animation: stripe-move 20s linear infinite;
+    background-size: 28.28px 28.28px; /* sqrt(20^2 + 20^2) for perfect loop */
+    animation: stripe-move 1s linear infinite;
   }
 
   /* Harsh button styles */
@@ -308,10 +309,10 @@
   }
 }
 
-/* Stripe animation */
+/* Stripe animation - 28.28px is the diagonal repeat distance for 20px stripes at 45deg */
 @keyframes stripe-move {
   0% { background-position: 0 0; }
-  100% { background-position: 40px 0; }
+  100% { background-position: 28.28px 0; }
 }
 
 /* Glitch animations - more aggressive */
