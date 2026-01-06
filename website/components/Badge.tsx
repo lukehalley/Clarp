@@ -19,7 +19,7 @@ export default function Badge({ children, variant = 'default', className = '' }:
 
   return (
     <span className={`badge border ${variants[variant]} ${className}`}>
-      {variant === 'warning' && <span className="animate-pulse">⚠</span>}
+      {variant === 'warning' && <span className="animate-pulse">!</span>}
       {variant === 'larp' && <span>✦</span>}
       {variant === 'success' && <span>✓</span>}
       {variant === 'error' && <span>✗</span>}

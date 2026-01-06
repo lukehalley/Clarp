@@ -27,8 +27,8 @@ congratulations! you're now a founder.
 time to announce your $5m raise.`,
       notes: [
         'this is literally how your bags were built',
-        'you think we\'re joking. go check the repos.',
-        'some 17yo did this yesterday and hit $30m mc. you\'re ngmi.',
+        'not joking. go check the repos. absolute state of crypto.',
+        'some 17yo did this yesterday and hit $30m mc. ngmi.',
       ],
     },
   },
@@ -59,9 +59,9 @@ const agent = {
 // claimed: "ai agent os"
 // reality: "a prompt router, not a framework"`,
       notes: [
-        'every "proprietary model" is gpt-4 with a system prompt. you paid for that.',
-        'arc framework has "few if any independent builders" - their words not ours',
-        'daos.fun: no dao let ai move funds autonomously. it\'s all theater.',
+        'every "proprietary model" is gpt-4 with a system prompt. congrats on your bags.',
+        'arc framework has "few if any independent builders" - their own words',
+        'daos.fun: no dao let ai move funds autonomously. pure theater.',
       ],
     },
   },
@@ -91,9 +91,9 @@ const trade = async () => {
 // on-chain part: nft ownership + revenue splits
 // "autonomous" part: cron jobs`,
       notes: [
-        '@larry0x called it "ai theatre in crypto". he was being nice.',
-        'virtuals agents crash when aws goes down. "decentralized" lmao',
-        'dev quote: "this is a scripted bot. there is no agent here." you bought it.',
+        '@larry0x called it "ai theatre in crypto". he was being generous.',
+        'virtuals agents crash when aws goes down. "decentralized" my ass',
+        'dev quote: "this is a scripted bot. there is no agent here." absolute state.',
       ],
     },
   },
@@ -115,9 +115,9 @@ q: did andy ayrey make money from goat?
 a: he says $1-3m from "donations" and
    "advisory tokens." didn't launch it though.
 
-q: what's the difference between $cla and ai16z?
+q: what's the difference between $clarp and ai16z?
 a: ai16z hit $400m claiming to be a "parody."
-   we're just honest about being worthless.
+   $clarp has better memes and worse tokenomics.
 
 q: is arc framework real infrastructure?
 a: "few if any independent builders using it"
@@ -127,9 +127,9 @@ q: are there really teens making millions?
 a: yes. quote from one (deleted): "i didn't
    expect it to blow up. it's literally a wrapper."`,
       notes: [
-        'follow @larry0x, @kelvinfichter, @punk6529 if you want more blackpills',
-        'every figure here is real. go verify. we dare you.',
-        'we are literally the only project not lying to your face',
+        'follow @larry0x, @kelvinfichter, @punk6529 for more blackpills',
+        'every figure here is real. go verify. do your own fucking research.',
+        'ngmi but at least you\'ll understand why',
       ],
     },
   },
@@ -190,7 +190,7 @@ export default function DocsSection() {
                       key={i}
                       className="flex items-start gap-2 text-sm text-slate-dark bg-larp-red/10 px-4 py-2 border-l-4 border-larp-red"
                     >
-                      <span className="text-larp-red font-bold">⚠</span>
+                      <span className="text-larp-red font-bold">→</span>
                       {note}
                     </div>
                   ))}

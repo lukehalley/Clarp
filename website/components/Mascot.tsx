@@ -12,7 +12,7 @@ export default function Mascot() {
         <pre className="font-mono text-clay text-xs leading-tight select-none">
 {`
         ┌─────────────────────────┐
-        │    ⚠ SCAM DETECTED ⚠   │
+        │    × SCAM DETECTED ×   │
         │   (just like yours)     │
         └─────────────────────────┘
                     │

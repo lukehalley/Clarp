@@ -14,8 +14,8 @@ export default function Footer() {
               <span className="text-danger-orange">$</span>cla
             </div>
             <p className="text-ivory-light/60 mb-6 max-w-sm">
-              the only ai agent honest about being bullshit.
               a middle finger to the vaporware industrial complex.
+              $400m for if-else statements. absolute degeneracy.
             </p>
             <div className="flex gap-4">
               <a
@@ -92,7 +92,7 @@ export default function Footer() {
               © 2025 claude larp agent. no rights reserved. it's a shitpost.
             </p>
             <p className="text-xs text-ivory-light/40 font-mono">
-              <span className="text-larp-red">⚠</span> not financial advice. don't buy this. you'll lose it all anyway.
+              <span className="text-larp-red">×</span> not financial advice. don't buy this. you'll lose it all anyway.
             </p>
           </div>
         </div>
@@ -107,7 +107,7 @@ export default function Footer() {
     │  and finding nothing but readmes.     │
     │                                       │
     │  wagmi                                │
-    │  (we're absolutely fucking not)       │
+    │  (lmao ngmi)                          │
     ╰───────────────────────────────────────╯
 `}
           </pre>

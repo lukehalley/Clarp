@@ -41,9 +41,9 @@ module.exports = {
         },
       },
       fontFamily: {
-        mono: ['JetBrains Mono', 'SF Mono', 'Fira Code', 'Consolas', 'monospace'],
-        display: ['Archivo Black', 'Impact', 'sans-serif'],
-        sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        mono: ['IBM Plex Mono', 'SF Mono', 'Consolas', 'monospace'],
+        display: ['IBM Plex Mono', 'SF Mono', 'Consolas', 'monospace'],
+        sans: ['IBM Plex Mono', 'SF Mono', 'Consolas', 'monospace'],
       },
       animation: {
         'blink': 'blink 1s step-end infinite',

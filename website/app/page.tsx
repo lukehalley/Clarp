@@ -215,8 +215,7 @@ export default function Home() {
       <nav className="sticky top-0 z-50 bg-ivory-light/95 backdrop-blur-sm border-b-2 border-slate-dark">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="font-mono text-xl font-bold text-slate-dark">$cla</span>
-            <span className="text-danger-orange text-sm">⚠</span>
+            <span className="font-mono text-xl font-bold text-slate-dark">$clarp</span>
           </div>
           <div className="flex items-center gap-6">
             <a href="#products" className="text-sm text-slate-light hover:text-danger-orange transition-colors">products</a>

@@ -166,8 +166,8 @@
   }
 
   .larp-card::before {
-    content: '⚠';
-    @apply absolute -top-3 -right-3 w-8 h-8 flex items-center justify-center text-sm;
+    content: '×';
+    @apply absolute -top-3 -right-3 w-8 h-8 flex items-center justify-center text-sm font-bold;
     background: var(--danger-orange);
     color: black;
   }
