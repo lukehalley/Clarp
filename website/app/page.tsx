@@ -105,8 +105,8 @@ export default function Home() {
   useEffect(() => {
     setMounted(true);
 
-    // Konami code easter egg: ↑↑↓↓←→←→BA
-    const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'KeyB', 'KeyA'];
+    // Konami code easter egg: ↑↑↓↓←→
+    const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
     let konamiIndex = 0;
 
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -803,7 +803,7 @@ export default function Home() {
       {konamiProgress > 0 && !konamiActivated && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[100] animate-fade-in">
           <div className="bg-slate-dark border-2 border-larp-yellow px-4 py-2 font-mono text-xs text-larp-yellow">
-            konami: {Array(konamiProgress).fill('▓').join('')}{Array(10 - konamiProgress).fill('░').join('')}
+            konami: {Array(konamiProgress).fill('▓').join('')}{Array(6 - konamiProgress).fill('░').join('')}
           </div>
         </div>
       )}
