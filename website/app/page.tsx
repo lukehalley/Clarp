@@ -113,22 +113,22 @@ export default function Home() {
 
     setLoadingMessage(shuffled[0]);
 
-    // Cycle through messages
+    // Cycle through messages (slow and painful)
     const messageInterval = setInterval(() => {
       messageIndex++;
       if (messageIndex < shuffled.length) {
         setLoadingMessage(shuffled[messageIndex]);
-        setLoadingProgress(prev => Math.min(prev + 12, 95));
+        setLoadingProgress(prev => Math.min(prev + 10, 95));
       }
-    }, 800);
+    }, 1800);
 
-    // Progress bar increments
+    // Progress bar increments (glacial)
     const progressInterval = setInterval(() => {
       setLoadingProgress(prev => {
         if (prev >= 99) return 99;
-        return prev + Math.random() * 8;
+        return prev + Math.random() * 3;
       });
-    }, 200);
+    }, 500);
 
     // Fail after cycling through messages
     setTimeout(() => {
@@ -143,8 +143,8 @@ export default function Home() {
         setShowLoadingModal(false);
         setLoadingFailed(false);
         setLoadingProgress(0);
-      }, 2000);
-    }, shuffled.length * 800 + 500);
+      }, 3000);
+    }, shuffled.length * 1800 + 1000);
   };
 
   // Easter egg: footer link click
