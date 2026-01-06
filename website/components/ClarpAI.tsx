@@ -63,13 +63,7 @@ interface Message {
 
 export default function ClarpAI() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 0,
-      type: 'ai',
-      content: "clarp ai online. ask me anything. I won't help.",
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [usedResponses, setUsedResponses] = useState<Set<number>>(new Set());
