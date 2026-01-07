@@ -529,9 +529,12 @@ export default function Home() {
               </div>
 
               {/* CA Box */}
-              <div className="bg-black px-4 py-2 font-mono text-xs sm:text-sm inline-flex items-center gap-2">
-                <span className="text-larp-green">ca:</span>
-                <span className="text-ivory-light/70">doesn't matter. you don't read contracts anyway.</span>
+              <div className="bg-black px-3 sm:px-4 py-2 font-mono text-[10px] sm:text-sm inline-block sm:inline-flex items-center gap-1 sm:gap-2 max-w-full">
+                <span className="text-larp-green shrink-0">ca:</span>
+                <span className="text-ivory-light/70 break-words">
+                  <span className="hidden sm:inline">doesn't matter. you don't read contracts anyway.</span>
+                  <span className="sm:hidden">you don't read contracts anyway.</span>
+                </span>
               </div>
             </div>
           </div>
@@ -752,43 +755,45 @@ export default function Home() {
       {/* wallet modal */}
       {showWalletModal && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
           onClick={() => setShowWalletModal(false)}
+          data-modal-open="true"
         >
           {/* backdrop */}
           <div className="absolute inset-0 bg-slate-dark/90 backdrop-blur-sm" />
 
           {/* modal */}
           <div
-            className="relative bg-ivory-light border-4 border-danger-orange p-8 max-w-md w-full mx-4 animate-[glitch_0.1s_ease-in-out_3]"
-            style={{ boxShadow: '8px 8px 0 #0a0a09, 12px 12px 0 #FF6B35' }}
+            className="relative bg-ivory-light border-2 sm:border-4 border-danger-orange p-6 sm:p-8 max-w-md w-full animate-[glitch_0.1s_ease-in-out_3]"
+            style={{ boxShadow: '4px 4px 0 #0a0a09, 6px 6px 0 #FF6B35' }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* close button */}
+            {/* close button - inside on mobile, outside on desktop */}
             <button
-              className="absolute -top-4 -right-4 w-10 h-10 bg-larp-red text-black font-mono font-bold text-xl flex items-center justify-center border-2 border-black hover:bg-danger-orange transition-colors"
-              style={{ boxShadow: '3px 3px 0 black' }}
+              className="absolute top-2 right-2 sm:-top-4 sm:-right-4 w-8 h-8 sm:w-10 sm:h-10 bg-larp-red text-black font-mono font-bold text-lg sm:text-xl flex items-center justify-center border-2 border-black hover:bg-danger-orange active:translate-x-0.5 active:translate-y-0.5 transition-all"
+              style={{ boxShadow: '2px 2px 0 black' }}
               onClick={() => setShowWalletModal(false)}
             >
               ✗
             </button>
 
             {/* content */}
-            <div className="text-center">
-              <h3 className="text-3xl md:text-4xl font-bold text-slate-dark mb-4 font-mono">
+            <div className="text-center pt-6 sm:pt-0">
+              <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-dark mb-3 sm:mb-4 font-mono">
                 there is no wallet
               </h3>
-              <p className="text-slate-light mb-6 font-mono text-sm">
+              <p className="text-slate-light mb-5 sm:mb-6 font-mono text-xs sm:text-sm">
                 you clicked "connect wallet" on a parody website.
               </p>
               <div className="space-y-3">
                 <button
-                  className="w-full btn-primary"
+                  className="w-full btn-primary text-sm sm:text-base py-3"
                   onClick={() => setShowWalletModal(false)}
                 >
                   close and reflect
                 </button>
-                <p className="text-xs text-slate-light/60 font-mono">
+                <p className="text-[10px] sm:text-xs text-slate-light/60 font-mono">
                   you won't.
                 </p>
               </div>
@@ -800,27 +805,32 @@ export default function Home() {
       {/* whitepaper modal - easter egg */}
       {showWhitepaperModal && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
           onClick={() => setShowWhitepaperModal(false)}
+          data-modal-open="true"
         >
           <div className="absolute inset-0 bg-slate-dark/95 backdrop-blur-sm" />
           <div
-            className="relative bg-ivory-light border-4 border-slate-dark p-8 sm:p-12 w-[90vw] sm:w-[70vw] md:w-[50vw] max-w-[600px] flex flex-col items-center justify-center"
+            className="relative bg-ivory-light border-2 sm:border-4 border-slate-dark p-6 sm:p-12 w-full max-w-[min(90vw,500px)] sm:max-w-[600px] flex flex-col items-center justify-center"
             style={{
-              boxShadow: '8px 8px 0 #0a0a09',
-              aspectRatio: '1 / 1.414'
+              boxShadow: '4px 4px 0 #0a0a09',
+              aspectRatio: '1 / 1.414',
+              maxHeight: 'calc(100vh - 4rem)'
             }}
             onClick={(e) => e.stopPropagation()}
           >
+            {/* close button - inside on mobile, outside on desktop */}
             <button
-              className="absolute -top-4 -right-4 w-10 h-10 bg-larp-red text-black font-mono font-bold text-xl flex items-center justify-center border-2 border-black hover:bg-danger-orange transition-colors"
-              style={{ boxShadow: '3px 3px 0 black' }}
+              className="absolute top-2 right-2 sm:-top-4 sm:-right-4 w-8 h-8 sm:w-10 sm:h-10 bg-larp-red text-black font-mono font-bold text-lg sm:text-xl flex items-center justify-center border-2 border-black hover:bg-danger-orange active:translate-x-0.5 active:translate-y-0.5 transition-all"
+              style={{ boxShadow: '2px 2px 0 black' }}
               onClick={() => setShowWhitepaperModal(false)}
             >
               ✗
             </button>
 
             <div className="text-center flex flex-col items-center justify-center h-full">
+              {/* blank whitepaper - that's the joke */}
             </div>
           </div>
         </div>
@@ -829,50 +839,52 @@ export default function Home() {
       {/* loading modal - cycles through messages then fails */}
       {showLoadingModal && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
           onClick={() => !loadingFailed && setShowLoadingModal(false)}
+          data-modal-open="true"
         >
           <div className="absolute inset-0 bg-slate-dark/95 backdrop-blur-sm" />
           <div
-            className={`relative bg-slate-dark border-4 p-8 max-w-md w-full mx-4 transition-colors ${loadingFailed ? 'border-larp-red' : 'border-danger-orange'}`}
-            style={{ boxShadow: loadingFailed ? '8px 8px 0 #E74C3C' : '8px 8px 0 #FF6B35' }}
+            className={`relative bg-slate-dark border-2 sm:border-4 p-6 sm:p-8 max-w-md w-full transition-colors ${loadingFailed ? 'border-larp-red' : 'border-danger-orange'}`}
+            style={{ boxShadow: loadingFailed ? '4px 4px 0 #E74C3C' : '4px 4px 0 #FF6B35' }}
             onClick={(e) => e.stopPropagation()}
           >
             {!loadingFailed && (
               <button
-                className="absolute -top-4 -right-4 w-10 h-10 bg-larp-red text-black font-mono font-bold text-xl flex items-center justify-center border-2 border-black hover:bg-danger-orange transition-colors"
-                style={{ boxShadow: '3px 3px 0 black' }}
+                className="absolute top-2 right-2 sm:-top-4 sm:-right-4 w-8 h-8 sm:w-10 sm:h-10 bg-larp-red text-black font-mono font-bold text-lg sm:text-xl flex items-center justify-center border-2 border-black hover:bg-danger-orange active:translate-x-0.5 active:translate-y-0.5 transition-all"
+                style={{ boxShadow: '2px 2px 0 black' }}
                 onClick={() => setShowLoadingModal(false)}
               >
                 ✗
               </button>
             )}
 
-            <div className="text-center">
-              <div className="mb-6">
+            <div className="text-center pt-4 sm:pt-0">
+              <div className="mb-5 sm:mb-6">
                 {loadingFailed ? (
-                  <div className="inline-block w-12 h-12 border-4 border-larp-red flex items-center justify-center text-larp-red text-2xl font-bold">
+                  <div className="inline-flex w-10 h-10 sm:w-12 sm:h-12 border-4 border-larp-red items-center justify-center text-larp-red text-xl sm:text-2xl font-bold">
                     ✗
                   </div>
                 ) : (
-                  <div className="inline-block w-12 h-12 border-4 border-danger-orange border-t-transparent rounded-full animate-spin" />
+                  <div className="inline-block w-10 h-10 sm:w-12 sm:h-12 border-4 border-danger-orange border-t-transparent rounded-full animate-spin" />
                 )}
               </div>
-              <p className={`font-mono text-sm mb-2 transition-colors ${loadingFailed ? 'text-larp-red' : 'text-danger-orange'}`}>
+              <p className={`font-mono text-xs sm:text-sm mb-2 transition-colors ${loadingFailed ? 'text-larp-red' : 'text-danger-orange'}`}>
                 {loadingMessage}
               </p>
-              <div className="w-full bg-slate-medium h-2 overflow-hidden mb-4">
+              <div className="w-full bg-slate-medium h-1.5 sm:h-2 overflow-hidden mb-3 sm:mb-4">
                 <div
                   className={`h-full transition-all duration-200 ${loadingFailed ? 'bg-larp-red' : 'bg-danger-orange'}`}
                   style={{ width: `${Math.min(loadingProgress, 99)}%` }}
                 />
               </div>
-              <p className={`font-mono text-xs ${loadingFailed ? 'text-larp-red' : 'text-ivory-light/50'}`}>
+              <p className={`font-mono text-[10px] sm:text-xs ${loadingFailed ? 'text-larp-red' : 'text-ivory-light/50'}`}>
                 {loadingFailed ? 'connection terminated' : `${Math.floor(loadingProgress)}% complete`}
               </p>
               {!loadingFailed && (
-                <p className="text-ivory-light/30 font-mono text-[10px] mt-4">
-                  (click anywhere to give up)
+                <p className="text-ivory-light/30 font-mono text-[9px] sm:text-[10px] mt-3 sm:mt-4">
+                  (tap anywhere to give up)
                 </p>
               )}
             </div>

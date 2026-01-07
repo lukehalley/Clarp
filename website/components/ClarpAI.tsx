@@ -145,11 +145,15 @@ export default function ClarpAI() {
     <>
       {/* Chat window */}
       <div
-        className={`fixed bottom-4 right-4 sm:right-6 z-[90] transition-all duration-300 ${
+        className={`fixed z-[90] transition-all duration-300 ${
           isOpen
             ? 'opacity-100 translate-y-0 pointer-events-auto'
             : 'opacity-0 translate-y-4 pointer-events-none'
         }`}
+        style={{
+          bottom: 'max(1rem, env(safe-area-inset-bottom))',
+          right: 'max(1rem, env(safe-area-inset-right))',
+        }}
       >
         <div
           className="w-[calc(100vw-2rem)] sm:w-[380px] bg-slate-dark text-ivory-light font-mono overflow-hidden"
@@ -286,9 +290,13 @@ export default function ClarpAI() {
       {/* Floating button */}
       <button
         onClick={handleOpen}
-        className={`fixed bottom-4 right-4 sm:right-6 z-[90] group transition-all duration-300 ${
+        className={`fixed z-[90] group transition-all duration-300 ${
           isOpen ? 'scale-0 opacity-0' : 'scale-100 opacity-100'
         }`}
+        style={{
+          bottom: 'max(1rem, env(safe-area-inset-bottom))',
+          right: 'max(1rem, env(safe-area-inset-right))',
+        }}
         aria-label="Open chat"
       >
         <div

@@ -311,7 +311,10 @@ export default function ActivityNotifications() {
   if (!isClient) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 z-[60] flex flex-col-reverse gap-2">
+    <div
+      className="fixed left-2 right-2 sm:left-4 sm:right-auto z-[60] flex flex-col-reverse gap-2 pointer-events-none"
+      style={{ bottom: 'max(1rem, env(safe-area-inset-bottom))' }}
+    >
       {notifications.map((notification) => {
         const config = TYPE_CONFIG[notification.type];
         const age = Date.now() - notification.timestamp;
@@ -320,7 +323,7 @@ export default function ActivityNotifications() {
         return (
           <div
             key={notification.id}
-            className={`notification-toast bg-ivory-light border-2 border-slate-dark font-mono text-xs sm:text-sm w-[320px] sm:w-[360px] ${
+            className={`notification-toast bg-ivory-light border-2 border-slate-dark font-mono text-xs w-full sm:w-[360px] pointer-events-auto ${
               notification.exiting ? 'animate-slide-out' : 'animate-slide-in'
             }`}
             style={{

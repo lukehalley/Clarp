@@ -29,38 +29,38 @@ export default function Clarp({ size = 64, className = '', animate = false }: Cl
         {/* Terracotta background - the substance */}
         <rect width="256" height="256" fill="#D97757"/>
 
-        {/* CLARP mascot - centered and maximized
-            Total width: 192 (body 160 + ears 16 each side)
-            Total height: 160 (body 96 + legs 64)
-            Centered: x offset = (256-192)/2 = 32, y offset = (256-160)/2 = 48
+        {/* CLARP mascot - matches marketing-assets/ticker-icon.svg exactly
+            This is the single source of truth for the logo design
+            Total mascot height: 180px (body 120 + legs 60)
+            Centered: (256-180)/2 = 38 from top
         */}
 
-        {/* Left ear void */}
-        <rect x="32" y="68" width="16" height="24" fill="#0a0a09"/>
+        {/* Body void */}
+        <rect x="28" y="38" width="200" height="120" fill="#0a0a09"/>
 
-        {/* Body void - main rectangle */}
-        <rect x="48" y="48" width="160" height="96" fill="#0a0a09"/>
+        {/* Left ear */}
+        <rect x="8" y="66" width="20" height="30" fill="#0a0a09"/>
 
-        {/* Right ear void */}
-        <rect x="208" y="68" width="16" height="24" fill="#0a0a09"/>
+        {/* Right ear */}
+        <rect x="228" y="66" width="20" height="30" fill="#0a0a09"/>
 
-        {/* Left eye - terracotta showing through (proportionate to original) */}
-        <rect x="80" y="76" width="24" height="40" fill="#D97757"/>
+        {/* Left eye - positioned for perfect mirror symmetry */}
+        <rect x="64" y="80" width="32" height="48" fill="#D97757"/>
 
-        {/* Right eye - terracotta showing through (proportionate to original) */}
-        <rect x="152" y="76" width="24" height="40" fill="#D97757"/>
+        {/* Right eye - mirror of left: 256 - 64 - 32 = 160 */}
+        <rect x="160" y="80" width="32" height="48" fill="#D97757"/>
 
-        {/* Left leg void */}
-        <rect x="56" y="144" width="32" height="64" fill="#0a0a09"/>
+        {/* Left leg */}
+        <rect x="40" y="158" width="40" height="60" fill="#0a0a09"/>
 
-        {/* Middle-left leg void */}
-        <rect x="104" y="144" width="24" height="64" fill="#0a0a09"/>
+        {/* Middle-left leg */}
+        <rect x="100" y="158" width="30" height="60" fill="#0a0a09"/>
 
-        {/* Middle-right leg void */}
-        <rect x="128" y="144" width="24" height="64" fill="#0a0a09"/>
+        {/* Middle-right leg */}
+        <rect x="126" y="158" width="30" height="60" fill="#0a0a09"/>
 
-        {/* Right leg void */}
-        <rect x="168" y="144" width="32" height="64" fill="#0a0a09"/>
+        {/* Right leg */}
+        <rect x="176" y="158" width="40" height="60" fill="#0a0a09"/>
       </svg>
     </div>
   );

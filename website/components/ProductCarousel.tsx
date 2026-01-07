@@ -165,11 +165,11 @@ export default function ProductCarousel() {
       </div>
 
       {/* Product counter */}
-      <div className="absolute -top-12 right-0 font-mono text-xs text-slate-light">
+      <div className="absolute -top-10 sm:-top-12 left-0 sm:left-auto sm:right-0 font-mono text-[10px] sm:text-xs text-slate-light">
         <span className="text-danger-orange">{currentIndex + 1}</span>
         <span className="mx-1">/</span>
         <span>{PRODUCTS.length}</span>
-        <span className="ml-2 text-slate-light/50">(all vaporware)</span>
+        <span className="ml-1 sm:ml-2 text-slate-light/50 hidden sm:inline">(all vaporware)</span>
       </div>
     </div>
   );

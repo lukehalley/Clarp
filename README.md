@@ -4,6 +4,9 @@
 
 # $CLARP
 
+> **Logo source of truth:** [`marketing-assets/ticker-icon.svg`](marketing-assets/ticker-icon.svg)
+> *All logo usages (website, socials, README) derive from this file.*
+
 **vaporware-as-a-service**
 
 <br>
