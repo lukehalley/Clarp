@@ -294,7 +294,7 @@ export default function Home() {
   if (!mounted) return null;
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen overflow-x-hidden">
       {/* sticky header with stripe + nav */}
       <header className="sticky top-0 z-50">
         <div className="construction-stripe h-3" />
@@ -600,8 +600,8 @@ export default function Home() {
                 this is <span className="text-danger-orange">clarp</span>
               </h2>
               <p className="text-sm sm:text-base text-ivory-light/70 mb-4 sm:mb-6">
-                you scrolled past 100 fake products to look at a jpeg.
-                and you'll scroll back up to look again.
+                you're about to scroll past 100 fake products.
+                but first, meet the jpeg.
               </p>
               <ul className="space-y-2 sm:space-y-3 mb-6 sm:mb-8 text-left">
                 {[

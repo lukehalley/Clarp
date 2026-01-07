@@ -266,26 +266,26 @@ export default function ActivityNotifications() {
   useEffect(() => {
     if (!isClient) return;
 
-    // Initial notification after longer delay
+    // Initial notification after shorter delay
     const initialTimeout = setTimeout(() => {
       addNotification();
-    }, 12000);
+    }, 5000);
 
-    // Sparse intervals - mostly long pauses with occasional activity
+    // More frequent intervals
     const getRandomDelay = () => {
       const roll = Math.random();
-      if (roll < 0.1) {
-        // 10% chance: moderate (8-15s)
-        return 8000 + Math.random() * 7000;
-      } else if (roll < 0.4) {
-        // 30% chance: slow (20-35s)
+      if (roll < 0.3) {
+        // 30% chance: quick (5-10s)
+        return 5000 + Math.random() * 5000;
+      } else if (roll < 0.6) {
+        // 30% chance: moderate (10-20s)
+        return 10000 + Math.random() * 10000;
+      } else if (roll < 0.85) {
+        // 25% chance: slow (20-35s)
         return 20000 + Math.random() * 15000;
-      } else if (roll < 0.75) {
-        // 35% chance: long pause (40-60s)
-        return 40000 + Math.random() * 20000;
       } else {
-        // 25% chance: very long pause (70-120s)
-        return 70000 + Math.random() * 50000;
+        // 15% chance: longer pause (35-50s)
+        return 35000 + Math.random() * 15000;
       }
     };
 
@@ -309,7 +309,7 @@ export default function ActivityNotifications() {
 
   return (
     <div
-      className="fixed left-2 right-2 sm:left-4 sm:right-auto z-[60] flex flex-col-reverse gap-2 pointer-events-none"
+      className="fixed left-2 sm:left-4 z-[60] flex flex-col-reverse gap-2 pointer-events-none"
       style={{ bottom: 'max(1rem, env(safe-area-inset-bottom))' }}
     >
       {notifications.map((notification) => {
@@ -320,7 +320,7 @@ export default function ActivityNotifications() {
         return (
           <div
             key={notification.id}
-            className={`notification-toast bg-ivory-light border-2 border-slate-dark font-mono text-xs w-full sm:w-[360px] pointer-events-auto ${
+            className={`notification-toast bg-ivory-light border-2 border-slate-dark font-mono text-xs w-[280px] sm:w-[360px] pointer-events-auto ${
               notification.exiting ? 'animate-slide-out' : 'animate-slide-in'
             }`}
             style={{

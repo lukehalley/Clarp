@@ -146,10 +146,6 @@ export default function Roadmap() {
             <PaperClip />
           </div>
 
-          {/* CLASSIFIED stamp at top */}
-          <div className="absolute top-4 right-4 sm:top-6 sm:right-8">
-            <Stamp text="CLASSIFIED" variant="classified" rotation={-8} />
-          </div>
 
           {/* Document header */}
           <div className="relative border-b-2 border-slate-dark/30 pb-4 mb-6">
@@ -163,9 +159,7 @@ export default function Roadmap() {
                 <div className="font-mono text-xs text-slate-dark/70">RE: Product Development Timeline</div>
               </div>
               <div className="font-mono text-xs text-slate-dark/70">
-                DATE: <span className="line-through text-slate-dark/40">Jan 2024</span>{' '}
-                <span className="line-through text-slate-dark/40">Jun 2024</span>{' '}
-                <span>Jan 2025</span>
+                DATE: Jan 2025
               </div>
             </div>
           </div>
@@ -174,8 +168,8 @@ export default function Roadmap() {
           <div className="relative mb-8">
             <p className="font-mono text-sm text-slate-dark leading-relaxed">
               This document outlines our <Redacted width={70} /> development roadmap for <Redacted width={50} />.
-              All timelines are <span className="line-through">firm</span> <span className="line-through">tentative</span> imaginary.
-              Please treat this information as <span className="line-through">confidential</span> comedy.
+              All timelines are <span className="line-through">firm</span> <span className="line-through">tentative</span> approximate.
+              Please treat this information as <span className="line-through">confidential</span> public.
             </p>
           </div>
 
@@ -307,7 +301,7 @@ export default function Roadmap() {
         {/* Bottom note outside the document */}
         <div className="mt-6 text-center">
           <p className="text-ivory-light/40 font-mono text-xs">
-            document leaked from /dev/null
+            leaked document
           </p>
         </div>
       </div>
