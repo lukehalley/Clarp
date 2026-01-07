@@ -27,7 +27,7 @@ const FILESYSTEM: Record<string, FileSystemNode> = {
 
 bought the top again. this is fine.
 "we're so back" - said 47 times this month
-"it's just a healthy correction" - down 94%
+"it's just a healthy correction" - trust
 "diamond hands" - can't sell anyway, no liquidity
 "the tech is solid" - haven't read the code
 "team is shipping" - last github commit: 8 months ago
@@ -187,7 +187,7 @@ exit`,
 [2024-02-03 14:25:00] INFO: Market cap: $50M
 [2024-02-03 14:30:00] WARN: Someone reads the code
 [2024-02-03 14:30:01] WARN: It's literally console.log("thinking...")
-[2024-02-03 14:30:02] ERROR: Price discovery: downward
+[2024-02-03 14:30:02] ERROR: Price discovery: initiated
 [2024-02-03 14:35:00] INFO: Team announces "V2 coming Q2"
 [2024-02-03 14:35:01] INFO: It's still Q2. It's always Q2.`,
               },

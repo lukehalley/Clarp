@@ -25,7 +25,7 @@ const SHAME_ENTRIES = [
     name: 'ai agent wrapper',
     raised: '$80m',
     shipped: 'chatgpt api call',
-    status: 'down 98%',
+    status: 'shipping v2',
     timeline: '6 months',
     excuse: 'shipping v2',
     highlight: 'status',

@@ -29,7 +29,7 @@ const PRODUCTS = [
   {
     name: 'clarp agent',
     tagline: 'autonomous ai wrapper',
-    description: 'chatgpt but we called it autonomous infrastructure. 41% win rate (trust us). down 98% but shipping v2.',
+    description: 'chatgpt but we called it autonomous infrastructure. 41% win rate (trust us). shipping v2.',
     features: ['gpt-4 api call (revolutionary)', '"neural network" in readme', 'executes 0 actual trades'],
     progress: 99,
     status: 'coming-soon' as const,
@@ -112,7 +112,7 @@ const TERMINAL_VARIATIONS = [
       { type: 'success', content: '✓ claimed 41% win rate (source: trust)' },
       { type: 'error', content: '✗ executed a single trade' },
     ],
-    info: 'down 98% but shipping v2... ngmi',
+    info: 'shipping v2... ngmi',
   },
   {
     command: 'clarp generate --modular-omnichain-l3',
@@ -563,7 +563,7 @@ export default function Home() {
                 vaporware-as-a-service
               </p>
               <p className="text-base sm:text-lg text-danger-orange font-mono mb-4 sm:mb-6 font-bold">
-                down 98% but shipping v2
+                building nothing, together
               </p>
 
               <p className="text-sm sm:text-base text-slate-light mb-6 sm:mb-8 max-w-md mx-auto lg:mx-0">
@@ -733,7 +733,7 @@ export default function Home() {
           <div className="space-y-4 sm:space-y-6">
             {[
               { phase: 'q1 2025', title: 'launch', items: ['deploy bonding curve', 'pay kol bundle 80% supply', 'claim "fair launch"'], status: 'complete' },
-              { phase: 'q2 2025', title: 'growth', items: ['say "we\'re so back" 47 times', 'down 98%, shipping v2', 'gaslight holders (marketing)'], status: 'current' },
+              { phase: 'q2 2025', title: 'growth', items: ['say "we\'re so back" 47 times', 'shipping v2 (always)', 'gaslight holders (marketing)'], status: 'current' },
               { phase: 'q2 2025', title: 'scale', items: ['raise $50m, ship landing page', 'partnership with other vaporware', 'audit theater: pay certik for pdf'], status: 'upcoming' },
               { phase: 'q2 forever', title: 'ship product', items: ['coming q2 (always)', 'modular omnichain intent-based', 'ngmi'], status: 'never' },
             ].map((phase, i) => (

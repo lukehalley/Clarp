@@ -105,7 +105,7 @@ a: it's vaporware-as-a-service
 q: dev do something?
 a: *becomes exit liquidity*
 
-q: why am i down 98%?
+q: wen product?
 a: shipping v2. we're so back.
 
 q: ngmi?

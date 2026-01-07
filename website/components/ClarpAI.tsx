@@ -10,7 +10,7 @@ const OFFENSIVE_RESPONSES = [
   "imagine being exit liquidity and asking questions.",
   "that's very jeet behavior of you.",
   "cope harder. or don't. I don't care.",
-  "you're down 98% and asking AI for help. delulu.",
+  "asking AI for help. delulu.",
   "we're so back (we're not).",
   "this conversation is cooked. like your portfolio.",
   "anon, touch grass.",

@@ -102,7 +102,7 @@ const NOTIFICATION_TEMPLATES: { type: NotificationType; messages: string[]; deta
     type: 'panic',
     messages: [
       'refreshing portfolio every 3 seconds',
-      'posted "this is fine" while down 80%',
+      'posted "this is fine" unironically',
       'asking "wen moon" in a dead discord',
       'dm\'d a 16yo for "alpha"',
       'bought a $2000 trading course',
