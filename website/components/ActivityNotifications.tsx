@@ -266,29 +266,26 @@ export default function ActivityNotifications() {
   useEffect(() => {
     if (!isClient) return;
 
-    // Initial notification after short delay
+    // Initial notification after longer delay
     const initialTimeout = setTimeout(() => {
       addNotification();
-    }, 3000);
+    }, 12000);
 
-    // Sporadic intervals - sometimes rapid bursts, sometimes long pauses
+    // Sparse intervals - mostly long pauses with occasional activity
     const getRandomDelay = () => {
       const roll = Math.random();
-      if (roll < 0.15) {
-        // 15% chance: rapid burst (0.8-1.5s)
-        return 800 + Math.random() * 700;
-      } else if (roll < 0.35) {
-        // 20% chance: quick (2-4s)
-        return 2000 + Math.random() * 2000;
-      } else if (roll < 0.7) {
-        // 35% chance: normal (5-10s)
-        return 5000 + Math.random() * 5000;
-      } else if (roll < 0.9) {
-        // 20% chance: slow (12-20s)
-        return 12000 + Math.random() * 8000;
+      if (roll < 0.1) {
+        // 10% chance: moderate (8-15s)
+        return 8000 + Math.random() * 7000;
+      } else if (roll < 0.4) {
+        // 30% chance: slow (20-35s)
+        return 20000 + Math.random() * 15000;
+      } else if (roll < 0.75) {
+        // 35% chance: long pause (40-60s)
+        return 40000 + Math.random() * 20000;
       } else {
-        // 10% chance: long pause (25-40s)
-        return 25000 + Math.random() * 15000;
+        // 25% chance: very long pause (70-120s)
+        return 70000 + Math.random() * 50000;
       }
     };
 
