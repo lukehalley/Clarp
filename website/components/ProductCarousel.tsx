@@ -18,7 +18,7 @@ const AUTO_SCROLL_INTERVAL = 4000; // 4 seconds between auto-scrolls
 export default function ProductCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoScrolling, setIsAutoScrolling] = useState(true);
-  const [isGlitching, setIsGlitching] = useState(false);
+  const [isButtonPressed, setIsButtonPressed] = useState(false);
   const autoScrollRef = useRef<NodeJS.Timeout | null>(null);
 
   // Number of visible cards (3 on desktop, 2 on tablet, 1 on mobile)
@@ -42,20 +42,13 @@ export default function ProductCarousel() {
 
   const maxIndex = PRODUCTS.length - visibleCount;
 
-  const triggerGlitch = useCallback(() => {
-    setIsGlitching(true);
-    setTimeout(() => setIsGlitching(false), 150);
-  }, []);
-
   const goToNext = useCallback(() => {
-    triggerGlitch();
     setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
-  }, [maxIndex, triggerGlitch]);
+  }, [maxIndex]);
 
   const goToPrev = useCallback(() => {
-    triggerGlitch();
     setCurrentIndex((prev) => (prev <= 0 ? maxIndex : prev - 1));
-  }, [maxIndex, triggerGlitch]);
+  }, [maxIndex]);
 
   // Handle manual navigation - stops auto-scroll
   const handleManualNav = useCallback((dir: 'prev' | 'next') => {
@@ -71,6 +64,8 @@ export default function ProductCarousel() {
   useEffect(() => {
     if (isAutoScrolling) {
       autoScrollRef.current = setInterval(() => {
+        setIsButtonPressed(true);
+        setTimeout(() => setIsButtonPressed(false), 150);
         goToNext();
       }, AUTO_SCROLL_INTERVAL);
     }
@@ -108,9 +103,9 @@ export default function ProductCarousel() {
         </button>
 
         {/* Cards container - fixed height to prevent layout shift */}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden -my-2 py-2">
           <div
-            className={`grid gap-4 sm:gap-6 ${isGlitching ? 'carousel-glitch' : ''}`}
+            className="grid gap-4 sm:gap-6"
             style={{
               gridTemplateColumns: `repeat(${visibleCount}, minmax(0, 1fr))`,
             }}
@@ -126,8 +121,8 @@ export default function ProductCarousel() {
         {/* Right arrow */}
         <button
           onClick={() => handleManualNav('next')}
-          className="group relative shrink-0 w-12 h-12 sm:w-16 sm:h-16 bg-slate-dark border-2 border-danger-orange flex items-center justify-center hover:bg-danger-orange active:translate-x-1 active:translate-y-1 active:shadow-none"
-          style={{ boxShadow: '4px 4px 0 var(--danger-orange)' }}
+          className={`group relative shrink-0 w-12 h-12 sm:w-16 sm:h-16 bg-slate-dark border-2 border-danger-orange flex items-center justify-center hover:bg-danger-orange active:translate-x-1 active:translate-y-1 active:shadow-none ${isButtonPressed ? 'translate-x-1 translate-y-1 !shadow-none' : ''}`}
+          style={{ boxShadow: isButtonPressed ? 'none' : '4px 4px 0 var(--danger-orange)' }}
           aria-label="Next products"
         >
           <span className="text-danger-orange group-hover:text-black text-2xl sm:text-3xl font-mono font-bold">
