@@ -1,28 +1,54 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
+import FullscreenTerminal from './FullscreenTerminal';
 
 interface TerminalProps {
   children: ReactNode;
   title?: string;
   className?: string;
+  canMaximize?: boolean;
 }
 
-export default function Terminal({ children, title = 'terminal', className = '' }: TerminalProps) {
+export default function Terminal({ children, title = 'terminal', className = '', canMaximize = true }: TerminalProps) {
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
   // Check if we need flex layout (when className contains flex)
   const needsFlex = className.includes('flex');
 
   return (
-    <div className={`terminal ${className}`}>
-      <div className="terminal-header shrink-0">
-        <div className="terminal-dot bg-larp-red" />
-        <div className="terminal-dot bg-larp-yellow" />
-        <div className="terminal-dot bg-larp-green" />
-        <span className="ml-3 text-xs text-ivory-light/50 font-mono">{title}</span>
+    <>
+      <div className={`terminal ${className}`}>
+        <div className="terminal-header shrink-0">
+          <div
+            className="terminal-dot bg-slate-light/50"
+            title="close (disabled)"
+          />
+          <div
+            className="terminal-dot bg-slate-light/50"
+            title="minimize (disabled)"
+          />
+          <div
+            className={`terminal-dot bg-larp-green transition-all ${
+              canMaximize
+                ? 'cursor-pointer hover:brightness-125 hover:ring-2 hover:ring-larp-green/50 animate-pulse'
+                : 'opacity-50'
+            }`}
+            onClick={() => canMaximize && setIsFullscreen(true)}
+            title={canMaximize ? "maximize (actually works)" : "maximize (disabled)"}
+          />
+          <span className="ml-3 text-xs text-ivory-light/50 font-mono">{title}</span>
+        </div>
+        <div className={`terminal-body text-sm ${needsFlex ? 'flex-1 overflow-hidden' : ''}`}>
+          {children}
+        </div>
       </div>
-      <div className={`terminal-body text-sm ${needsFlex ? 'flex-1 overflow-hidden' : ''}`}>
-        {children}
-      </div>
-    </div>
+
+      {/* Fullscreen terminal modal */}
+      <FullscreenTerminal
+        isOpen={isFullscreen}
+        onClose={() => setIsFullscreen(false)}
+      />
+    </>
   );
 }

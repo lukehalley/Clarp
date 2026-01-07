@@ -13,6 +13,7 @@ import Clarp from '@/components/Clarp';
 import ClarpAI from '@/components/ClarpAI';
 import ActivityNotifications from '@/components/ActivityNotifications';
 import HallOfShame from '@/components/HallOfShame';
+import PixelGithub from '@/components/PixelGithub';
 
 const ASCII_LOGO = `
  ██████╗██╗      █████╗ ██████╗ ██████╗
@@ -410,6 +411,16 @@ export default function Home() {
             >
               {navHoverText['hall of shame'] || 'hall of shame'}
             </a>
+            <a
+              href="https://github.com/chrmln/clarp"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-secondary text-sm px-3 py-2 flex items-center gap-2 group"
+              title="view source (it's real)"
+            >
+              <PixelGithub size={16} className="group-hover:animate-[glitch_0.1s_ease-in-out_2]" />
+              <span className="hidden lg:inline">source</span>
+            </a>
             <button className="btn-secondary text-sm px-4 py-2" onClick={() => setShowWalletModal(true)}>connect wallet</button>
           </div>
 
@@ -452,12 +463,24 @@ export default function Home() {
               >
                 hall of shame
               </a>
-              <button
-                className="w-full btn-secondary text-sm px-4 py-2 mt-2"
-                onClick={() => { setShowWalletModal(true); setMobileMenuOpen(false); }}
-              >
-                connect wallet
-              </button>
+              <div className="flex gap-2 mt-2">
+                <a
+                  href="https://github.com/chrmln/clarp"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-secondary text-sm px-4 py-2 flex items-center justify-center gap-2"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <PixelGithub size={16} />
+                  source
+                </a>
+                <button
+                  className="flex-1 btn-secondary text-sm px-4 py-2"
+                  onClick={() => { setShowWalletModal(true); setMobileMenuOpen(false); }}
+                >
+                  connect wallet
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -907,7 +930,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-slate-dark/95 backdrop-blur-sm" />
           <div
             className={`relative bg-slate-dark border-4 p-8 max-w-md w-full mx-4 transition-colors ${loadingFailed ? 'border-larp-red' : 'border-danger-orange'}`}
-            style={{ boxShadow: loadingFailed ? '8px 8px 0 #ef4444' : '8px 8px 0 #FF6B35' }}
+            style={{ boxShadow: loadingFailed ? '8px 8px 0 #E74C3C' : '8px 8px 0 #FF6B35' }}
             onClick={(e) => e.stopPropagation()}
           >
             {!loadingFailed && (
