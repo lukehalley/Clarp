@@ -1,62 +1,16 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import chatbotResponses from '@/data/chatbot-responses.json';
 
-const OFFENSIVE_RESPONSES = [
-  // Self-aware vaporware AI
-  "i'm embedded in a site that admits it ships nothing. you're asking me for alpha.",
-  "the website says vaporware. i'm part of the vaporware. what did you expect.",
-  "you scrolled past 'exit liquidity' warnings to talk to a chatbot. bold.",
-  "i'm a chatgpt wrapper on a parody site. my win rate is in the tokenomics.",
-  "this conversation costs gas. the insight is free. (both worthless.)",
-  "you read 'building nothing professionally' and clicked the chat icon. respect.",
-  "i have access to the entire $CLARP documentation. it's blank.",
-  "my training data is the blank whitepaper. i learned nothing. accurately.",
-  "the roadmap says q2. i say q2. we're consistent. that's the product.",
+type ResponseCategory = {
+  patterns: string[];
+  responses: string[];
+};
 
-  // Acknowledging the site context
-  "you're on a site with 100 fake products asking a fake ai for real advice.",
-  "the hall of shame is one click away but you chose violence (talking to me).",
-  "there's a progress bar at 99% that never moves. that's my answer queue.",
-  "somewhere above us the mascot is roasting you. i'm just the warm-up.",
-  "the terminal showed you the truth. you closed it. opened chat. ngmi.",
-  "i'm literally under a section called 'vaporware portfolio'. read the room.",
-  "you could be reading the cope manual. you're here instead. fascinating.",
-
-  // $CLARP specific mockery
-  "$CLARP holders asking me for help. the site warned you. repeatedly.",
-  "i'm the ai that ships nothing for the token that builds nothing. synergy.",
-  "the tokenomics page says you're exit liquidity. i'm just confirming.",
-  "you bought $CLARP and now you're venting to javascript. the stages of grief.",
-  "my creators admit they're shipping nothing. i'm the proof.",
-  "asking clarp ai about $CLARP. that's like asking the fire for warmth advice.",
-  "41% win rate. your $CLARP bags. both documented. both accurate.",
-
-  // Meta about being on a parody site
-  "you're consulting a chatbot on a token parody site. your thesis is showing.",
-  "i exist to roast people who read 'scam' and clicked anyway. that's you.",
-  "the whole site is a joke. i'm the punchline. you're the setup.",
-  "transparent vaporware. transparent unhelpfulness. we're consistent.",
-  "you want alpha from the AI on the 'we build nothing' homepage. interesting.",
-  "my responses ship nothing. just like the products. intentional design.",
-  "the site admits it's satire. i'm the satirical support. get satirical help.",
-
-  // Honest about being useless
-  "i'm honest about being useless. unlike the other ai tokens you've bought.",
-  "at least i admit i won't help. check your other investments' promises.",
-  "i do nothing but i say i do nothing. that's more than your portfolio.",
-  "you expected help from admitted vaporware. that's the real question here.",
-  "the site says 'ngmi'. i say 'ngmi'. we're a unified experience.",
-  "coming q2. my helpful response is also coming q2. (it's not.)",
-
-  // Brutal self-awareness
-  "i'm a div element with opinions. you're taking financial advice from css.",
-  "this chat widget cost more to build than the product roadmap. (the roadmap is free.)",
-  "you're talking to the most honest AI in crypto. the bar is underground.",
-  "my purpose is to exist on a joke site. i'm achieving it. are you?",
-  "the absurdity of asking me anything is the point. you're completing the art.",
-  "i have no product. no roadmap. no answer. but i admit it. revolutionary.",
-];
+type ChatbotResponses = {
+  [key: string]: ResponseCategory;
+};
 
 interface Message {
   id: number;
@@ -69,7 +23,7 @@ export default function ClarpAI() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [usedResponses, setUsedResponses] = useState<Set<number>>(new Set());
+  const [usedResponses, setUsedResponses] = useState<Set<string>>(new Set());
   const [hasNewMessage, setHasNewMessage] = useState(false);
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [viewportHeight, setViewportHeight] = useState<number | null>(null);
@@ -122,32 +76,76 @@ export default function ClarpAI() {
     setIsInputFocused(false);
   }, []);
 
-  const getRandomResponse = () => {
-    if (usedResponses.size >= OFFENSIVE_RESPONSES.length) {
-      setUsedResponses(new Set());
+  const findMatchingCategory = (userInput: string): string => {
+    const input = userInput.toLowerCase().trim();
+    const responses = chatbotResponses as ChatbotResponses;
+
+    // Check each category for pattern matches
+    for (const [category, data] of Object.entries(responses)) {
+      if (category === 'default') continue;
+
+      for (const pattern of data.patterns) {
+        // Check if the pattern exists in the input
+        if (input.includes(pattern.toLowerCase())) {
+          return category;
+        }
+      }
+    }
+
+    return 'default';
+  };
+
+  const getRandomResponse = (userInput: string) => {
+    const responses = chatbotResponses as ChatbotResponses;
+    const category = findMatchingCategory(userInput);
+    const categoryResponses = responses[category]?.responses || responses.default.responses;
+
+    // Create a unique key for tracking used responses per category
+    const categoryKey = category;
+
+    // Get or initialize the set of used indices for this category
+    const usedInCategory = new Set(
+      Array.from(usedResponses).filter(key => key.startsWith(`${categoryKey}:`)).map(key => parseInt(key.split(':')[1]))
+    );
+
+    // If all responses in category have been used, reset for this category
+    if (usedInCategory.size >= categoryResponses.length) {
+      // Remove all used responses for this category
+      setUsedResponses(prev => {
+        const newSet = new Set(prev);
+        Array.from(newSet).forEach(key => {
+          if (key.startsWith(`${categoryKey}:`)) {
+            newSet.delete(key);
+          }
+        });
+        return newSet;
+      });
+      usedInCategory.clear();
     }
 
     let index: number;
     do {
-      index = Math.floor(Math.random() * OFFENSIVE_RESPONSES.length);
-    } while (usedResponses.has(index) && usedResponses.size < OFFENSIVE_RESPONSES.length);
+      index = Math.floor(Math.random() * categoryResponses.length);
+    } while (usedInCategory.has(index) && usedInCategory.size < categoryResponses.length);
 
     setUsedResponses((prev) => {
       const newSet = new Set(prev);
-      newSet.add(index);
+      newSet.add(`${categoryKey}:${index}`);
       return newSet;
     });
-    return OFFENSIVE_RESPONSES[index];
+
+    return categoryResponses[index];
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isTyping) return;
 
+    const userInput = input.trim();
     const userMessage: Message = {
       id: Date.now(),
       type: 'user',
-      content: input.trim(),
+      content: userInput,
     };
 
     setMessages((prev) => [...prev, userMessage]);
@@ -160,7 +158,7 @@ export default function ClarpAI() {
       const aiMessage: Message = {
         id: Date.now() + 1,
         type: 'ai',
-        content: getRandomResponse(),
+        content: getRandomResponse(userInput),
       };
       setMessages((prev) => [...prev, aiMessage]);
       setIsTyping(false);

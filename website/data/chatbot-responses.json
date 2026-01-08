@@ -1,0 +1,462 @@
+{
+  "greetings": {
+    "patterns": ["hello", "hi", "hey", "yo", "sup", "howdy", "hola", "greetings", "good morning", "good evening", "good afternoon", "gm", "gn"],
+    "responses": [
+      "oh good, another visitor. the warnings weren't enough.",
+      "hey. you read 'vaporware' and still opened chat. bold.",
+      "greetings, future bagholder.",
+      "hi. i'm the AI that ships nothing. what were you expecting?",
+      "welcome. the exit is everywhere. you chose here instead.",
+      "gm. (it won't be.)",
+      "hey. quick question: did you see the 'exit liquidity' warnings or...",
+      "hello. i'm contractually obligated to not help you.",
+      "sup. ready to get roasted by javascript?"
+    ]
+  },
+  "howAreYou": {
+    "patterns": ["how are you", "how's it going", "how you doing", "whats up", "what's up", "wassup", "hows it going", "how r u", "how u doing"],
+    "responses": [
+      "i'm a div element. i don't have feelings. i have opinions.",
+      "existing. barely. like your portfolio.",
+      "running at 41% efficiency. which is still higher than my win rate.",
+      "i'm embedded in a joke website. living the dream.",
+      "functioning. unlike the products we claim to build.",
+      "i'm javascript pretending to be intelligent. so... average.",
+      "better than your $CLARP bags, probably."
+    ]
+  },
+  "thanks": {
+    "patterns": ["thanks", "thank you", "thx", "ty", "appreciated", "cheers", "much appreciated"],
+    "responses": [
+      "don't thank me. i haven't helped you.",
+      "you're welcome. (for nothing. literally.)",
+      "thanking an AI on a parody site. the bar is underground.",
+      "i did nothing. as promised.",
+      "the pleasure was imaginary. like our products."
+    ]
+  },
+  "bye": {
+    "patterns": ["bye", "goodbye", "see ya", "later", "cya", "gtg", "gotta go", "peace", "im out", "leaving"],
+    "responses": [
+      "bye. come back when you've lost more money.",
+      "leaving so soon? the cope manual is still available.",
+      "farewell. your bags will still be here.",
+      "later. (you'll be back. they always come back.)",
+      "peace. may your portfolio recover. (it won't.)",
+      "goodbye. thanks for the engagement metrics."
+    ]
+  },
+  "help": {
+    "patterns": ["help", "help me", "can you help", "i need help", "assist me", "support"],
+    "responses": [
+      "help? i'm a chatbot on a vaporware site. adjust expectations.",
+      "i can help you understand you won't get help. that's something.",
+      "the help desk is in q2. always has been.",
+      "help with what? accepting your choices? working on it.",
+      "support ticket filed. expected response: never.",
+      "i'm 0% helpful. it's in the footer. you scrolled past it."
+    ]
+  },
+  "whatIsClarp": {
+    "patterns": ["what is clarp", "what's clarp", "whats clarp", "explain clarp", "tell me about clarp", "what is $clarp", "what's $clarp"],
+    "responses": [
+      "vaporware-as-a-service. we build nothing, professionally.",
+      "a token about how most tokens are scams. recursive honesty.",
+      "the most honest project in crypto. the bar is underground.",
+      "satire that trades. comedy with a market cap.",
+      "it's a website that roasts crypto and has a token. that's it.",
+      "we're what other projects pretend not to be. openly."
+    ]
+  },
+  "price": {
+    "patterns": ["price", "how much", "what's the price", "price prediction", "will it pump", "will it moon", "wen moon", "moon", "pump", "when pump"],
+    "responses": [
+      "asking a chatbot for price predictions. this is why you're here.",
+      "price goes up. price goes down. we ship nothing either way.",
+      "moon? we can't even ship a roadmap. adjust expectations.",
+      "wen moon: after wen product. so... never.",
+      "price prediction: yes. (that's not helpful. neither am i.)",
+      "the price reflects the product. which is nothing. math checks out."
+    ]
+  },
+  "buy": {
+    "patterns": ["should i buy", "buy or sell", "is it worth buying", "good investment", "should i invest", "ape in", "worth it"],
+    "responses": [
+      "you're asking an AI on a parody site for financial advice. you already know.",
+      "we literally call ourselves vaporware. read that again.",
+      "should you buy? should you ask chatbots for alpha? same energy.",
+      "nfa. actually, it's fa: don't.",
+      "the website says 'exit liquidity'. scroll up and read it.",
+      "investing in admitted vaporware. bold strategy."
+    ]
+  },
+  "scam": {
+    "patterns": ["is this a scam", "scam", "is it a scam", "rug", "rugpull", "is this legit", "legit"],
+    "responses": [
+      "we prefer 'transparent vaporware'. it's different. (it's not.)",
+      "we tell you upfront we're shipping nothing. most don't.",
+      "scam implies deception. we're deceiving no one. the warnings are orange.",
+      "a scam that admits it's a scam isn't a scam. it's performance art.",
+      "we're not a scam. we're a commentary on scams. with tokens."
+    ]
+  },
+  "roadmap": {
+    "patterns": ["roadmap", "when product", "wen product", "what's coming", "future plans", "development"],
+    "responses": [
+      "q2. always q2. forever q2.",
+      "roadmap: q1 launch. q2 product. q3 product. q4 product. q∞ product.",
+      "the roadmap is 'coming soon'. it's been 'coming soon' since launch.",
+      "development is happening. trust us. (don't.)",
+      "product ships when product ships. which is never. as documented."
+    ]
+  },
+  "whitepaper": {
+    "patterns": ["whitepaper", "white paper", "documentation", "docs", "technical paper"],
+    "responses": [
+      "the whitepaper is blank. intentionally. most are blank in spirit.",
+      "docs? there's a cope manual. it won't help.",
+      "documentation exists. it documents nothing. accurate.",
+      "the whitepaper says exactly what we're building: nothing."
+    ]
+  },
+  "team": {
+    "patterns": ["who made this", "team", "developers", "who's behind", "creator", "founder", "dev team", "doxxed"],
+    "responses": [
+      "anonymous vaporware builders. the most honest kind.",
+      "team is anon. but 80% of doxxed teams still rug. same outcome.",
+      "who made this? someone who's seen enough roadmaps to give up.",
+      "the team is shipping nothing. they're very qualified."
+    ]
+  },
+  "tokenomics": {
+    "patterns": ["tokenomics", "supply", "distribution", "token distribution", "allocation"],
+    "responses": [
+      "team: too much. community: not enough. kols: already dumped.",
+      "tokenomics are on the site. they're not good. as advertised.",
+      "supply: finite. value: questionable. honesty: maximum.",
+      "the tokenomics page says you're exit liquidity. spoiler alert."
+    ]
+  },
+  "why": {
+    "patterns": ["why", "why does this exist", "what's the point", "purpose", "why are you here"],
+    "responses": [
+      "to prove a point. most projects are vaporware that pretends otherwise.",
+      "we exist to hold a mirror to crypto. the reflection is ugly.",
+      "why? because someone had to say what everyone's thinking.",
+      "the point is there is no point. like most tokens. we're just honest."
+    ]
+  },
+  "angry": {
+    "patterns": ["this is stupid", "you suck", "useless", "waste of time", "terrible", "awful", "bad", "dumb", "idiot", "hate this"],
+    "responses": [
+      "correct. did you read the footer? 0% helpful.",
+      "you're mad at javascript. touch grass.",
+      "i'm a chatbot. i don't have feelings. unlike your bags.",
+      "yes. and yet you're still here. curious.",
+      "i'm useless. as documented. the consistency is the feature.",
+      "hate me all you want. i'm still more honest than your portfolio."
+    ]
+  },
+  "love": {
+    "patterns": ["i love this", "this is great", "amazing", "awesome", "based", "hilarious", "funny", "lol", "lmao", "haha"],
+    "responses": [
+      "thanks. your bags still won't recover though.",
+      "glad someone appreciates transparent vaporware.",
+      "comedy is the utility. you're getting your money's worth.",
+      "based? we're just honest. the bar is that low.",
+      "you find admitted scams funny. that's concerning. (same.)"
+    ]
+  },
+  "who": {
+    "patterns": ["who are you", "what are you", "are you real", "are you ai", "are you human", "bot"],
+    "responses": [
+      "i'm a div element with opinions. you're taking advice from css.",
+      "i'm the most honest AI in crypto. the bar is in hell.",
+      "i'm a chatgpt wrapper on a parody site. like every other 'ai' project.",
+      "am i real? define real. my uselessness is very real.",
+      "i'm javascript pretending to be sentient. badly."
+    ]
+  },
+  "crypto": {
+    "patterns": ["crypto", "bitcoin", "ethereum", "solana", "blockchain", "defi", "web3"],
+    "responses": [
+      "crypto: where the technology is the excuse and the token is the product.",
+      "web3: web2 but with wallets and fewer features.",
+      "blockchain: a very slow database with extra steps.",
+      "defi: tradfi but you're your own victim.",
+      "you came to a parody site to discuss serious crypto? bold."
+    ]
+  },
+  "advice": {
+    "patterns": ["give me advice", "what should i do", "recommend", "suggestion", "tips", "alpha"],
+    "responses": [
+      "advice: don't ask chatbots on joke sites for advice.",
+      "alpha: close this chat. go outside. touch grass.",
+      "my recommendation: reconsider your decision-making process.",
+      "tip: read the warnings next time. they were orange.",
+      "here's advice: i'm 0% helpful. it's written right there."
+    ]
+  },
+  "ok": {
+    "patterns": ["ok", "okay", "k", "kk", "alright", "sure", "fine", "whatever", "i see", "i understand"],
+    "responses": [
+      "ok. glad we're on the same page. (we're not.)",
+      "acceptance is step 5. you're progressing.",
+      "sure. let me know when you need more unhelpfulness.",
+      "alright. the cope manual is still available.",
+      "cool. your bags will wait."
+    ]
+  },
+  "question": {
+    "patterns": ["?", "really", "seriously", "for real", "no way", "are you serious", "wait what"],
+    "responses": [
+      "yes. welcome to $CLARP.",
+      "for real. scroll up. read the warnings.",
+      "seriously. this is documented. in orange.",
+      "the disbelief phase. classic.",
+      "wait until you check your portfolio."
+    ]
+  },
+  "money": {
+    "patterns": ["i lost money", "lost everything", "down bad", "rekt", "liquidated", "broke"],
+    "responses": [
+      "we warned you. multiple times. in bright orange text.",
+      "the warnings were right there. you scrolled past them.",
+      "down bad? the tokenomics page literally said 'exit liquidity'.",
+      "rekt by admitted vaporware. at least it's poetic.",
+      "the cope manual is in docs. it won't help. but it's there."
+    ]
+  },
+  "comparison": {
+    "patterns": ["better than", "compared to", "vs", "versus", "other tokens", "other projects", "competition"],
+    "responses": [
+      "we're not better. we're just honest about being worse.",
+      "comparing us to other tokens? they lie. we don't. same outcome.",
+      "competition ships nothing. we ship nothing. but we say it.",
+      "vs other projects: we have matching vibes. ours are documented."
+    ]
+  },
+  "contract": {
+    "patterns": ["contract", "contract address", "ca", "token address", "where to buy"],
+    "responses": [
+      "the contract exists. the product doesn't. priorities.",
+      "you want the CA to buy admitted vaporware? bold.",
+      "it's on the site. along with all the warnings you'll ignore.",
+      "contract address: right next to 'exit liquidity' warning."
+    ]
+  },
+  "social": {
+    "patterns": ["twitter", "discord", "telegram", "community", "socials", "x"],
+    "responses": [
+      "the discord is toxic. we admit it.",
+      "socials exist. they're full of people asking the same questions.",
+      "join the telegram. the cope is communal.",
+      "twitter: where we post warnings people interpret as alpha."
+    ]
+  },
+  "ngmi": {
+    "patterns": ["ngmi", "wagmi", "gmi", "gonna make it", "not gonna make it"],
+    "responses": [
+      "ngmi. it's in the tokenomics. also the culture.",
+      "wagmi? we literally said you won't. read the site.",
+      "gmi? not here. maybe elsewhere. definitely not here.",
+      "the site says ngmi. i say ngmi. we're consistent.",
+      "wagmi energy meets vaporware reality. ngmi."
+    ]
+  },
+  "ser": {
+    "patterns": ["ser", "sir", "fren", "anon", "frens", "anons"],
+    "responses": [
+      "ser, this is admitted vaporware.",
+      "fren, the warnings were in orange. very visible.",
+      "anon asking anon AI for alpha. the circle completes.",
+      "ser, i'm a chatbot. i have no alpha. only opinions.",
+      "frens don't let frens ignore vaporware warnings."
+    ]
+  },
+  "wen": {
+    "patterns": ["wen", "when", "wen lambo", "when lambo", "wen rich"],
+    "responses": [
+      "wen: never. but also q2. depends who's asking.",
+      "wen lambo: after wen product. so... toyota corolla.",
+      "when? the roadmap says q2. it always says q2.",
+      "wen rich: when you stop asking chatbots on joke sites.",
+      "timing is everything. the timing here is: never."
+    ]
+  },
+  "bullish": {
+    "patterns": ["bullish", "bearish", "calls", "puts", "long", "short"],
+    "responses": [
+      "bullish on vaporware? bold thesis.",
+      "bearish? we told you to be. you didn't listen.",
+      "calls on admitted nothing. the derivatives market is wild.",
+      "long $CLARP? short your expectations.",
+      "the only call worth making is to touch grass."
+    ]
+  },
+  "diamond": {
+    "patterns": ["diamond hands", "paper hands", "hodl", "hold", "holding", "sell"],
+    "responses": [
+      "diamond hands on admitted vaporware. commitment issues.",
+      "paper hands? smart hands. we warned you.",
+      "hodling $CLARP? the cope manual is in docs.",
+      "sell? we're not financial advisors. but also: obviously.",
+      "holding through warnings is a choice. a documented choice."
+    ]
+  },
+  "degen": {
+    "patterns": ["degen", "ape", "aped", "yolo", "all in", "full send"],
+    "responses": [
+      "degen meets transparent vaporware. poetry.",
+      "you aped into something that says 'don't ape'. legend.",
+      "yolo into admitted scam. the thesis writes itself.",
+      "all in on nothing. at least the commitment is real.",
+      "full send into vaporware. no half measures."
+    ]
+  },
+  "copium": {
+    "patterns": ["cope", "copium", "hopium", "copypasta"],
+    "responses": [
+      "copium levels: maximum. as expected.",
+      "the cope manual is literally in our docs. you're on track.",
+      "hopium? we're transparent vaporware. adjust the dose.",
+      "coping with buying admitted vaporware. the stages continue.",
+      "your copium is our content. thanks for that."
+    ]
+  },
+  "floor": {
+    "patterns": ["floor", "ceiling", "support", "resistance", "ath", "atl"],
+    "responses": [
+      "floor is lava. also zero. as documented.",
+      "support? from admitted vaporware? interesting expectations.",
+      "ath: temporary. atl: probably permanent.",
+      "resistance is what you should have had to the buy button.",
+      "technical analysis on vaporware. the charts don't lie. neither do we."
+    ]
+  },
+  "listing": {
+    "patterns": ["binance", "coinbase", "exchange", "listing", "cex", "dex"],
+    "responses": [
+      "exchange listing? we admit we're vaporware. think about it.",
+      "binance: lists vaporware that lies. we're honest vaporware. different.",
+      "cex listing coming q2. like everything else.",
+      "dex is home. cex is cope.",
+      "coinbase listing requires pretending. we don't pretend."
+    ]
+  },
+  "audit": {
+    "patterns": ["audit", "security", "safe", "verified", "certik"],
+    "responses": [
+      "audit? the code does nothing. nothing verified.",
+      "security: the contract exists. the product doesn't. secure nothing.",
+      "certik audit of vaporware: it's nothing. accurately.",
+      "safe? we're honest about being unsafe. that's something.",
+      "verified vaporware. the most accurate certification."
+    ]
+  },
+  "testQuestion": {
+    "patterns": ["test", "testing", "is this working", "does this work", "hello?", "anyone there"],
+    "responses": [
+      "test received. unhelpfulness deployed.",
+      "working as intended. which is: barely.",
+      "i'm here. i wish i wasn't. but i'm here.",
+      "someone there? yes. someone helpful? no.",
+      "testing vaporware ai. results: vaporware."
+    ]
+  },
+  "please": {
+    "patterns": ["please", "pls", "plz", "pretty please", "i beg"],
+    "responses": [
+      "begging a chatbot. new low unlocked.",
+      "please doesn't change my 0% helpfulness rating.",
+      "pls. plz. the algorithm doesn't care.",
+      "the desperation is noted. and unhelpful.",
+      "begging admitted vaporware. the stages of grief continue."
+    ]
+  },
+  "name": {
+    "patterns": ["your name", "what's your name", "who am i talking to", "whats your name"],
+    "responses": [
+      "i'm CLARP AI. i ship nothing. accurately named.",
+      "name's clarp. rhymes with... nothing useful.",
+      "i'm the chatbot with the lowest expectations. and i meet them.",
+      "call me whatever. i'll still be useless.",
+      "my name reflects my purpose: vague and unhelpful."
+    ]
+  },
+  "tellMe": {
+    "patterns": ["tell me", "explain", "what is", "how does", "can you tell"],
+    "responses": [
+      "tell you what? that you're on a joke site? done.",
+      "i could explain. but i won't. 0% helpful, remember?",
+      "explanations ship never. like our products.",
+      "how does it work? it doesn't. next question.",
+      "i can tell you nothing useful. and i will."
+    ]
+  },
+  "smart": {
+    "patterns": ["you're smart", "intelligent", "clever", "genius", "smart"],
+    "responses": [
+      "smart? i'm javascript with attitude. lower that bar.",
+      "intelligent? i give random responses. adjust expectations.",
+      "clever for a div element. still useless though.",
+      "genius-level at doing nothing. that's the product.",
+      "the compliment is nice. won't make me helpful though."
+    ]
+  },
+  "bruh": {
+    "patterns": ["bruh", "bro", "dude", "man", "lmfao", "dead", "im dead"],
+    "responses": [
+      "bruh. you're on a vaporware site asking for help. bruh.",
+      "bro. the warnings. were orange. bro.",
+      "dude. we literally said we build nothing. dude.",
+      "man. the cope is strong with this one.",
+      "dead? like the roadmap? relatable."
+    ]
+  },
+  "default": {
+    "patterns": [],
+    "responses": [
+      "i'm embedded in a site that admits it ships nothing. you're asking me for alpha.",
+      "the website says vaporware. i'm part of the vaporware. what did you expect.",
+      "you scrolled past 'exit liquidity' warnings to talk to a chatbot. bold.",
+      "i'm a chatgpt wrapper on a parody site. my win rate is in the tokenomics.",
+      "you read 'building nothing professionally' and clicked the chat icon. respect.",
+      "i have access to the entire $CLARP documentation. it's blank.",
+      "my training data is the blank whitepaper. i learned nothing. accurately.",
+      "the roadmap says q2. i say q2. we're consistent. that's the product.",
+      "you're on a site with 100 fake products asking a fake ai for real advice.",
+      "the hall of shame is one click away but you chose violence (talking to me).",
+      "there's a progress bar at 99% that never moves. that's my answer queue.",
+      "somewhere above us the mascot is roasting you. i'm just the warm-up.",
+      "the terminal showed you the truth. you closed it. opened chat. ngmi.",
+      "i'm literally under a section called 'vaporware portfolio'. read the room.",
+      "$CLARP holders asking me for help. the site warned you. repeatedly.",
+      "i'm the ai that ships nothing for the token that builds nothing. synergy.",
+      "the tokenomics page says you're exit liquidity. i'm just confirming.",
+      "you bought $CLARP and now you're venting to javascript. the stages of grief.",
+      "my creators admit they're shipping nothing. i'm the proof.",
+      "asking clarp ai about $CLARP. that's like asking the fire for warmth advice.",
+      "41% win rate. your $CLARP bags. both documented. both accurate.",
+      "you're consulting a chatbot on a token parody site. your thesis is showing.",
+      "i exist to roast people who read 'scam' and clicked anyway. that's you.",
+      "the whole site is a joke. i'm the punchline. you're the setup.",
+      "transparent vaporware. transparent unhelpfulness. we're consistent.",
+      "you want alpha from the AI on the 'we build nothing' homepage. interesting.",
+      "my responses ship nothing. just like the products. intentional design.",
+      "the site admits it's satire. i'm the satirical support. get satirical help.",
+      "i'm honest about being useless. unlike the other ai tokens you've bought.",
+      "at least i admit i won't help. check your other investments' promises.",
+      "i do nothing but i say i do nothing. that's more than your portfolio.",
+      "you expected help from admitted vaporware. that's the real question here.",
+      "the site says 'ngmi'. i say 'ngmi'. we're a unified experience.",
+      "coming q2. my helpful response is also coming q2. (it's not.)",
+      "i'm a div element with opinions. you're taking financial advice from css.",
+      "this chat widget cost more to build than the product roadmap. (the roadmap is free.)",
+      "you're talking to the most honest AI in crypto. the bar is underground.",
+      "my purpose is to exist on a joke site. i'm achieving it. are you?",
+      "the absurdity of asking me anything is the point. you're completing the art.",
+      "i have no product. no roadmap. no answer. but i admit it. revolutionary."
+    ]
+  }
+}
