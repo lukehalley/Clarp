@@ -30,10 +30,6 @@ they raised $400m. shipped a landing page. we did the same thing for free.
 
 $CLARP is self-aware vaporware. no product. no roadmap. just vibes and a token.
 
-<img src="marketing-assets/promo-card-1.svg" alt="clarp terminal" width="100%" />
-
-<br>
-
 ## features
 
 | what we promised | what we shipped |
@@ -81,10 +77,6 @@ $CLARP is self-aware vaporware. no product. no roadmap. just vibes and a token.
 
 <br>
 
-<img src="marketing-assets/promo-card-2.svg" alt="clarp stats" width="100%" />
-
-<br>
-
 ## roadmap
 
 | quarter | milestone | status |
@@ -98,10 +90,6 @@ $CLARP is self-aware vaporware. no product. no roadmap. just vibes and a token.
 | Q2 ∞ | heat death of universe | ⏳ on track |
 
 <sub>* all dates are estimates. all estimates are lies. all lies are roadmaps.</sub>
-
-<br>
-
-<img src="marketing-assets/promo-square-1.svg" alt="clarp help" width="100%" />
 
 <br>
 
@@ -130,10 +118,6 @@ $CLARP is self-aware vaporware. no product. no roadmap. just vibes and a token.
 
           pages: 0  |  math: none  |  citations: trust me
 ```
-
-<br>
-
-<img src="marketing-assets/promo-square-2.svg" alt="clarp mascot" width="100%" />
 
 <br>
 
@@ -206,10 +190,6 @@ if you want to help:<br>
 we raised **$0** from:
 
 not a16z · not paradigm · not polychain · not your money (yet)
-
-<br>
-
-<img src="marketing-assets/promo-minimal-1.svg" alt="clarp minimal" width="100%" />
 
 <br>
 
