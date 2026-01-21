@@ -104,6 +104,10 @@ export default function Home() {
   const [roadmapButtonText, setRoadmapButtonText] = useState('view roadmap');
   const [isRoadmapScrolling, setIsRoadmapScrolling] = useState(false);
 
+  // CA copy state
+  const [caCopied, setCaCopied] = useState(false);
+  const CA_ADDRESS = 'GtwMkjRY8Vi5oGaLaEsd1xnsr3AkZ6ZYBqsG5ipTBAGS';
+
   // Terminal conversation typing animation
   useEffect(() => {
     if (!mounted) return;
@@ -589,9 +593,20 @@ export default function Home() {
               </div>
 
               {/* CA Box */}
-              <div className="bg-black px-3 sm:px-4 py-2 font-mono text-[10px] sm:text-sm inline-block sm:inline-flex items-center gap-1 sm:gap-2 max-w-full">
-                <span className="text-larp-green shrink-0">ca:</span>
-                <span className="text-ivory-light/70 break-all">GtwMkjRY8Vi5oGaLaEsd1xnsr3AkZ6ZYBqsG5ipTBAGS</span>
+              <div
+                className="bg-slate-dark border-2 border-danger-orange px-4 sm:px-6 py-3 sm:py-4 font-mono flex items-center gap-3 sm:gap-4 group cursor-pointer hover:border-larp-green transition-colors w-full max-w-2xl"
+                style={{ boxShadow: '4px 4px 0 #FF6B35' }}
+                onClick={() => {
+                  navigator.clipboard.writeText(CA_ADDRESS);
+                  setCaCopied(true);
+                  setTimeout(() => setCaCopied(false), 2000);
+                }}
+              >
+                <span className="text-danger-orange font-bold text-sm sm:text-base shrink-0">ca:</span>
+                <span className="text-ivory-light text-xs sm:text-sm flex-1">{CA_ADDRESS}</span>
+                <span className={`shrink-0 text-xs sm:text-sm px-3 py-1 border transition-all ${caCopied ? 'bg-larp-green text-black border-larp-green' : 'bg-transparent text-ivory-light/60 border-ivory-light/30 group-hover:border-larp-green group-hover:text-larp-green'}`}>
+                  {caCopied ? '✓ copied' : 'copy'}
+                </span>
               </div>
             </div>
           </div>

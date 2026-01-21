@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="marketing-assets/twitter-pfp.svg" alt="$CLARP" width="128" />
+<img src="marketing-assets/twitter-pfp.png" alt="$CLARP" width="128" />
 
 # $CLARP
 
@@ -44,7 +44,7 @@ $CLARP is self-aware vaporware. no product. no roadmap. just vibes and a token.
 
 <br>
 
-<img src="marketing-assets/promo-card-3.svg" alt="clarp quote" width="100%" />
+<img src="marketing-assets/promo-card-3.png" alt="clarp quote" width="100%" />
 
 <br>
 

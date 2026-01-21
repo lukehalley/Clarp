@@ -70,12 +70,14 @@ export default function Footer() {
               self-aware vaporware. no product. just vibes.
             </p>
             <div className="flex gap-3 sm:gap-4">
-              <button
-                onClick={handleSocialClick}
-                className={`w-10 h-10 bg-slate-medium flex items-center justify-center text-ivory-light/60 hover:text-danger-orange hover:bg-slate-light/20 transition-colors border border-slate-light/20 ${socialClicks >= 5 ? 'animate-pulse' : ''}`}
+              <a
+                href="https://x.com/i/communities/2013904367188132011"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 bg-slate-medium flex items-center justify-center text-ivory-light/60 hover:text-danger-orange hover:bg-slate-light/20 transition-colors border border-slate-light/20"
               >
-                <span className="text-lg">{socialClicks >= 5 ? '.' : '𝕏'}</span>
-              </button>
+                <span className="text-lg">𝕏</span>
+              </a>
               <button
                 onClick={handleSocialClick}
                 className={`w-10 h-10 bg-slate-medium flex items-center justify-center text-ivory-light/60 hover:text-danger-orange hover:bg-slate-light/20 transition-colors border border-slate-light/20 ${socialClicks >= 5 ? 'animate-pulse' : ''}`}
@@ -91,7 +93,7 @@ export default function Footer() {
             </div>
             {socialClicks >= 3 && (
               <p className="text-[10px] text-ivory-light/30 font-mono mt-2">
-                clicked {socialClicks} social buttons. none of them work.
+                clicked {socialClicks} social buttons. most don't work.
               </p>
             )}
           </div>

@@ -445,12 +445,12 @@ export default function VapourwareDetector() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="https://x.com/intent/follow?screen_name=CLARP_bot"
+              href="https://x.com/i/communities/2013904367188132011"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-primary"
             >
-              follow @CLARP on x
+              join $CLARP on x
             </a>
             <Link href="/" className="btn-secondary">
               back to main site
