@@ -1,11 +1,8 @@
 <div align="center">
 
-<img src="marketing-assets/ticker-icon.svg" alt="$CLARP" width="128" />
+<img src="marketing-assets/twitter-pfp.svg" alt="$CLARP" width="128" />
 
 # $CLARP
-
-> **Logo source of truth:** [`marketing-assets/ticker-icon.svg`](marketing-assets/ticker-icon.svg)
-> *All logo usages (website, socials, README) derive from this file.*
 
 **vaporware-as-a-service**
 
@@ -23,8 +20,6 @@
 
 <sub>none of those links work btw</sub>
 
-</div>
-
 ---
 
 <br>
@@ -35,51 +30,25 @@ they raised $400m. shipped a landing page. we did the same thing for free.
 
 $CLARP is self-aware vaporware. no product. no roadmap. just vibes and a token.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                                                             │
-│   Q: is this a rug?                                         │
-│   A: it's vaporware-as-a-service. technically different.    │
-│                                                             │
-│   Q: wen product?                                           │
-│   A: q2 (the q2 that never ends)                            │
-│                                                             │
-│   Q: why am i reading this?                                 │
-│   A: you tell me, anon                                      │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-```
+<img src="marketing-assets/promo-card-1.svg" alt="clarp terminal" width="100%" />
 
 <br>
 
 ## features
 
-<table>
-<tr>
-<td width="50%">
+| what we promised | what we shipped |
+|------------------|-----------------|
+| autonomous ai agents | this readme |
+| cross-chain interoperability | a landing page |
+| modular execution layer | vibes |
+| zero-knowledge proofs | |
+| restaking primitive | |
+| intent-based architecture | |
+| real yield (lol) | |
 
-### what we promised
+<br>
 
-- autonomous ai agents
-- cross-chain interoperability
-- modular execution layer
-- zero-knowledge proofs
-- restaking primitive
-- intent-based architecture
-- real yield (lol)
-
-</td>
-<td width="50%">
-
-### what we shipped
-
-- this readme
-- a landing page
-- vibes
-
-</td>
-</tr>
-</table>
+<img src="marketing-assets/promo-card-3.svg" alt="clarp quote" width="100%" />
 
 <br>
 
@@ -112,6 +81,10 @@ $CLARP is self-aware vaporware. no product. no roadmap. just vibes and a token.
 
 <br>
 
+<img src="marketing-assets/promo-card-2.svg" alt="clarp stats" width="100%" />
+
+<br>
+
 ## roadmap
 
 | quarter | milestone | status |
@@ -128,22 +101,18 @@ $CLARP is self-aware vaporware. no product. no roadmap. just vibes and a token.
 
 <br>
 
+<img src="marketing-assets/promo-square-1.svg" alt="clarp help" width="100%" />
+
+<br>
+
 ## documentation
 
 <br>
 <br>
 <br>
-<br>
-<br>
-
-<div align="center">
 
 *you're looking at it*
 
-</div>
-
-<br>
-<br>
 <br>
 <br>
 <br>
@@ -154,17 +123,17 @@ $CLARP is self-aware vaporware. no product. no roadmap. just vibes and a token.
 ┌─────────────────────────────────────────────────────────────┐
 │                                                             │
 │                                                             │
-│                                                             │
-│                                                             │
 │                        [ blank ]                            │
-│                                                             │
-│                                                             │
 │                                                             │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 
-                    pages: 0  |  math: none  |  citations: trust me
+          pages: 0  |  math: none  |  citations: trust me
 ```
+
+<br>
+
+<img src="marketing-assets/promo-square-2.svg" alt="clarp mascot" width="100%" />
 
 <br>
 
@@ -197,18 +166,12 @@ found a bug? keep it. we're not paying you. this is vaporware.
 ## getting started
 
 ```bash
-# step 1
-$ npm install hope
+$ clarp status
 
-# step 2
-$ hope --deploy
+products: 0
+shipping: q2
 
-error: hope not found
-error: you are exit liquidity
-error: ngmi
-
-# step 3
-# there is no step 3
+$CLARP
 ```
 
 <br>
@@ -217,11 +180,11 @@ error: ngmi
 
 contributions are not accepted. this is vaporware. there's nothing to contribute to.
 
-if you want to help:
-1. don't
-2. go outside
-3. touch grass
-4. reconsider your life choices that led you to a github readme for a satirical memecoin
+if you want to help:<br>
+1. don't<br>
+2. go outside<br>
+3. touch grass<br>
+4. reconsider your life choices
 
 <br>
 
@@ -242,20 +205,21 @@ if you want to help:
 
 we raised **$0** from:
 
-- not a16z
-- not paradigm
-- not polychain
-- not your money (yet)
+not a16z · not paradigm · not polychain · not your money (yet)
+
+<br>
+
+<img src="marketing-assets/promo-minimal-1.svg" alt="clarp minimal" width="100%" />
 
 <br>
 
 ## acknowledgments
 
-special thanks to:
-- every project that raised $100m+ and shipped a landing page
-- the vcs who funded them anyway
-- the kols who shilled them
-- you, for reading this far
+special thanks to:<br>
+every project that raised $100m+ and shipped a landing page<br>
+the vcs who funded them anyway<br>
+the kols who shilled them<br>
+you, for reading this far
 
 <br>
 
@@ -263,31 +227,12 @@ special thanks to:
 
 <br>
 
-<div align="center">
-
-```
-╭───────────────────────────────────────────────────────────╮
-│                                                           │
-│   you scrolled all the way down?                          │
-│                                                           │
-│   just like checking "ai agent" repos                     │
-│   and finding nothing but readmes.                        │
-│                                                           │
-│   anyway                                                  │
-│                                                           │
-│   gm. or gn. whichever gets more engagement.              │
-│                                                           │
-╰───────────────────────────────────────────────────────────╯
-```
-
-<br>
-
-**$CLARP** — *at least we're honest about it*
+**$CLARP** — *the honesty is the product.*
 
 <br>
 
 <sub>© 2025 clarp. no rights reserved. it's a shitpost.</sub>
 
-<sub>not financial advice. don't buy this. you'll lose it all anyway.</sub>
+<sub>ngmi.</sub>
 
 </div>
