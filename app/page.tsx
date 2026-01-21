@@ -577,10 +577,7 @@ export default function Home() {
               {/* CA Box */}
               <div className="bg-black px-3 sm:px-4 py-2 font-mono text-[10px] sm:text-sm inline-block sm:inline-flex items-center gap-1 sm:gap-2 max-w-full">
                 <span className="text-larp-green shrink-0">ca:</span>
-                <span className="text-ivory-light/70 break-words">
-                  <span className="hidden sm:inline">doesn't matter. you don't read contracts anyway.</span>
-                  <span className="sm:hidden">you don't read contracts anyway.</span>
-                </span>
+                <span className="text-ivory-light/70 break-all">GtwMkjRY8Vi5oGaLaEsd1xnsr3AkZ6ZYBqsG5ipTBAGS</span>
               </div>
             </div>
           </div>
