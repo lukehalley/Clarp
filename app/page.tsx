@@ -343,7 +343,7 @@ export default function Home() {
               snitch mode
             </a>
             <a
-              href="https://github.com/chrmln/clarp"
+              href="https://github.com/lukehalley/Clarp"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-secondary text-sm px-3 py-2 flex items-center gap-2 group"
@@ -403,7 +403,7 @@ export default function Home() {
               </a>
               <div className="flex gap-2 mt-2">
                 <a
-                  href="https://github.com/chrmln/clarp"
+                  href="https://github.com/lukehalley/Clarp"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn-secondary text-sm px-4 py-2 flex items-center justify-center gap-2"

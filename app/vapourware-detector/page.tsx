@@ -2,17 +2,18 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import Clarp from '@/components/Clarp';
+import Navbar from '@/components/Navbar';
 import WarningTicker from '@/components/WarningTicker';
 import Footer from '@/components/Footer';
+import { Skull, AlertTriangle, AlertCircle, CheckCircle, Sparkles, Bot, FileText, Ghost, ClipboardCopy, Users, FlaskConical } from 'lucide-react';
 
 // Fake scan results for the mockup
 const SCAN_VERDICTS = [
-  { score: 97, verdict: 'CONFIRMED VAPOURWARE', color: 'larp-red', icon: '☠️' },
-  { score: 84, verdict: 'LIKELY RUGPULL', color: 'larp-red', icon: '🚨' },
-  { score: 72, verdict: 'SUSPICIOUS AF', color: 'larp-yellow', icon: '⚠️' },
-  { score: 45, verdict: 'PROBABLY FINE', color: 'larp-green', icon: '✓' },
-  { score: 12, verdict: 'SOMEHOW REAL', color: 'larp-green', icon: '🦄' },
+  { score: 97, verdict: 'CONFIRMED VAPOURWARE', color: 'larp-red', icon: 'skull' },
+  { score: 84, verdict: 'LIKELY RUGPULL', color: 'larp-red', icon: 'alert-triangle' },
+  { score: 72, verdict: 'SUSPICIOUS AF', color: 'larp-yellow', icon: 'alert-circle' },
+  { score: 45, verdict: 'PROBABLY FINE', color: 'larp-green', icon: 'check-circle' },
+  { score: 12, verdict: 'SOMEHOW REAL', color: 'larp-green', icon: 'sparkles' },
 ];
 
 const SCAN_FINDINGS = [
@@ -37,13 +38,38 @@ const FAKE_REPOS = [
 ];
 
 const TICKER_MESSAGES = [
-  '⚠ ai recognizes ai ⚠',
+  'ai recognizes ai',
   'scanning github repos since never',
   'detecting vapourware professionally',
   'trust no readme',
   'your portfolio is a warning sign',
   'due diligence is cope',
 ];
+
+const VerdictIcon = ({ icon, className = '' }: { icon: string; className?: string }) => {
+  const iconProps = { size: 24, className };
+  switch (icon) {
+    case 'skull': return <Skull {...iconProps} />;
+    case 'alert-triangle': return <AlertTriangle {...iconProps} />;
+    case 'alert-circle': return <AlertCircle {...iconProps} />;
+    case 'check-circle': return <CheckCircle {...iconProps} />;
+    case 'sparkles': return <Sparkles {...iconProps} />;
+    default: return <AlertCircle {...iconProps} />;
+  }
+};
+
+const DetectionIcon = ({ icon, className = '' }: { icon: string; className?: string }) => {
+  const iconProps = { size: 32, className };
+  switch (icon) {
+    case 'bot': return <Bot {...iconProps} />;
+    case 'file-text': return <FileText {...iconProps} />;
+    case 'ghost': return <Ghost {...iconProps} />;
+    case 'clipboard-copy': return <ClipboardCopy {...iconProps} />;
+    case 'users': return <Users {...iconProps} />;
+    case 'flask': return <FlaskConical {...iconProps} />;
+    default: return <AlertCircle {...iconProps} />;
+  }
+};
 
 export default function VapourwareDetector() {
   const [mounted, setMounted] = useState(false);
@@ -122,26 +148,22 @@ export default function VapourwareDetector() {
 
   return (
     <main className="min-h-screen overflow-x-hidden">
-      {/* header */}
-      <header className="sticky top-0 z-50">
-        <div className="construction-stripe h-3" />
-        <nav className="bg-ivory-light/95 backdrop-blur-sm border-b-2 border-slate-dark">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity">
-              <Clarp size={28} className="sm:w-8 sm:h-8" />
-              <span className="font-mono text-lg sm:text-xl font-bold text-slate-dark">$clarp</span>
-            </Link>
-            <div className="flex items-center gap-4">
-              <Link href="/" className="text-sm text-slate-light hover:text-danger-orange transition-colors">
-                ← back
-              </Link>
-            </div>
-          </div>
-        </nav>
-      </header>
+      <Navbar />
+
+      {/* back button */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-slate-dark text-ivory-light font-mono text-sm border-2 border-slate-dark hover:bg-danger-orange hover:border-danger-orange hover:text-slate-dark transition-colors"
+          style={{ boxShadow: '3px 3px 0 #1a1a2e' }}
+        >
+          <span>←</span>
+          <span>back to main</span>
+        </Link>
+      </div>
 
       {/* hero section */}
-      <section className="relative py-16 sm:py-24 px-4 sm:px-6 overflow-hidden">
+      <section className="relative py-12 sm:py-20 px-4 sm:px-6 overflow-hidden">
         <div className="absolute inset-0 bg-grid bg-grid opacity-30" />
 
         <div className="max-w-4xl mx-auto relative text-center">
@@ -214,18 +236,20 @@ export default function VapourwareDetector() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {[
-              { icon: '🤖', title: 'ai-generated code', desc: 'detects claude/gpt patterns. the "helpful assistant" energy is unmistakable.' },
-              { icon: '📝', title: 'readme bloat', desc: 'when the readme is longer than the actual code, that\'s a red flag.' },
-              { icon: '👻', title: 'ghost commits', desc: 'bulk commits at 3am. "initial commit" with 10k lines. sus.' },
-              { icon: '📋', title: 'copy-paste signatures', desc: 'we know that stack overflow code. we\'ve seen it 47,000 times.' },
-              { icon: '🎭', title: 'fake contributors', desc: 'all commits from the same wallet? "team of 12" with 1 actual dev?' },
-              { icon: '🧪', title: 'test coverage: 0%', desc: 'no tests = no product = no point. next.' },
+              { icon: 'bot', title: 'ai-generated code', desc: 'detects claude/gpt patterns. the "helpful assistant" energy is unmistakable.' },
+              { icon: 'file-text', title: 'readme bloat', desc: 'when the readme is longer than the actual code, that\'s a red flag.' },
+              { icon: 'ghost', title: 'ghost commits', desc: 'bulk commits at 3am. "initial commit" with 10k lines. sus.' },
+              { icon: 'clipboard-copy', title: 'copy-paste signatures', desc: 'we know that stack overflow code. we\'ve seen it 47,000 times.' },
+              { icon: 'users', title: 'fake contributors', desc: 'all commits from the same wallet? "team of 12" with 1 actual dev?' },
+              { icon: 'flask', title: 'test coverage: 0%', desc: 'no tests = no product = no point. next.' },
             ].map((item, i) => (
               <div
                 key={i}
                 className="bg-ivory-light/5 border border-ivory-light/10 p-6 hover:border-danger-orange/50 transition-colors group"
               >
-                <div className="text-3xl mb-4 group-hover:animate-pulse">{item.icon}</div>
+                <div className="mb-4 text-ivory-light/60 group-hover:text-danger-orange group-hover:animate-pulse transition-colors">
+                  <DetectionIcon icon={item.icon} />
+                </div>
                 <h3 className="text-lg font-bold mb-2 text-danger-orange font-mono">{item.title}</h3>
                 <p className="text-sm text-ivory-light/60">{item.desc}</p>
               </div>
@@ -294,7 +318,7 @@ export default function VapourwareDetector() {
                     <div className="animate-fade-in">
                       <div className="border-t border-ivory-light/20 pt-4 mt-4">
                         <div className="flex items-center gap-3 mb-4">
-                          <span className="text-2xl">{selectedVerdict.icon}</span>
+                          <VerdictIcon icon={selectedVerdict.icon} className={`text-${selectedVerdict.color}`} />
                           <div>
                             <div className={`text-${selectedVerdict.color} font-bold text-lg`}>
                               {selectedVerdict.verdict}

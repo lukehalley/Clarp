@@ -242,7 +242,7 @@
   {
     "name": "clarp chat",
     "tagline": "discord but tokenized",
-    "description": "chat rooms where every message is an nft. your shitposts live forever on-chain.",
+    "description": "chat rooms where every message is an nft. your hot takes live forever on-chain.",
     "features": ["gas per message", "edit: impossible", "delete: lol no"],
     "progress": 62,
     "status": "development"

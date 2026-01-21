@@ -211,7 +211,7 @@ you, for reading this far
 
 <br>
 
-<sub>© 2025 clarp. no rights reserved. it's a shitpost.</sub>
+<sub>© 2025 clarp. no rights reserved. it's a parody.</sub>
 
 <sub>ngmi.</sub>
 
