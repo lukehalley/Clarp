@@ -75,27 +75,38 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 bg-slate-medium flex items-center justify-center text-ivory-light/60 hover:text-danger-orange hover:bg-slate-light/20 transition-colors border border-slate-light/20"
+                title="x community"
               >
                 <span className="text-lg">𝕏</span>
               </a>
-              <button
-                onClick={handleSocialClick}
-                className={`w-10 h-10 bg-slate-medium flex items-center justify-center text-ivory-light/60 hover:text-danger-orange hover:bg-slate-light/20 transition-colors border border-slate-light/20 ${socialClicks >= 5 ? 'animate-pulse' : ''}`}
+              <a
+                href="https://t.me/claboratory"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 bg-slate-medium flex items-center justify-center text-ivory-light/60 hover:text-danger-orange hover:bg-slate-light/20 transition-colors border border-slate-light/20"
+                title="telegram"
               >
-                <span className="text-lg">{socialClicks >= 5 ? '.' : '◆'}</span>
-              </button>
-              <button
-                onClick={handleSocialClick}
-                className={`w-10 h-10 bg-slate-medium flex items-center justify-center text-ivory-light/60 hover:text-danger-orange hover:bg-slate-light/20 transition-colors border border-slate-light/20 ${socialClicks >= 5 ? 'animate-pulse' : ''}`}
+                <span className="text-lg">✈</span>
+              </a>
+              <a
+                href="https://github.com/lukehalley/Clarp"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 bg-slate-medium flex items-center justify-center text-ivory-light/60 hover:text-danger-orange hover:bg-slate-light/20 transition-colors border border-slate-light/20"
+                title="github"
               >
-                <span className="text-lg">{socialClicks >= 5 ? '.' : '⌘'}</span>
-              </button>
+                <span className="text-lg">◈</span>
+              </a>
+              <a
+                href="https://dexscreener.com/solana/6c71mun334bafcuvn3cwajfqnk6skztzk9vfzrthstwj"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 bg-slate-medium flex items-center justify-center text-ivory-light/60 hover:text-danger-orange hover:bg-slate-light/20 transition-colors border border-slate-light/20"
+                title="dexscreener"
+              >
+                <span className="text-lg">◎</span>
+              </a>
             </div>
-            {socialClicks >= 3 && (
-              <p className="text-[10px] text-ivory-light/30 font-mono mt-2">
-                clicked {socialClicks} social buttons. most don't work.
-              </p>
-            )}
           </div>
 
           {/* Links - two columns that should align */}

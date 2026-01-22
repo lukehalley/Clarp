@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import Terminal from '@/components/Terminal';
 import ProductCarousel from '@/components/ProductCarousel';
 import ProgressBar from '@/components/ProgressBar';
@@ -10,10 +11,8 @@ import Mascot from '@/components/Mascot';
 import DocsSection from '@/components/DocsSection';
 import Footer from '@/components/Footer';
 import Clarp from '@/components/Clarp';
-import ClarpAI from '@/components/ClarpAI';
 import ActivityNotifications from '@/components/ActivityNotifications';
 import HallOfShame from '@/components/HallOfShame';
-import PixelGithub from '@/components/PixelGithub';
 import WarningTicker from '@/components/WarningTicker';
 import Roadmap from '@/components/Roadmap';
 import TERMINAL_CONVERSATIONS from '@/data/terminal-conversations.json';
@@ -55,23 +54,12 @@ const FOOTER_MESSAGES = [
   'page coming q2 (the eternal q2).',
 ];
 
-const NAV_HOVER_TEXT: Record<string, string> = {
-  products: 'vaporware',
-  ai: 'chatgpt wrapper',
-  docs: 'cope manual',
-  'hall of shame': 'your portfolio',
-  'detector': 'snitch mode',
-};
-
 // Animation phases: 'typing' | 'paused' | 'deleting'
 type AnimationPhase = 'typing' | 'paused' | 'deleting';
 
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
-  const [showWalletModal, setShowWalletModal] = useState(false);
-  const [showSmoke, setShowSmoke] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Terminal conversation animation states
   const [currentConversation, setCurrentConversation] = useState(0);
@@ -91,7 +79,6 @@ export default function Home() {
   const [loadingFailed, setLoadingFailed] = useState(false);
   const [showFooterMessage, setShowFooterMessage] = useState(false);
   const [footerMessage, setFooterMessage] = useState('');
-  const [navHoverText, setNavHoverText] = useState<Record<string, string>>({});
   const [ctaClicks, setCtaClicks] = useState({ doIt: 0, pretend: 0 });
   const [asciiClicks, setAsciiClicks] = useState(0);
   const [konamiProgress, setKonamiProgress] = useState(0);
@@ -99,11 +86,6 @@ export default function Home() {
   const [rageClicks, setRageClicks] = useState(0);
   const [showRageMessage, setShowRageMessage] = useState(false);
   const [cursorTrail, setCursorTrail] = useState<{x: number, y: number, id: number}[]>([]);
-
-  // Roadmap button state - theatrical fake-out
-  const [roadmapClicks, setRoadmapClicks] = useState(0);
-  const [roadmapButtonText, setRoadmapButtonText] = useState('view roadmap');
-  const [isRoadmapScrolling, setIsRoadmapScrolling] = useState(false);
 
   // CA copy state
   const [caCopied, setCaCopied] = useState(false);
@@ -288,144 +270,10 @@ export default function Home() {
     setTimeout(() => setShowFooterMessage(false), 3000);
   };
 
-  // Easter egg: nav hover text change
-  const handleNavHover = (key: string) => {
-    setNavHoverText(prev => ({ ...prev, [key]: NAV_HOVER_TEXT[key] || key }));
-  };
-
-  const handleNavLeave = (key: string) => {
-    setNavHoverText(prev => ({ ...prev, [key]: '' }));
-  };
-
   if (!mounted) return null;
 
   return (
     <main className="min-h-screen overflow-x-hidden">
-      {/* sticky header with stripe + nav */}
-      <header className="sticky top-0 z-50">
-        <div className="construction-stripe h-3" />
-        <nav className="bg-ivory-light/95 backdrop-blur-sm border-b-2 border-slate-dark">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Clarp size={28} className="sm:w-8 sm:h-8" />
-            <span className="font-mono text-lg sm:text-xl font-bold text-slate-dark">$clarp</span>
-          </div>
-
-          {/* Desktop nav */}
-          <div className="hidden md:flex items-center gap-6">
-            <a
-              href="#products"
-              className="text-sm text-slate-light hover:text-danger-orange transition-colors"
-              onMouseEnter={() => handleNavHover('products')}
-              onMouseLeave={() => handleNavLeave('products')}
-            >
-              {navHoverText['products'] || 'products'}
-            </a>
-            <a
-              href="#docs"
-              className="text-sm text-slate-light hover:text-danger-orange transition-colors"
-              onMouseEnter={() => handleNavHover('docs')}
-              onMouseLeave={() => handleNavLeave('docs')}
-            >
-              {navHoverText['docs'] || 'docs'}
-            </a>
-            <a
-              href="#victims"
-              className="text-sm text-slate-light hover:text-danger-orange transition-colors"
-              onMouseEnter={() => handleNavHover('hall of shame')}
-              onMouseLeave={() => handleNavLeave('hall of shame')}
-            >
-              {navHoverText['hall of shame'] || 'hall of shame'}
-            </a>
-            <a
-              href="/vapourware-detector"
-              className="text-sm text-danger-orange hover:text-larp-red transition-colors"
-            >
-              snitch mode
-            </a>
-            <a
-              href="https://github.com/lukehalley/Clarp"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-secondary text-sm px-3 py-2 flex items-center gap-2 group"
-              title="view source (it's real)"
-            >
-              <PixelGithub size={16} className="group-hover:animate-[glitch_0.1s_ease-in-out_2]" />
-              <span className="hidden lg:inline">source</span>
-            </a>
-            <button className="btn-secondary text-sm px-4 py-2" onClick={() => setShowWalletModal(true)}>connect wallet</button>
-          </div>
-
-          {/* Mobile hamburger */}
-          <button
-            className="md:hidden p-2 text-slate-dark"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            <div className="w-6 h-5 flex flex-col justify-between">
-              <span className={`block h-0.5 bg-slate-dark transition-transform ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`} />
-              <span className={`block h-0.5 bg-slate-dark transition-opacity ${mobileMenuOpen ? 'opacity-0' : ''}`} />
-              <span className={`block h-0.5 bg-slate-dark transition-transform ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
-            </div>
-          </button>
-        </div>
-
-        {/* Mobile menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden border-t border-slate-dark/20 bg-ivory-light">
-            <div className="px-4 py-4 space-y-3">
-              <a
-                href="#products"
-                className="block py-2 text-slate-light hover:text-danger-orange transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                products
-              </a>
-              <a
-                href="#docs"
-                className="block py-2 text-slate-light hover:text-danger-orange transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                docs
-              </a>
-              <a
-                href="#victims"
-                className="block py-2 text-slate-light hover:text-danger-orange transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                hall of shame
-              </a>
-              <a
-                href="/vapourware-detector"
-                className="block py-2 text-danger-orange hover:text-larp-red transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                snitch mode
-              </a>
-              <div className="flex gap-2 mt-2">
-                <a
-                  href="https://github.com/lukehalley/Clarp"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-secondary text-sm px-4 py-2 flex items-center justify-center gap-2"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <PixelGithub size={16} />
-                  source
-                </a>
-                <button
-                  className="flex-1 btn-secondary text-sm px-4 py-2"
-                  onClick={() => { setShowWalletModal(true); setMobileMenuOpen(false); }}
-                >
-                  connect wallet
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-        </nav>
-      </header>
-
       {/* hero section */}
       <section className="relative py-12 sm:py-16 lg:py-24 px-4 sm:px-6 overflow-hidden">
         {/* background grid */}
@@ -522,75 +370,20 @@ export default function Home() {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start mb-6 sm:mb-8 w-full max-w-full">
-                <div className="relative">
-                  <button
-                    className={`btn-primary relative overflow-hidden group ${isRoadmapScrolling ? 'animate-pulse' : ''}`}
-                    onClick={(e) => {
-                      if (isRoadmapScrolling) return;
-
-                      const clickCount = roadmapClicks + 1;
-                      setRoadmapClicks(clickCount);
-
-                      // Glitch effect on the button
-                      const btn = e.currentTarget;
-                      btn.classList.add('animate-[glitch_0.1s_ease-in-out_3]');
-                      setTimeout(() => btn.classList.remove('animate-[glitch_0.1s_ease-in-out_3]'), 300);
-
-                      // Smoke effect
-                      setShowSmoke(true);
-                      setTimeout(() => setShowSmoke(false), 800);
-
-                      // Progressive mocking text based on click count
-                      const mockingTexts = [
-                        'ugh. fine.',
-                        'again?',
-                        'it\'s still there',
-                        'obsessed much?',
-                        'seek help',
-                      ];
-
-                      // Change text after smoke starts
-                      setTimeout(() => {
-                        setRoadmapButtonText(mockingTexts[Math.min(clickCount - 1, mockingTexts.length - 1)]);
-                        setIsRoadmapScrolling(true);
-                      }, 400);
-
-                      // Scroll to roadmap after theatrical delay
-                      setTimeout(() => {
-                        document.getElementById('roadmap')?.scrollIntoView({ behavior: 'smooth' });
-                        setIsRoadmapScrolling(false);
-                        // Reset text after a bit
-                        setTimeout(() => {
-                          if (clickCount < 3) {
-                            setRoadmapButtonText('view roadmap');
-                          }
-                        }, 2000);
-                      }, 900);
-                    }}
-                  >
-                    <span className={`transition-opacity ${isRoadmapScrolling ? 'opacity-70' : ''}`}>
-                      {roadmapButtonText}
-                    </span>
-                    <span className="absolute inset-0 flex items-center justify-center opacity-0 group-active:opacity-100 text-black font-mono text-xs tracking-widest">░░░░░░░</span>
-                  </button>
-                  {showSmoke && (
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-                      <span className="absolute smoke-particle smoke-1 text-slate-dark/70 font-mono text-sm">░░</span>
-                      <span className="absolute smoke-particle smoke-2 text-slate-dark/60 font-mono text-xs">░░░</span>
-                      <span className="absolute smoke-particle smoke-3 text-danger-orange/50 font-mono text-sm">░</span>
-                      <span className="absolute smoke-particle smoke-4 text-slate-dark/50 font-mono text-xs">░░</span>
-                      <span className="absolute smoke-particle smoke-5 text-danger-orange/40 font-mono text-lg">░</span>
-                      <span className="absolute smoke-particle smoke-6 text-slate-dark/60 font-mono text-xs">░░░</span>
-                      <span className="absolute smoke-particle smoke-7 text-slate-dark/50 font-mono text-sm">░░</span>
-                    </div>
-                  )}
-                </div>
-                <button
-                  className="btn-secondary hover:opacity-100 transition-opacity"
-                  onClick={triggerFakeLoading}
+                <Link
+                  href="/roadmap"
+                  className="btn-primary relative overflow-hidden group"
                 >
-                  get started (never)
-                </button>
+                  view roadmap
+                </Link>
+                <a
+                  href="https://dexscreener.com/solana/6c71mun334bafcuvn3cwajfqnk6skztzk9vfzrthstwj"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-secondary hover:opacity-100 transition-opacity"
+                >
+                  get started
+                </a>
               </div>
 
               {/* CA Box */}
@@ -852,14 +645,9 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
             <button
               className={`btn-primary ${ctaClicks.doIt >= 3 ? 'animate-pulse' : ''}`}
-              onClick={() => {
-                setCtaClicks(prev => ({ ...prev, doIt: prev.doIt + 1 }));
-                if (ctaClicks.doIt >= 5) {
-                  setShowWalletModal(true);
-                }
-              }}
+              onClick={() => setCtaClicks(prev => ({ ...prev, doIt: prev.doIt + 1 }))}
             >
-              {ctaClicks.doIt >= 5 ? 'fine. here.' : ctaClicks.doIt >= 3 ? 'stop' : ctaClicks.doIt >= 1 ? 'you clicked it' : 'do it anyway'}
+              {ctaClicks.doIt >= 5 ? 'you won' : ctaClicks.doIt >= 3 ? 'stop' : ctaClicks.doIt >= 1 ? 'you clicked it' : 'do it anyway'}
             </button>
             <button
               className={`btn-secondary ${ctaClicks.pretend >= 3 ? 'line-through' : ''}`}
@@ -881,59 +669,6 @@ export default function Home() {
 
       {/* activity notifications */}
       <ActivityNotifications />
-
-      {/* clarp ai floating chat */}
-      <ClarpAI />
-
-      {/* wallet modal */}
-      {showWalletModal && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-          style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
-          onClick={() => setShowWalletModal(false)}
-          data-modal-open="true"
-        >
-          {/* backdrop */}
-          <div className="absolute inset-0 bg-slate-dark/90 backdrop-blur-sm" />
-
-          {/* modal */}
-          <div
-            className="relative bg-ivory-light border-2 sm:border-4 border-danger-orange p-6 sm:p-8 max-w-md w-full animate-[glitch_0.1s_ease-in-out_3]"
-            style={{ boxShadow: '4px 4px 0 #0a0a09, 6px 6px 0 #FF6B35' }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* close button - inside on mobile, outside on desktop */}
-            <button
-              className="absolute top-2 right-2 sm:-top-4 sm:-right-4 w-8 h-8 sm:w-10 sm:h-10 bg-larp-red text-black font-mono font-bold text-lg sm:text-xl flex items-center justify-center border-2 border-black hover:bg-danger-orange active:translate-x-0.5 active:translate-y-0.5 transition-all"
-              style={{ boxShadow: '2px 2px 0 black' }}
-              onClick={() => setShowWalletModal(false)}
-            >
-              ✗
-            </button>
-
-            {/* content */}
-            <div className="text-center pt-6 sm:pt-0">
-              <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-dark mb-3 sm:mb-4 font-mono">
-                there is no wallet
-              </h3>
-              <p className="text-slate-light mb-5 sm:mb-6 font-mono text-xs sm:text-sm">
-                you clicked "connect wallet" on a parody website.
-              </p>
-              <div className="space-y-3">
-                <button
-                  className="w-full btn-primary text-sm sm:text-base py-3"
-                  onClick={() => setShowWalletModal(false)}
-                >
-                  close and reflect
-                </button>
-                <p className="text-[10px] sm:text-xs text-slate-light/60 font-mono">
-                  you won't.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* whitepaper modal - easter egg */}
       {showWhitepaperModal && (

@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
 import WarningTicker from '@/components/WarningTicker';
 import Footer from '@/components/Footer';
 import { Skull, AlertTriangle, AlertCircle, CheckCircle, Sparkles, Bot, FileText, Ghost, ClipboardCopy, Users, FlaskConical, Loader2, ExternalLink } from 'lucide-react';
@@ -48,7 +47,7 @@ interface RecentScan {
 
 const TICKER_MESSAGES = [
   'ai recognizes ai',
-  'scanning github repos live',
+  'scanning github repos',
   'detecting vapourware professionally',
   'trust no readme',
   'your portfolio is a warning sign',
@@ -213,8 +212,6 @@ export default function VapourwareDetector() {
 
   return (
     <main className="min-h-screen overflow-x-hidden">
-      <Navbar />
-
       {/* back button */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6">
         <Link
@@ -228,14 +225,14 @@ export default function VapourwareDetector() {
       </div>
 
       {/* hero section */}
-      <section className="relative py-12 sm:py-20 px-4 sm:px-6 overflow-hidden">
+      <section className="relative py-12 sm:py-16 lg:py-24 px-4 sm:px-6 overflow-hidden">
         <div className="absolute inset-0 bg-grid bg-grid opacity-30" />
 
         <div className="max-w-4xl mx-auto relative text-center">
           {/* badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-larp-green/10 border border-larp-green/30 text-larp-green font-mono text-xs mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-danger-orange/10 border border-danger-orange/30 text-danger-orange font-mono text-xs mb-6">
             <span className="animate-pulse">●</span>
-            live - powered by claude ai
+            demo - powered by claude ai
           </div>
 
           {/* title */}
@@ -334,7 +331,7 @@ export default function VapourwareDetector() {
       <section className="py-16 sm:py-24 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
-            <span className="badge badge-warning mb-4">live scanner</span>
+            <span className="badge badge-warning mb-4">demo scanner</span>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-dark mb-4 font-display">
               scan a <span className="text-danger-orange">repo</span>
             </h2>
@@ -527,7 +524,7 @@ export default function VapourwareDetector() {
       <section className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-dark text-ivory-light">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
-            <span className="badge badge-error mb-4">live feed</span>
+            <span className="badge badge-error mb-4">recent scans</span>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 font-display">
               recent <span className="text-danger-orange">scans</span>
             </h2>
@@ -618,7 +615,7 @@ export default function VapourwareDetector() {
       </section>
 
       {/* final ticker */}
-      <WarningTicker messages={['ai recognizes ai', 'trust no readme', 'dyor means nothing if the code is fake', 'vapourware detector: now live']} direction="right" />
+      <WarningTicker messages={['ai recognizes ai', 'trust no readme', 'dyor means nothing if the code is fake', 'vapourware detector: demo']} direction="right" />
 
       <Footer />
     </main>

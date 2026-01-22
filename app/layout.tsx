@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Analytics } from '@vercel/analytics/next';
+import ClientLayout from '@/components/ClientLayout';
 import './globals.css';
 
 export const viewport: Viewport = {
@@ -39,7 +40,9 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body className="antialiased">
-        {children}
+        <ClientLayout>
+          {children}
+        </ClientLayout>
         <Analytics />
       </body>
     </html>

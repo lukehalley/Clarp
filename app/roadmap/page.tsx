@@ -1,38 +1,84 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
-import WarningTicker from '@/components/WarningTicker';
 import Footer from '@/components/Footer';
+import WarningTicker from '@/components/WarningTicker';
+import Terminal from '@/components/Terminal';
 import {
-  Terminal,
+  Terminal as TerminalIcon,
   Bot,
   Scan,
-  Users,
   TrendingUp,
   AlertTriangle,
   CheckCircle,
   Clock,
-  Zap,
-  MessageSquare,
   GitBranch,
   Shield,
   Target,
-  Rocket,
-  Construction,
-  Twitter,
-  Code,
   Database,
   Eye,
-  DollarSign,
   Award,
   Search,
   FileText,
-  Lock,
   Coins,
-  Heart
+  Heart,
+  ChevronDown,
+  Zap,
+  Twitter
 } from 'lucide-react';
+
+// ASCII art header
+const ROADMAP_ASCII = `
+██████╗  ██████╗  █████╗ ██████╗ ███╗   ███╗ █████╗ ██████╗
+██╔══██╗██╔═══██╗██╔══██╗██╔══██╗████╗ ████║██╔══██╗██╔══██╗
+██████╔╝██║   ██║███████║██║  ██║██╔████╔██║███████║██████╔╝
+██╔══██╗██║   ██║██╔══██║██║  ██║██║╚██╔╝██║██╔══██║██╔═══╝
+██║  ██║╚██████╔╝██║  ██║██████╔╝██║ ╚═╝ ██║██║  ██║██║
+╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝     `;
+
+const ROADMAP_ASCII_LIES = `
+██╗     ██╗███████╗███████╗
+██║     ██║██╔════╝██╔════╝
+██║     ██║█████╗  ███████╗
+██║     ██║██╔══╝  ╚════██║
+███████╗██║███████╗███████║
+╚══════╝╚═╝╚══════╝╚══════╝`;
+
+const ROADMAP_ASCII_COPE = `
+ ██████╗ ██████╗ ██████╗ ███████╗
+██╔════╝██╔═══██╗██╔══██╗██╔════╝
+██║     ██║   ██║██████╔╝█████╗
+██║     ██║   ██║██╔═══╝ ██╔══╝
+╚██████╗╚██████╔╝██║     ███████╗
+ ╚═════╝ ╚═════╝ ╚═╝     ╚══════╝`;
+
+// Boot sequence messages
+const BOOT_MESSAGES = [
+  { text: '> booting trust_pilot...', delay: 0 },
+  { text: '> scanning ct for rugs...', delay: 300 },
+  { text: '> 847 suspicious projects found', delay: 600 },
+  { text: '> polymarket odds loaded', delay: 900 },
+  { text: '> first mover: LOCKED', delay: 1200 },
+  { text: '> status: ONLINE', delay: 1500 },
+];
+
+// Snarky messages for various interactions
+const PROGRESS_HOVER_MESSAGES = [
+  'shipping faster than your favorite ai agent',
+  'first mover advantage loading...',
+  'no other tool does this. yet.',
+  'early believers get rewarded',
+  'this is the alpha',
+];
+
+const PHASE_CLICK_MESSAGES = [
+  'you found the alpha',
+  'early research = early rewards',
+  'this is what due diligence looks like',
+  'you\'re earlier than you think',
+  'most won\'t read this far',
+];
 
 interface RoadmapFeature {
   name: string;
@@ -56,81 +102,16 @@ interface RoadmapPhase {
 
 const ROADMAP_PHASES: RoadmapPhase[] = [
   {
-    id: 'v0',
-    version: 'v0.1',
-    title: 'vapourware detector',
-    status: 'building',
-    description: 'paste any github repo. get a verdict. ai recognizes ai.',
-    longDescription: 'The foundation of CLARP - a working scanner that analyzes GitHub repositories and returns an honest assessment of whether the project is real or just another AI-generated facade. Uses Claude AI to analyze code patterns, commit history, contributor authenticity, and documentation quality.',
-    features: [
-      {
-        name: 'github repo scanner',
-        status: 'in-progress',
-        description: 'fetch and analyze any public repository',
-        details: [
-          'Parses GitHub URLs in multiple formats (full URL, owner/repo shorthand)',
-          'Fetches repository metadata via GitHub API (stars, forks, creation date, last push)',
-          'Retrieves full file tree structure up to 500 files',
-          'Downloads and analyzes README content',
-          'Rate-limited to respect GitHub API limits',
-        ],
-        icon: <GitBranch size={20} />,
-      },
-      {
-        name: 'claude ai analysis',
-        status: 'in-progress',
-        description: 'ai-powered code quality and authenticity assessment',
-        details: [
-          'Uses Claude 3.5 Haiku for fast, cost-effective analysis',
-          'Custom prompt engineered to detect AI-generated code patterns',
-          'Analyzes commit messages for authenticity signals',
-          'Evaluates README-to-code ratio for "documentation theater" detection',
-          'Returns structured JSON verdict with confidence scores',
-        ],
-        icon: <Bot size={20} />,
-      },
-      {
-        name: 'LARP score (0-100)',
-        status: 'in-progress',
-        description: 'quantified assessment of project legitimacy',
-        details: [
-          '90-100: Confirmed vapourware - obvious AI slop, zero substance',
-          '70-89: Highly suspicious - probably abandoned or rugpull material',
-          '50-69: Yellow flags - some real code but concerning patterns',
-          '30-49: Probably fine - minor concerns but appears legitimate',
-          '0-29: Appears legitimate - rare, actual development happening',
-        ],
-        icon: <Target size={20} />,
-      },
-      {
-        name: 'detection matrix (6 signals)',
-        status: 'in-progress',
-        description: 'multi-dimensional analysis of red flags',
-        details: [
-          'AI-generated code: Detects Claude/GPT patterns',
-          'README bloat: Docs exceed code substance',
-          'Ghost commits: Bulk commits, suspicious patterns',
-          'Copy-paste signatures: Stack Overflow code detection',
-          'Fake contributors: Single dev claiming team',
-          'Test coverage: Zero tests = zero confidence',
-        ],
-        icon: <Scan size={20} />,
-      },
-    ],
-    eta: 'q1 2025',
-    snarkyNote: 'building the thing that detects when others aren\'t building. ironic? maybe. necessary? absolutely.',
-  },
-  {
     id: 'v1',
     version: 'v1.0',
-    title: 'polymarket intelligence layer',
-    status: 'planned',
-    description: 'polymarket shows what people bet. we show why they\'re wrong.',
-    longDescription: 'Polymarket has crypto betting markets - "will X ship?", "will Y refund?". But betting odds don\'t tell you if the project is legit. TROVE had 80% "will raise $20M" odds. They did. Then kept $12.7M. CLARP adds the evidence layer: pull markets, analyze underlying projects, show both together.',
+    title: 'polymarket intel',
+    status: 'building',
+    description: 'prediction odds + on-chain analysis. first of its kind.',
+    longDescription: 'TROVE had 80% odds to raise $20M. They did. Then kept $12.7M. Prediction markets show sentiment. We show evidence. First mover in a category that doesn\'t exist yet.',
     features: [
       {
         name: 'polymarket API integration',
-        status: 'planned',
+        status: 'in-progress',
         description: 'pull all crypto markets (tag_id=21)',
         details: [
           'Connect to Polymarket Gamma API',
@@ -139,11 +120,11 @@ const ROADMAP_PHASES: RoadmapPhase[] = [
           'Real-time odds data',
           'Daily refresh via Vercel cron',
         ],
-        icon: <TrendingUp size={20} />,
+        icon: <TrendingUp size={18} />,
       },
       {
         name: 'project mapping system',
-        status: 'planned',
+        status: 'in-progress',
         description: 'link markets to underlying projects',
         details: [
           'Map market_id → GitHub, X handle, contract',
@@ -152,11 +133,11 @@ const ROADMAP_PHASES: RoadmapPhase[] = [
           'Flag unmapped markets as "unanalyzed"',
           'Community submissions for new mappings',
         ],
-        icon: <Database size={20} />,
+        icon: <Database size={18} />,
       },
       {
         name: 'CLARP analysis overlay',
-        status: 'planned',
+        status: 'in-progress',
         description: 'run CLARP scan on each project',
         details: [
           'GitHub analysis (if repo exists)',
@@ -165,7 +146,7 @@ const ROADMAP_PHASES: RoadmapPhase[] = [
           'Rebrand detection (wallet connections)',
           'No code? That\'s a signal itself.',
         ],
-        icon: <Search size={20} />,
+        icon: <Search size={18} />,
       },
       {
         name: 'markets dashboard',
@@ -178,7 +159,7 @@ const ROADMAP_PHASES: RoadmapPhase[] = [
           'Sort by: Volume / CLARP Score / Ending Soon',
           'Link to Polymarket for betting',
         ],
-        icon: <Eye size={20} />,
+        icon: <Eye size={18} />,
       },
       {
         name: 'market detail pages',
@@ -191,19 +172,84 @@ const ROADMAP_PHASES: RoadmapPhase[] = [
           'Related markets',
           'Share button for X',
         ],
-        icon: <FileText size={20} />,
+        icon: <FileText size={18} />,
       },
     ],
     eta: 'q1 2025',
-    snarkyNote: 'polymarket = what people bet. CLARP = what the code says. together = full picture before you ape.',
+    snarkyNote: 'other tools check one thing. we check everything.',
   },
   {
     id: 'v2',
     version: 'v2.0',
-    title: 'enhanced detection',
+    title: 'x bot',
     status: 'planned',
-    description: 'catch serial offenders. nowhere to hide.',
-    longDescription: 'Inspired by the TROVE/Space/UFO Gaming pattern - projects that fail, rebrand, and ICO again. You can change your name, but you can\'t hide your wallet history. Enhanced detection catches rebrands, tracks team wallets, and monitors KOL accountability.',
+    description: 'tag @CLARP. get a verdict. 24/7 autonomous.',
+    longDescription: 'Tag @CLARP with any project. Get instant LARP score. Public accountability. No one can hide. Runs 24/7.',
+    features: [
+      {
+        name: 'x bot (@CLARP)',
+        status: 'planned',
+        description: 'autonomous scanning on crypto twitter',
+        details: [
+          'Mention @CLARP with GitHub URL to scan',
+          'Bot replies with LARP score and flags',
+          'Public accountability via replies',
+          'Queue system for volume spikes',
+          '"scanned. larp score: 94. godspeed."',
+        ],
+        icon: <Twitter size={18} />,
+      },
+      {
+        name: 'github repo scanner',
+        status: 'planned',
+        description: 'fetch and analyze any public repository',
+        details: [
+          'Parses GitHub URLs in multiple formats',
+          'Fetches repository metadata via GitHub API',
+          'Analyzes code patterns with Claude AI',
+          'Detects AI-generated code signatures',
+          'README-to-code ratio analysis',
+        ],
+        icon: <GitBranch size={18} />,
+      },
+      {
+        name: 'LARP score (0-100)',
+        status: 'planned',
+        description: 'quantified trust assessment',
+        details: [
+          '90-100: Confirmed vapourware - obvious AI slop',
+          '70-89: Highly suspicious - probably rugpull material',
+          '50-69: Yellow flags - concerning patterns',
+          '30-49: Probably fine - minor concerns',
+          '0-29: Appears legitimate - rare',
+        ],
+        icon: <Target size={18} />,
+      },
+      {
+        name: 'detection matrix (6 signals)',
+        status: 'planned',
+        description: 'comprehensive multi-signal analysis',
+        details: [
+          'AI-generated code detection',
+          'README bloat / documentation theater',
+          'Ghost commits / suspicious patterns',
+          'Fake contributors detection',
+          'Test coverage analysis',
+          'Contract fork detection',
+        ],
+        icon: <Scan size={18} />,
+      },
+    ],
+    eta: 'q2 2025',
+    snarkyNote: 'autonomous. 24/7. public. the trust pilot ct deserves.',
+  },
+  {
+    id: 'v3',
+    version: 'v3.0',
+    title: 'rebrand detection',
+    status: 'planned',
+    description: 'same team. new name. we see you.',
+    longDescription: 'UFO Gaming → TROVE → Space. Same wallets. Different names. You can rebrand. You can\'t hide your wallet history.',
     features: [
       {
         name: 'rebrand detection',
@@ -216,7 +262,7 @@ const ROADMAP_PHASES: RoadmapPhase[] = [
           'Case study: TROVE = UFO Gaming rebrand',
           'Alert users before they ape',
         ],
-        icon: <AlertTriangle size={20} />,
+        icon: <AlertTriangle size={18} />,
       },
       {
         name: 'logo similarity detection',
@@ -228,7 +274,7 @@ const ROADMAP_PHASES: RoadmapPhase[] = [
           'UFO Gaming → TROVE → Space logo pattern',
           'Community-contributed logo database',
         ],
-        icon: <Eye size={20} />,
+        icon: <Eye size={18} />,
       },
       {
         name: 'team wallet tracking',
@@ -240,7 +286,7 @@ const ROADMAP_PHASES: RoadmapPhase[] = [
           'Detect wallet clustering patterns',
           '"New team" = old team with new wallets',
         ],
-        icon: <Coins size={20} />,
+        icon: <Coins size={18} />,
       },
       {
         name: 'KOL accountability tracker',
@@ -253,33 +299,20 @@ const ROADMAP_PHASES: RoadmapPhase[] = [
           'wale.moca promoted TROVE, now apologizing',
           'Undisclosed paid relationships flagged',
         ],
-        icon: <Award size={20} />,
+        icon: <Award size={18} />,
       },
     ],
     eta: 'q2 2025',
-    snarkyNote: '$20M raised. $12.7M kept. "transparency" post after the fact. we see the pattern.',
+    snarkyNote: '$20M raised. $12.7M kept. we see you.',
   },
   {
-    id: 'v3',
-    version: 'v3.0',
-    title: 'distribution & community',
+    id: 'v4',
+    version: 'v4.0',
+    title: 'snitch mode',
     status: 'future',
-    description: 'make scanning viral. snitch mode activated.',
-    longDescription: 'Expanding access beyond the website. Tag @CLARP on X to scan any project publicly. Use the Claude Code skill for local scanning. Community intel layer with anonymous reporting and bounties for catching rugs early.',
+    description: 'report rugs. earn bounties. hall of shame.',
+    longDescription: 'Stake $CLARP to submit intel. Earn bounties for catching rugs early. Hall of shame archives every rug.',
     features: [
-      {
-        name: 'x bot (@CLARP)',
-        status: 'planned',
-        description: 'tag to scan any project publicly',
-        details: [
-          'Mention @CLARP with GitHub URL to scan',
-          'Bot replies with LARP score and flags',
-          'Public accountability via replies',
-          'Queue system for volume spikes',
-          '"scanned. larp score: 94. godspeed."',
-        ],
-        icon: <Twitter size={20} />,
-      },
       {
         name: 'claude code skill',
         status: 'planned',
@@ -291,7 +324,7 @@ const ROADMAP_PHASES: RoadmapPhase[] = [
           'Self-audit before shipping',
           'Distribution via Claude marketplace',
         ],
-        icon: <Terminal size={20} />,
+        icon: <TerminalIcon size={18} />,
       },
       {
         name: 'snitch mode',
@@ -304,7 +337,7 @@ const ROADMAP_PHASES: RoadmapPhase[] = [
           'Early warning system',
           'Whistleblower protections',
         ],
-        icon: <AlertTriangle size={20} />,
+        icon: <AlertTriangle size={18} />,
       },
       {
         name: 'hall of shame v2',
@@ -317,19 +350,19 @@ const ROADMAP_PHASES: RoadmapPhase[] = [
           'Searchable by wallet, name, team',
           '"Learn from history or repeat it"',
         ],
-        icon: <Database size={20} />,
+        icon: <Database size={18} />,
       },
     ],
     eta: 'q3 2025',
     snarkyNote: 'trust no one. verify everything. snitch often.',
   },
   {
-    id: 'v4',
-    version: 'v4.0',
-    title: 'charity flywheel',
+    id: 'v5',
+    version: 'v5.0',
+    title: 'ai safety donations',
     status: 'future',
-    description: 'buy $CLARP to save ourselves from AI domination.',
-    longDescription: 'A fee distribution model that funds AI safety research. Because if we\'re using AI to detect AI-generated scams, we should probably also fund the people trying to make sure AI doesn\'t destroy us all.',
+    description: 'fees fund ai safety. on-chain receipts.',
+    longDescription: 'AI detects the scams. Fees fund AI safety research. MIRI, Future of Life. On-chain proof.',
     features: [
       {
         name: 'fee distribution',
@@ -342,7 +375,7 @@ const ROADMAP_PHASES: RoadmapPhase[] = [
           '10% Community rewards',
           'Transparent on-chain tracking',
         ],
-        icon: <Coins size={20} />,
+        icon: <Coins size={18} />,
       },
       {
         name: 'verified donations',
@@ -354,7 +387,7 @@ const ROADMAP_PHASES: RoadmapPhase[] = [
           'Public donation dashboard',
           'Community governance on recipients',
         ],
-        icon: <Heart size={20} />,
+        icon: <Heart size={18} />,
       },
       {
         name: 'community verification',
@@ -366,7 +399,7 @@ const ROADMAP_PHASES: RoadmapPhase[] = [
           'Slashing for wrong votes',
           'Decentralized threat intelligence',
         ],
-        icon: <Shield size={20} />,
+        icon: <Shield size={18} />,
       },
     ],
     eta: '2026',
@@ -374,302 +407,642 @@ const ROADMAP_PHASES: RoadmapPhase[] = [
   },
 ];
 
-const TICKER_MESSAGES = [
-  'roadmap loaded. actually.',
-  'polymarket + clarp = full picture',
-  'odds without evidence is gambling',
-  'building in public',
-  'judging their code',
-  'trust no roadmap except this one',
-];
-
-const getStatusColor = (status: RoadmapPhase['status']) => {
-  switch (status) {
-    case 'live': return 'text-larp-green';
-    case 'building': return 'text-danger-orange';
-    case 'planned': return 'text-larp-yellow';
-    case 'future': return 'text-slate-light';
-    default: return 'text-slate-light';
-  }
-};
-
 const getStatusBadge = (status: RoadmapPhase['status']) => {
   switch (status) {
-    case 'live': return 'bg-larp-green/10 border-larp-green/30 text-larp-green';
-    case 'building': return 'bg-danger-orange/10 border-danger-orange/30 text-danger-orange';
-    case 'planned': return 'bg-larp-yellow/10 border-larp-yellow/30 text-larp-yellow';
-    case 'future': return 'bg-slate-light/10 border-slate-light/30 text-slate-light';
-    default: return 'bg-slate-light/10 border-slate-light/30 text-slate-light';
+    case 'live': return { bg: 'bg-larp-green/20', border: 'border-larp-green', text: 'text-larp-green', label: 'shipped' };
+    case 'building': return { bg: 'bg-danger-orange/20', border: 'border-danger-orange', text: 'text-danger-orange', label: 'building' };
+    case 'planned': return { bg: 'bg-danger-orange/20', border: 'border-danger-orange', text: 'text-danger-orange', label: 'planned' };
+    case 'future': return { bg: 'bg-slate-light/20', border: 'border-slate-light', text: 'text-slate-light', label: 'copium' };
   }
 };
 
-const getFeatureStatusIcon = (status: 'done' | 'in-progress' | 'planned') => {
+const getFeatureStatus = (status: 'done' | 'in-progress' | 'planned') => {
   switch (status) {
-    case 'done': return <CheckCircle size={16} className="text-larp-green" />;
-    case 'in-progress': return <Clock size={16} className="text-danger-orange animate-pulse" />;
-    case 'planned': return <Construction size={16} className="text-slate-light" />;
-  }
-};
-
-const getFeatureStatusText = (status: 'done' | 'in-progress' | 'planned') => {
-  switch (status) {
-    case 'done': return 'shipped';
-    case 'in-progress': return 'building';
-    case 'planned': return 'planned';
+    case 'done': return { icon: <CheckCircle size={16} />, color: 'text-larp-green', label: 'shipped' };
+    case 'in-progress': return { icon: <Zap size={16} />, color: 'text-danger-orange', label: 'building' };
+    case 'planned': return { icon: <Clock size={16} />, color: 'text-slate-light', label: 'planned' };
   }
 };
 
 export default function RoadmapPage() {
   const [mounted, setMounted] = useState(false);
-  const [terminalText, setTerminalText] = useState('');
+  const [bootMessages, setBootMessages] = useState<string[]>([]);
+  const [bootComplete, setBootComplete] = useState(false);
   const [showCursor, setShowCursor] = useState(true);
+  const [expandedPhases, setExpandedPhases] = useState<Set<string>>(new Set(['v1'])); // v1 = polymarket
 
+  // Easter egg states
+  const [asciiClicks, setAsciiClicks] = useState(0);
+  const [totalPhaseClicks, setTotalPhaseClicks] = useState(0);
+  const [progressClicks, setProgressClicks] = useState(0);
+  const [progressHoverMsg, setProgressHoverMsg] = useState('');
+  const [showPhaseClickMsg, setShowPhaseClickMsg] = useState(false);
+  const [phaseClickMsg, setPhaseClickMsg] = useState('');
+  const [showSmoke, setShowSmoke] = useState(false);
+  const [smokePhaseId, setSmokePhaseId] = useState<string | null>(null);
+  const [glitchPhaseId, setGlitchPhaseId] = useState<string | null>(null);
+
+  // Calculate progress - only shipped features count
+  const totalFeatures = ROADMAP_PHASES.reduce((acc, phase) => acc + phase.features.length, 0);
+  const completedFeatures = ROADMAP_PHASES.reduce((acc, phase) =>
+    acc + phase.features.filter(f => f.status === 'done').length, 0);
+  const inProgressFeatures = ROADMAP_PHASES.reduce((acc, phase) =>
+    acc + phase.features.filter(f => f.status === 'in-progress').length, 0);
+  // 0% until something actually ships. no credit for "building".
+  const progressPercent = Math.round((completedFeatures / totalFeatures) * 100);
+
+  // Boot sequence
   useEffect(() => {
     setMounted(true);
 
-    const text = '$ clarp --roadmap --verbose --honest';
-    let i = 0;
-    const typeInterval = setInterval(() => {
-      if (i <= text.length) {
-        setTerminalText(text.slice(0, i));
-        i++;
-      } else {
-        clearInterval(typeInterval);
-      }
-    }, 40);
+    // Reset state in case of StrictMode double-run
+    setBootMessages([]);
+    setBootComplete(false);
 
+    const timeoutIds: NodeJS.Timeout[] = [];
+
+    BOOT_MESSAGES.forEach(({ text, delay }) => {
+      const id = setTimeout(() => {
+        setBootMessages(prev => [...prev, text]);
+      }, delay);
+      timeoutIds.push(id);
+    });
+
+    const completeId = setTimeout(() => {
+      setBootComplete(true);
+    }, 2000);
+    timeoutIds.push(completeId);
+
+    // Cursor blink
     const cursorInterval = setInterval(() => {
       setShowCursor(prev => !prev);
     }, 530);
 
     return () => {
-      clearInterval(typeInterval);
+      timeoutIds.forEach(id => clearTimeout(id));
       clearInterval(cursorInterval);
     };
   }, []);
 
+  // ASCII click easter egg
+  const handleAsciiClick = () => {
+    setAsciiClicks(prev => prev + 1);
+  };
+
+  const getAsciiArt = () => {
+    if (asciiClicks >= 7) return ROADMAP_ASCII_COPE;
+    if (asciiClicks >= 4) return ROADMAP_ASCII_LIES;
+    return ROADMAP_ASCII;
+  };
+
+  const getAsciiLabel = () => {
+    if (asciiClicks >= 7) return 'COPE';
+    if (asciiClicks >= 4) return 'LIES';
+    return 'ROADMAP';
+  };
+
+  // Phase click handler with effects
+  const handlePhaseClick = useCallback((phaseId: string) => {
+    // Glitch effect
+    setGlitchPhaseId(phaseId);
+    setTimeout(() => setGlitchPhaseId(null), 150);
+
+    // Smoke effect
+    setShowSmoke(true);
+    setSmokePhaseId(phaseId);
+    setTimeout(() => {
+      setShowSmoke(false);
+      setSmokePhaseId(null);
+    }, 600);
+
+    // Increment counter
+    setTotalPhaseClicks(prev => {
+      const newCount = prev + 1;
+      // Show snarky message every few clicks
+      if (newCount % 3 === 0) {
+        const msg = PHASE_CLICK_MESSAGES[Math.floor(Math.random() * PHASE_CLICK_MESSAGES.length)];
+        setPhaseClickMsg(msg);
+        setShowPhaseClickMsg(true);
+        setTimeout(() => setShowPhaseClickMsg(false), 2000);
+      }
+      return newCount;
+    });
+
+    // Toggle expansion
+    setExpandedPhases(prev => {
+      const next = new Set(prev);
+      if (next.has(phaseId)) {
+        next.delete(phaseId);
+      } else {
+        next.add(phaseId);
+      }
+      return next;
+    });
+  }, []);
+
+  // Progress bar click
+  const handleProgressClick = () => {
+    setProgressClicks(prev => prev + 1);
+    const msg = PROGRESS_HOVER_MESSAGES[Math.floor(Math.random() * PROGRESS_HOVER_MESSAGES.length)];
+    setProgressHoverMsg(msg);
+  };
+
+  const getProgressDisplay = () => {
+    if (progressClicks >= 10) return { percent: '0%', message: 'still 0%. like your other investments.' };
+    if (progressClicks >= 5) return { percent: '0%', message: 'clicking won\'t make it ship faster' };
+    if (progressClicks >= 1) return { percent: '0%', message: 'nothing shipped yet. refreshingly honest.' };
+    return { percent: `${progressPercent}%`, message: progressPercent === 0 ? 'building. not larping.' : '' };
+  };
+
   if (!mounted) return null;
 
+  const progressDisplay = getProgressDisplay();
+
   return (
-    <main className="min-h-screen overflow-x-hidden bg-ivory-light">
-      <Navbar />
+    <main className="min-h-screen overflow-x-hidden">
+      {/* Hero with Terminal */}
+      <section className="relative py-12 sm:py-20 px-4 sm:px-6 overflow-hidden">
+        {/* Layered background texture */}
+        <div className="absolute inset-0 bg-grid bg-[size:24px_24px] opacity-40" />
+        <div className="absolute inset-0 bg-noise opacity-50" />
 
-      {/* Back button */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-slate-dark text-ivory-light font-mono text-sm border-2 border-slate-dark hover:bg-danger-orange hover:border-danger-orange hover:text-slate-dark transition-colors"
-          style={{ boxShadow: '3px 3px 0 #1a1a2e' }}
-        >
-          <span>←</span>
-          <span>back to main</span>
-        </Link>
-      </div>
+        <div className="max-w-6xl mx-auto relative z-10">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            {/* Left: Terminal with ASCII */}
+            <div className="order-2 lg:order-1">
+              <Terminal title="roadmap.exe" canMaximize={false}>
+                <div className="min-h-[280px] sm:min-h-[320px]">
+                  {/* ASCII Logo */}
+                  <pre
+                    className={`ascii-art text-danger-orange mb-4 hidden md:block cursor-pointer hover:text-larp-red transition-colors ${
+                      asciiClicks >= 4 ? 'animate-[glitch_0.1s_ease-in-out_infinite]' : ''
+                    }`}
+                    onClick={handleAsciiClick}
+                  >
+                    {getAsciiArt()}
+                  </pre>
+                  {/* Mobile fallback */}
+                  <div
+                    className="md:hidden text-2xl font-bold text-danger-orange mb-4 cursor-pointer"
+                    onClick={handleAsciiClick}
+                  >
+                    {getAsciiLabel()}
+                  </div>
 
-      {/* Hero Section */}
-      <section className="relative py-12 sm:py-16 px-4 sm:px-6 overflow-hidden">
-        <div className="absolute inset-0 bg-grid opacity-30" />
+                  {/* Boot messages */}
+                  <div className="space-y-1">
+                    {bootMessages.map((msg, i) => (
+                      <div
+                        key={i}
+                        className={`font-mono text-sm ${
+                          msg.includes('LOCKED') || msg.includes('ONLINE') ? 'text-larp-green font-bold' :
+                          msg.includes('found') ? 'text-danger-orange' :
+                          'text-ivory-light/70'
+                        }`}
+                      >
+                        {msg}
+                      </div>
+                    ))}
+                    {!bootComplete && (
+                      <span className={`inline-block w-2 h-4 bg-danger-orange ${showCursor ? 'opacity-100' : 'opacity-0'}`} />
+                    )}
+                    {bootComplete && (
+                      <div className="mt-4 pt-4 border-t border-ivory-light/10">
+                        <span className="text-larp-green">&gt;</span>{' '}
+                        <span className="text-ivory-light font-bold">you're early.</span>
+                        <span className={`inline-block w-2 h-4 bg-larp-green ml-1 ${showCursor ? 'opacity-100' : 'opacity-0'}`} />
+                      </div>
+                    )}
+                  </div>
 
-        <div className="max-w-4xl mx-auto relative text-center">
-          {/* Terminal prompt */}
-          <div className="bg-slate-dark border-2 border-danger-orange p-4 sm:p-6 text-left max-w-2xl mx-auto mb-8" style={{ boxShadow: '6px 6px 0 #FF6B35' }}>
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-3 h-3 rounded-full bg-larp-red/50" />
-              <div className="w-3 h-3 rounded-full bg-larp-yellow/50" />
-              <div className="w-3 h-3 rounded-full bg-larp-green/50" />
-              <span className="ml-2 text-xs text-ivory-light/40 font-mono">roadmap.exe v1.0</span>
+                  {asciiClicks >= 2 && (
+                    <p className="text-xs text-ivory-light/30 font-mono mt-4">
+                      {asciiClicks >= 7 ? 'maximum cope.' : asciiClicks >= 4 ? 'truth unlocked.' : `clicked ${asciiClicks}x`}
+                    </p>
+                  )}
+                </div>
+              </Terminal>
             </div>
-            <div className="font-mono text-sm text-ivory-light">
-              <span className="text-danger-orange">$</span>{' '}
-              <span className="text-larp-green">{terminalText}</span>
-              <span className={`inline-block w-2 h-4 bg-danger-orange ml-1 ${showCursor ? 'opacity-100' : 'opacity-0'}`} />
-            </div>
-            <div className="mt-3 text-xs text-ivory-light/60 font-mono space-y-1">
-              <div><span className="text-larp-green">✓</span> autonomous trust pilot initialized...</div>
-              <div><span className="text-larp-green">✓</span> polymarket integration planned</div>
-              <div><span className="text-larp-green">✓</span> evidence layer: active</div>
-              <div><span className="text-danger-orange">!</span> warning: we might actually keep you safe</div>
+
+            {/* Right: Hero copy */}
+            <div className="order-1 lg:order-2 text-center lg:text-left">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-dark leading-tight mb-6">
+                THE <span className="text-danger-orange">ROADMAP</span>
+              </h1>
+              <div className="w-48 sm:w-64 lg:w-80 h-1.5 bg-danger-orange mb-6 mx-auto lg:mx-0" />
+
+              <p className="text-xl sm:text-2xl text-slate-dark font-bold mb-3">
+                first autonomous trust pilot
+              </p>
+              <p className="text-lg text-slate-light mb-6">
+                polymarket + on-chain + ai. <span className="text-danger-orange font-bold">no one else.</span>
+              </p>
+
+              {/* Progress Card */}
+              <div
+                className="bg-white border-2 border-slate-dark p-4 sm:p-5 cursor-pointer hover:border-danger-orange transition-colors"
+                style={{ boxShadow: '4px 4px 0 #0a0a09' }}
+                onClick={handleProgressClick}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-mono text-slate-dark font-bold">
+                    PROGRESS
+                  </span>
+                  <span className={`text-lg font-mono font-bold ${
+                    progressClicks >= 1 ? 'text-danger-orange' : 'text-danger-orange'
+                  }`}>
+                    {progressDisplay.percent}
+                  </span>
+                </div>
+
+                <div className="h-3 bg-ivory-dark border border-slate-dark/20 overflow-hidden relative">
+                  {progressPercent === 0 && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-[8px] font-mono text-slate-light/50 tracking-widest">EMPTY</span>
+                    </div>
+                  )}
+                  <div
+                    className={`h-full transition-all duration-500 ${
+                      progressClicks >= 1 ? 'bg-danger-orange animate-pulse' : 'bg-danger-orange'
+                    }`}
+                    style={{ width: progressPercent === 0 ? '0%' : `${progressPercent}%` }}
+                  />
+                </div>
+
+                <div className="mt-3 flex items-center justify-between text-xs font-mono">
+                  <span className="text-slate-light">{completedFeatures} done / {inProgressFeatures} building / {totalFeatures - completedFeatures - inProgressFeatures} planned</span>
+                  {progressDisplay.message && (
+                    <span className="text-danger-orange font-bold">{progressDisplay.message}</span>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
-
-          {/* Title */}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-slate-dark leading-tight mb-6 font-display">
-            the <span className="text-danger-orange">roadmap</span>
-          </h1>
-
-          <p className="text-lg sm:text-xl text-slate-light mb-4 font-mono">
-            the first autonomous trust pilot for crypto.
-          </p>
-          <p className="text-sm sm:text-base text-slate-light max-w-2xl mx-auto">
-            polymarket shows what people bet. CLARP shows why they're wrong.
-            we're building the <span className="text-danger-orange font-bold">evidence layer</span> that keeps you safe from rugs and larps.
-          </p>
         </div>
       </section>
 
       {/* Ticker */}
-      <WarningTicker messages={TICKER_MESSAGES} direction="left" />
+      <WarningTicker
+        messages={['FIRST MOVER', 'POLYMARKET + AI', 'NO ONE ELSE', 'YOU\'RE EARLY']}
+        direction="left"
+      />
 
-      {/* Roadmap Phases - Light background, expanded */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6">
-        <div className="max-w-5xl mx-auto space-y-16">
-          {ROADMAP_PHASES.map((phase, phaseIndex) => (
-            <div key={phase.id} className="relative">
-              {/* Phase Header */}
-              <div className="mb-8">
-                <div className="flex flex-wrap items-center gap-3 mb-4">
-                  <span className="text-2xl sm:text-3xl font-bold text-danger-orange font-mono">{phase.version}</span>
-                  <h2 className="text-2xl sm:text-3xl font-bold text-slate-dark font-display">{phase.title}</h2>
-                  <span className={`px-3 py-1 text-xs font-mono border ${getStatusBadge(phase.status)}`}>
-                    {phase.status}
-                  </span>
-                </div>
-                <p className="text-lg text-slate-light font-mono mb-2">{phase.description}</p>
-                <p className="text-sm text-slate-light/80 max-w-3xl">{phase.longDescription}</p>
-                <div className="mt-3 flex items-center gap-4 text-sm">
-                  <span className="text-slate-light">ETA:</span>
-                  <span className={`font-mono font-bold ${phase.status === 'live' ? 'text-larp-green' : 'text-slate-dark'}`}>
-                    {phase.eta}
-                  </span>
-                </div>
-              </div>
+      {/* Roadmap Phases */}
+      <section className="py-12 sm:py-20 px-4 sm:px-6 bg-slate-dark relative">
+        {/* Texture overlay */}
+        <div className="absolute inset-0 bg-noise opacity-30" />
+        <div className="max-w-4xl mx-auto space-y-6 relative z-10">
+          {ROADMAP_PHASES.map((phase) => {
+            const isExpanded = expandedPhases.has(phase.id);
+            const statusBadge = getStatusBadge(phase.status);
+            const isGlitching = glitchPhaseId === phase.id;
+            const hasSmokeEffect = showSmoke && smokePhaseId === phase.id;
 
-              {/* Features Grid */}
-              <div className="space-y-6">
-                {phase.features.map((feature, featureIndex) => (
-                  <div
-                    key={featureIndex}
-                    className="bg-white border-2 border-slate-dark/10 p-6 hover:border-danger-orange/30 transition-colors"
-                    style={{ boxShadow: '4px 4px 0 rgba(10,10,9,0.1)' }}
-                  >
-                    {/* Feature Header */}
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-start gap-4">
-                        <div className="p-2 bg-slate-dark/5 text-slate-dark">
-                          {feature.icon}
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-bold text-slate-dark font-mono">{feature.name}</h3>
-                          <p className="text-sm text-slate-light">{feature.description}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        {getFeatureStatusIcon(feature.status)}
-                        <span className={`text-xs font-mono ${
-                          feature.status === 'done' ? 'text-larp-green' :
-                          feature.status === 'in-progress' ? 'text-danger-orange' :
-                          'text-slate-light'
-                        }`}>
-                          {getFeatureStatusText(feature.status)}
-                        </span>
+            return (
+              <div
+                key={phase.id}
+                className={`relative ${isGlitching ? 'animate-[glitch_0.1s_ease-in-out_2]' : ''}`}
+              >
+                {/* Smoke particles */}
+                {hasSmokeEffect && (
+                  <div className="absolute inset-0 pointer-events-none overflow-hidden z-10">
+                    {[...Array(6)].map((_, i) => (
+                      <span
+                        key={i}
+                        className="absolute text-danger-orange/60 font-mono animate-[smoke-rise_0.6s_ease-out_forwards]"
+                        style={{
+                          left: `${15 + Math.random() * 70}%`,
+                          top: '50%',
+                          animationDelay: `${i * 0.05}s`,
+                          fontSize: `${10 + Math.random() * 6}px`,
+                        }}
+                      >
+                        ░░
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Phase Header */}
+                <div
+                  className={`border-2 p-5 sm:p-8 cursor-pointer transition-all ${
+                    isExpanded
+                      ? 'bg-ivory-light border-danger-orange'
+                      : 'bg-ivory-light/5 border-ivory-light/30 hover:border-danger-orange/50'
+                  }`}
+                  style={{
+                    boxShadow: isExpanded ? '6px 6px 0 #FF6B35' : '4px 4px 0 rgba(250,249,245,0.1)'
+                  }}
+                  onClick={() => handlePhaseClick(phase.id)}
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                    <div className="flex items-start gap-5">
+                      <span className={`text-3xl sm:text-4xl font-bold font-mono leading-none ${
+                        phase.status === 'building' ? 'text-danger-orange' :
+                        isExpanded ? 'text-danger-orange' : 'text-ivory-light'
+                      }`}>
+                        {phase.version}
+                      </span>
+                      <div>
+                        <h2 className={`text-xl sm:text-2xl font-bold uppercase tracking-wide ${isExpanded ? 'text-slate-dark' : 'text-ivory-light'}`}>
+                          {phase.title}
+                        </h2>
+                        <div className={`w-20 h-1 my-3 ${isExpanded ? 'bg-danger-orange' : 'bg-ivory-light/20'}`} />
+                        <p className={`text-base sm:text-lg ${isExpanded ? 'text-slate-dark font-bold' : 'text-ivory-light/80'}`}>
+                          {phase.description}
+                        </p>
                       </div>
                     </div>
 
-                    {/* Feature Details */}
-                    <div className="ml-14 pl-4 border-l-2 border-slate-dark/10">
-                      <ul className="space-y-2">
-                        {feature.details.map((detail, detailIndex) => (
-                          <li key={detailIndex} className="flex items-start gap-2 text-sm text-slate-light">
-                            <span className="text-danger-orange shrink-0 mt-1">▸</span>
-                            <span>{detail}</span>
-                          </li>
-                        ))}
-                      </ul>
+                    <div className="flex items-center gap-3 sm:flex-col sm:items-end sm:gap-2">
+                      <span className={`px-4 py-1.5 text-xs font-mono font-bold uppercase border-2 ${statusBadge.bg} ${statusBadge.border} ${statusBadge.text}`}>
+                        {statusBadge.label}
+                      </span>
+                      <span className={`text-sm font-mono font-bold ${isExpanded ? 'text-slate-light' : 'text-ivory-light/50'}`}>
+                        {phase.eta}
+                      </span>
+                      <ChevronDown
+                        size={24}
+                        className={`transition-transform ${isExpanded ? 'rotate-180 text-danger-orange' : 'text-ivory-light/40'}`}
+                      />
                     </div>
                   </div>
-                ))}
-              </div>
-
-              {/* Snarky Note */}
-              <div className="mt-6 p-4 bg-danger-orange/5 border-l-4 border-danger-orange">
-                <p className="text-sm text-slate-dark font-mono">
-                  <span className="text-danger-orange font-bold">note:</span> {phase.snarkyNote}
-                </p>
-              </div>
-
-              {/* Divider (except for last phase) */}
-              {phaseIndex < ROADMAP_PHASES.length - 1 && (
-                <div className="mt-16 flex items-center gap-4">
-                  <div className="flex-1 h-px bg-slate-dark/10" />
-                  <span className="text-xs text-slate-light font-mono">next phase</span>
-                  <div className="flex-1 h-px bg-slate-dark/10" />
                 </div>
-              )}
+
+                {/* Expanded Content */}
+                {isExpanded && (
+                  <div className="border-2 border-t-0 border-danger-orange bg-ivory-light" style={{ boxShadow: '6px 6px 0 #FF6B35' }}>
+                    {/* Long description with highlighted keywords */}
+                    <div className="p-5 sm:p-8 border-b-2 border-slate-dark/20">
+                      <div className="text-lg sm:text-xl text-slate-dark leading-relaxed space-y-4">
+                        {phase.id === 'v1' && (
+                          <>
+                            <p>
+                              <a href="https://cryptonews.net/news/altcoins/32302794/" target="_blank" rel="noopener noreferrer" className="font-bold underline decoration-slate-dark/30 hover:decoration-danger-orange transition-colors">TROVE had 80% odds</a> to raise $20M.
+                            </p>
+                            <p>
+                              They did. Then <span className="text-danger-orange font-bold">kept $9.4M.</span>
+                            </p>
+                            <p>
+                              Token <span className="font-bold">crashed 95% in 10 minutes.</span>
+                            </p>
+                            <p className="pt-2 border-t border-slate-dark/10">
+                              Prediction markets show sentiment. <span className="bg-danger-orange/30 px-1 font-bold">We show evidence.</span>
+                            </p>
+                            <p className="text-danger-orange font-bold">
+                              First mover in a category that doesn't exist yet.
+                            </p>
+                          </>
+                        )}
+                        {phase.id === 'v2' && (
+                          <>
+                            <p>
+                              Tag <span className="font-mono bg-slate-dark text-ivory-light px-2 py-0.5">@CLARP</span> with any project.
+                            </p>
+                            <p>
+                              Get <span className="text-danger-orange font-bold text-2xl">instant LARP score.</span>
+                            </p>
+                            <p>
+                              Public accountability. <span className="font-bold">No one can hide.</span>
+                            </p>
+                            <p className="text-larp-green font-bold">
+                              Runs 24/7. Autonomous.
+                            </p>
+                          </>
+                        )}
+                        {phase.id === 'v3' && (
+                          <>
+                            <p className="font-mono text-base bg-slate-dark text-ivory-light px-3 py-2 inline-block">
+                              UFO Gaming → TROVE → Space
+                            </p>
+                            <p>
+                              Same wallets. <span className="font-bold">Different names.</span>
+                            </p>
+                            <p>
+                              You can rebrand.
+                            </p>
+                            <p className="text-danger-orange font-bold text-xl">
+                              You can't hide your wallet history.
+                            </p>
+                          </>
+                        )}
+                        {phase.id === 'v4' && (
+                          <>
+                            <p>
+                              Stake <span className="font-mono bg-slate-dark text-danger-orange px-2 py-0.5">$CLARP</span> to submit intel.
+                            </p>
+                            <p>
+                              <span className="font-bold">Earn bounties</span> for catching rugs early.
+                            </p>
+                            <p className="bg-larp-red/20 px-3 py-2 inline-block font-bold">
+                              Hall of shame archives every rug.
+                            </p>
+                          </>
+                        )}
+                        {phase.id === 'v5' && (
+                          <>
+                            <p>
+                              AI detects the scams.
+                            </p>
+                            <p>
+                              <span className="font-bold">Fees fund AI safety research.</span>
+                            </p>
+                            <p className="text-danger-orange font-bold">
+                              MIRI. Future of Life.
+                            </p>
+                            <p>
+                              On-chain proof. <span className="bg-larp-green/30 px-2 py-1 font-bold">Verifiable.</span>
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="p-4 sm:p-6 space-y-4">
+                      {phase.features.map((feature, idx) => {
+                        const featureStatus = getFeatureStatus(feature.status);
+
+                        return (
+                          <div
+                            key={idx}
+                            className="border-2 border-slate-dark/30 p-4 sm:p-5 bg-white hover:border-danger-orange transition-colors"
+                            style={{ boxShadow: '3px 3px 0 rgba(10,10,9,0.15)' }}
+                          >
+                            <div className="flex items-start justify-between gap-3 mb-4">
+                              <div className="flex items-start gap-3">
+                                <span className={`mt-1 ${feature.status === 'done' ? 'text-larp-green' : 'text-danger-orange'}`}>
+                                  {feature.icon}
+                                </span>
+                                <div>
+                                  <h3 className={`font-mono text-base sm:text-lg font-bold ${feature.status === 'done' ? 'text-larp-green' : 'text-slate-dark'}`}>
+                                    {feature.name}
+                                    {feature.status === 'done' && <span className="ml-2">✓</span>}
+                                  </h3>
+                                  <div className="w-12 h-0.5 bg-danger-orange/50 my-2" />
+                                  <p className="text-sm sm:text-base text-slate-medium font-medium">{feature.description}</p>
+                                </div>
+                              </div>
+                              <span className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-bold border ${
+                                feature.status === 'done' ? 'border-larp-green bg-larp-green/10' :
+                                feature.status === 'in-progress' ? 'border-danger-orange bg-danger-orange/10' :
+                                'border-slate-light/50 bg-slate-light/10'
+                              } ${featureStatus.color}`}>
+                                {featureStatus.icon}
+                                <span className="hidden sm:inline uppercase">{featureStatus.label}</span>
+                              </span>
+                            </div>
+
+                            <ul className="ml-7 space-y-2.5">
+                              {feature.details.map((detail, i) => {
+                                // Highlight certain keywords in details
+                                const highlightedDetail = detail
+                                  .replace(/GitHub API|Claude AI|Polymarket|LARP score/g, '<span class="font-bold text-slate-dark">$&</span>')
+                                  .replace(/\d+%|\d+ days?|\d+\/\d+|24\/7/g, '<span class="font-mono text-danger-orange font-bold">$&</span>')
+                                  .replace(/"[^"]+"/g, '<span class="font-mono bg-slate-dark/5 px-1">$&</span>');
+
+                                return (
+                                  <li key={i} className="text-sm flex items-start gap-2.5 group">
+                                    <span className={`shrink-0 font-bold mt-0.5 ${feature.status === 'done' ? 'text-larp-green' : 'text-danger-orange group-hover:scale-125 transition-transform'}`}>
+                                      {feature.status === 'done' ? '✓' : '▸'}
+                                    </span>
+                                    <span
+                                      className={`${feature.status === 'done' ? 'text-slate-light line-through' : 'text-slate-dark'}`}
+                                      dangerouslySetInnerHTML={{ __html: highlightedDetail }}
+                                    />
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <div className="p-4 sm:p-6 bg-slate-dark border-t-2 border-danger-orange">
+                      <p className="text-base sm:text-lg font-mono text-ivory-light">
+                        <span className="text-danger-orange font-bold">//</span> <span className="font-bold">{phase.snarkyNote}</span>
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
+          {/* Click counter easter egg */}
+          {totalPhaseClicks >= 5 && (
+            <div className="text-center pt-4">
+              <p className="text-xs font-mono text-ivory-light/30">
+                {totalPhaseClicks >= 20
+                  ? `${totalPhaseClicks} clicks. you're more thorough than most vcs.`
+                  : totalPhaseClicks >= 10
+                  ? `${totalPhaseClicks} clicks. doing actual research?`
+                  : `clicked ${totalPhaseClicks} times. curious one, aren't you.`
+                }
+              </p>
             </div>
-          ))}
+          )}
         </div>
       </section>
+
+      {/* Snarky toast message */}
+      {showPhaseClickMsg && (
+        <div
+          className="fixed left-2 sm:left-4 z-50 animate-slide-in"
+          style={{ bottom: 'max(1rem, env(safe-area-inset-bottom))' }}
+        >
+          <div
+            className="bg-ivory-light border-2 border-slate-dark px-3 py-2 font-mono text-xs w-[280px] sm:w-[320px]"
+            style={{ boxShadow: '4px 4px 0 var(--slate-dark)' }}
+          >
+            <div className="flex items-center gap-2 mb-1">
+              <span className="w-4 h-4 flex items-center justify-center text-[9px] font-bold border border-danger-orange text-danger-orange">
+                !
+              </span>
+              <span className="text-slate-light text-[9px] uppercase tracking-wider">alpha</span>
+            </div>
+            <p className="text-slate-dark leading-tight">
+              <span className="text-danger-orange font-bold">$</span> {phaseClickMsg}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Ticker */}
-      <WarningTicker messages={['autonomous trust pilot', 'polymarket odds + clarp evidence', 'keeping you safe from rugs', 'actually building']} direction="right" />
+      <WarningTicker
+        messages={['ALPHA', 'COMPREHENSIVE', '24/7 AUTONOMOUS', 'EVIDENCE > VIBES']}
+        direction="right"
+      />
 
-      {/* Mission Section */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-dark">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-ivory-light mb-4 font-display">
-              the <span className="text-danger-orange">mission</span>
-            </h2>
-            <p className="text-lg text-ivory-light/60 font-mono">
-              the first autonomous trust pilot for crypto
-            </p>
+      {/* CTA Section */}
+      <section className="py-16 sm:py-24 px-4 sm:px-6 relative">
+        <div className="absolute inset-0 bg-grid bg-[size:24px_24px] opacity-30" />
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-dark mb-4 uppercase tracking-wide">
+            {totalPhaseClicks >= 15
+              ? 'YOU DID THE RESEARCH'
+              : 'FIRST MOVER'
+            }
+          </h2>
+          <div className="w-48 sm:w-64 h-1.5 bg-danger-orange mx-auto mb-8" />
+          <p className="text-xl sm:text-2xl text-slate-dark font-bold mb-3">
+            {totalPhaseClicks >= 15
+              ? 'most won\'t read this far.'
+              : 'polymarket + on-chain + ai.'
+            }
+          </p>
+          <p className="text-lg text-slate-light mb-8">
+            {totalPhaseClicks >= 15
+              ? <><span className="text-danger-orange font-bold">you're early.</span></>
+              : <><span className="text-danger-orange font-bold">no one else</span> is building this.</>
+            }
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <a
+              href="https://x.com/i/communities/2013904367188132011"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary inline-flex items-center justify-center gap-2 text-base px-8 py-4"
+            >
+              <Twitter size={20} />
+              JOIN EARLY
+            </a>
+            <Link
+              href="/"
+              className="btn-secondary inline-flex items-center justify-center gap-2 text-base px-8 py-4"
+            >
+              ← BACK
+            </Link>
           </div>
 
-          <div className="space-y-6 font-mono text-base sm:text-lg">
-            <div className="flex items-start gap-4 p-6 bg-ivory-light/5 border border-ivory-light/10">
-              <span className="text-danger-orange shrink-0 text-xl">▸</span>
-              <p className="text-ivory-light/80">
-                <span className="text-danger-orange font-bold">rugchecker</span> tells you if the contract will drain your wallet.
-              </p>
-            </div>
-            <div className="flex items-start gap-4 p-6 bg-ivory-light/5 border border-ivory-light/10">
-              <span className="text-larp-green shrink-0 text-xl">▸</span>
-              <p className="text-ivory-light/80">
-                <span className="text-larp-green font-bold">$CLARP</span> tells you if there's anything behind the contract at all.
-              </p>
-            </div>
-            <div className="flex items-start gap-4 p-6 bg-ivory-light/5 border border-ivory-light/10">
-              <span className="text-larp-yellow shrink-0 text-xl">▸</span>
-              <p className="text-ivory-light/80">
-                <span className="text-larp-yellow font-bold">polymarket</span> tells you what people bet. <span className="text-danger-orange font-bold">CLARP</span> tells you why they're wrong.
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-12 text-center">
-            <p className="text-ivory-light/40 text-sm font-mono mb-8">
-              autonomous trust pilot. keeping you safe from rugs and larps.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/vapourware-detector" className="btn-primary">
-                try the detector
-              </Link>
-              <a
-                href="https://x.com/i/communities/2013904367188132011"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-outline"
-              >
-                join on x
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Bottom note */}
-      <section className="py-8 px-4 sm:px-6 bg-ivory-light">
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs text-slate-light/60 font-mono">
-            this roadmap will be updated as we build. unlike most roadmaps, which are updated never.
+          <p className="text-base text-slate-dark font-mono mt-10">
+            other tools check one thing. <span className="text-danger-orange font-bold">we check everything.</span>
           </p>
         </div>
       </section>
 
-      {/* Final ticker */}
-      <WarningTicker messages={['autonomous trust pilot', 'evidence over odds', 'safe from rugs', 'building continues']} direction="left" />
+      {/* Final Ticker */}
+      <WarningTicker
+        messages={['BUILDING NOW', 'FIRST MOVER', 'LOCKED', 'EARLY']}
+        direction="left"
+      />
 
       <Footer />
+
+      {/* Smoke animation styles */}
+      <style jsx global>{`
+        @keyframes smoke-rise {
+          0% {
+            opacity: 0.8;
+            transform: translateY(0) scale(1);
+          }
+          100% {
+            opacity: 0;
+            transform: translateY(-50px) scale(1.5);
+          }
+        }
+      `}</style>
     </main>
   );
 }
