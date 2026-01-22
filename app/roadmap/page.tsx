@@ -187,9 +187,9 @@ const ROADMAP_PHASES: RoadmapPhase[] = [
     longDescription: 'Tag @CLARP with any project. Get instant LARP score. Public accountability. No one can hide. Runs 24/7.',
     features: [
       {
-        name: 'x bot (@CLARP)',
+        name: 'Autonomous Trust Pilot',
         status: 'planned',
-        description: 'autonomous scanning on crypto twitter',
+        description: 'the first autonomous trust pilot for crypto',
         details: [
           'Mention @CLARP with GitHub URL to scan',
           'Bot replies with LARP score and flags',
