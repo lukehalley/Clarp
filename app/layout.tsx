@@ -12,19 +12,54 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'Clarp',
-  description: 'The AI coding assistant that exclusively generates vaporware. Now shipping nothing to production.',
-  keywords: ['clarp', 'ai agent', 'satire', 'crypto', 'solana', 'memecoin', 'vaporware'],
+  metadataBase: new URL('https://clarp.lukehalley.com'),
+  title: {
+    default: 'Clarp - AI Vaporware Generator',
+    template: '%s | Clarp',
+  },
+  description: 'The AI coding assistant that exclusively generates vaporware. Now shipping nothing to production. Building the future, one empty promise at a time.',
+  keywords: ['clarp', 'ai agent', 'satire', 'crypto', 'solana', 'memecoin', 'vaporware', 'ai coding assistant', 'vaporware generator'],
+  authors: [{ name: 'Clarp Team' }],
+  creator: 'Clarp',
+  publisher: 'Clarp',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   openGraph: {
-    title: 'Clarp ($CLARP)',
-    description: 'The AI coding assistant that exclusively generates vaporware.',
+    title: 'Clarp ($CLARP) - AI Vaporware Generator',
+    description: 'The AI coding assistant that exclusively generates vaporware. Now shipping nothing to production. Building the future, one empty promise at a time.',
     type: 'website',
     locale: 'en_US',
+    url: 'https://clarp.lukehalley.com',
+    siteName: 'Clarp',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Clarp - The AI coding assistant that exclusively generates vaporware',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Clarp ($CLARP)',
-    description: 'The AI coding assistant that exclusively generates vaporware.',
+    title: 'Clarp ($CLARP) - AI Vaporware Generator',
+    description: 'The AI coding assistant that exclusively generates vaporware. Now shipping nothing to production. Building the future, one empty promise at a time.',
+    images: ['/og-image.png'],
+    creator: '@clarp',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
 };
 
