@@ -424,6 +424,50 @@ const getFeatureStatus = (status: 'done' | 'in-progress' | 'planned') => {
   }
 };
 
+// Highlight keywords in detail text
+const HighlightedText = ({ text }: { text: string }) => {
+  const keywords = /\b(GitHub API|Grok|Polymarket|LARP score|GitHub|API)\b/g;
+  const numbers = /(\d+%|\d+ days?|\d+\/\d+|24\/7)/g;
+  const quotes = /"([^"]+)"/g;
+
+  // Split by all patterns and rebuild with highlights
+  const parts: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let key = 0;
+
+  // Combined regex to find all matches in order
+  const combined = new RegExp(`(${keywords.source})|(${numbers.source})|(${quotes.source})`, 'g');
+  let match;
+
+  while ((match = combined.exec(text)) !== null) {
+    // Add text before match
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index));
+    }
+
+    // Determine which type of match
+    if (match[1]) {
+      // Keyword match
+      parts.push(<span key={key++} className="font-bold text-slate-dark">{match[1]}</span>);
+    } else if (match[2]) {
+      // Number match
+      parts.push(<span key={key++} className="font-mono text-danger-orange font-bold">{match[2]}</span>);
+    } else if (match[3]) {
+      // Quote match (includes the quotes)
+      parts.push(<span key={key++} className="font-mono bg-slate-dark/5 px-1">{match[3]}</span>);
+    }
+
+    lastIndex = combined.lastIndex;
+  }
+
+  // Add remaining text
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+
+  return <>{parts}</>;
+};
+
 export default function RoadmapPage() {
   const [mounted, setMounted] = useState(false);
   const [bootMessages, setBootMessages] = useState<string[]>([]);
@@ -902,25 +946,16 @@ export default function RoadmapPage() {
                             </div>
 
                             <ul className="ml-7 space-y-2.5">
-                              {feature.details.map((detail, i) => {
-                                // Highlight certain keywords in details
-                                const highlightedDetail = detail
-                                  .replace(/GitHub API|Grok|Polymarket|LARP score/g, '<span class="font-bold text-slate-dark">$&</span>')
-                                  .replace(/\d+%|\d+ days?|\d+\/\d+|24\/7/g, '<span class="font-mono text-danger-orange font-bold">$&</span>')
-                                  .replace(/"[^"]+"/g, '<span class="font-mono bg-slate-dark/5 px-1">$&</span>');
-
-                                return (
+                              {feature.details.map((detail, i) => (
                                   <li key={i} className="text-sm flex items-start gap-2.5 group">
                                     <span className={`shrink-0 font-bold mt-0.5 ${feature.status === 'done' ? 'text-larp-green' : 'text-danger-orange group-hover:scale-125 transition-transform'}`}>
                                       {feature.status === 'done' ? '✓' : '▸'}
                                     </span>
-                                    <span
-                                      className={`${feature.status === 'done' ? 'text-slate-light line-through' : 'text-slate-dark'}`}
-                                      dangerouslySetInnerHTML={{ __html: highlightedDetail }}
-                                    />
+                                    <span className={`${feature.status === 'done' ? 'text-slate-light line-through' : 'text-slate-dark'}`}>
+                                      <HighlightedText text={detail} />
+                                    </span>
                                   </li>
-                                );
-                              })}
+                                ))}
                             </ul>
                           </div>
                         );
