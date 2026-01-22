@@ -55,7 +55,7 @@
   <text x="20" y="135" font-family="monospace" font-size="34" fill="#0a0a09" font-weight="bold">C[LARP] AGENT</text>
 
   <!-- Tagline -->
-  <text x="20" y="165" font-family="monospace" font-size="18" fill="#FF6B35" font-weight="bold">tag @CLARP. get a verdict.</text>
+  <text x="20" y="165" font-family="monospace" font-size="18" fill="#FF6B35" font-weight="bold">tag @CLARPAgent. get a verdict.</text>
 
   <!-- Fake tweet box -->
   <rect x="20" y="185" width="360" height="210" fill="#FFFFFF" stroke="#0a0a09" stroke-width="2"/>

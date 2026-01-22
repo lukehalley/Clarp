@@ -183,8 +183,8 @@ const ROADMAP_PHASES: RoadmapPhase[] = [
     version: '2',
     title: 'C[LARP] AGENT',
     status: 'planned',
-    description: 'tag @CLARP. get a verdict. 24/7 autonomous.',
-    longDescription: 'Tag @CLARP with any project. Get instant LARP score. Public accountability. No one can hide. Runs 24/7.',
+    description: 'tag @CLARPAgent. get a verdict. 24/7 autonomous.',
+    longDescription: 'tag @CLARPAgent with any project. Get instant LARP score. Public accountability. No one can hide. Runs 24/7.',
     features: [
       {
         name: 'Autonomous Trust Pilot',
