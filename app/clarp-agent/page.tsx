@@ -237,7 +237,7 @@ export default function ClarpAgent() {
 
           {/* title */}
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-dark leading-tight mb-4 sm:mb-6 font-display preserve-case">
-            C(LARP)
+            C[LARP]
             <br />
             <span className="text-danger-orange">AGENT</span>
           </h1>
@@ -350,7 +350,7 @@ export default function ClarpAgent() {
               <div className="terminal-dot bg-larp-red opacity-50" />
               <div className="terminal-dot bg-larp-yellow opacity-50" />
               <div className="terminal-dot bg-larp-green opacity-50" />
-              <span className="ml-3 text-xs text-ivory-light/50 font-mono">C(LARP) AGENT v1.0.0</span>
+              <span className="ml-3 text-xs text-ivory-light/50 font-mono">C[LARP] AGENT v1.0.0</span>
             </div>
             <div ref={terminalRef} className="terminal-body min-h-[250px] max-h-[500px] overflow-y-auto">
               {/* input row */}
@@ -619,7 +619,7 @@ export default function ClarpAgent() {
       </section>
 
       {/* final ticker */}
-      <WarningTicker messages={['AI RECOGNIZES AI', 'TRUST NO README', 'DYOR MEANS NOTHING IF THE CODE IS FAKE', 'C(LARP) AGENT: DEMO']} direction="right" />
+      <WarningTicker messages={['AI RECOGNIZES AI', 'TRUST NO README', 'DYOR MEANS NOTHING IF THE CODE IS FAKE', 'C[LARP] AGENT: DEMO']} direction="right" />
 
       <Footer />
     </main>
