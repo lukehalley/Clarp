@@ -138,21 +138,33 @@ export default function Footer() {
             <h4 className="font-mono text-xs sm:text-sm text-danger-orange mb-3 sm:mb-4 h-5">honesty</h4>
             <ul className="space-y-2 sm:space-y-3">
               {[
-                { label: 'docs', note: 'you\'re looking at it' },
-                { label: 'whitepaper', note: 'blank' },
-                { label: 'github', note: 'empty' },
-                { label: 'audit', note: '"gpt said it\'s fine"' },
+                { label: 'docs', note: 'you\'re looking at it', href: null },
+                { label: 'whitepaper', note: 'blank', href: null },
+                { label: 'github', note: 'actually exists', href: 'https://github.com/lukehalley/Clarp' },
+                { label: 'audit', note: '"gpt said it\'s fine"', href: null },
               ].map(item => (
                 <li key={item.label} className="min-h-[24px] flex items-center">
-                  <button
-                    onClick={(e) => handleLinkClick(e, item.label)}
-                    className={`text-sm text-left transition-colors flex items-center gap-2 ${
-                      clickedLink === item.label ? 'text-larp-red' : 'text-ivory-light/60 hover:text-ivory-light'
-                    }`}
-                  >
-                    {clickedLink === item.label ? '✗ ' : ''}{item.label}
-                    <span className="text-[10px] text-slate-light shrink-0">({item.note})</span>
-                  </button>
+                  {item.href ? (
+                    <a
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-left transition-colors flex items-center gap-2 text-ivory-light/60 hover:text-danger-orange"
+                    >
+                      {item.label}
+                      <span className="text-[10px] text-larp-green shrink-0">({item.note})</span>
+                    </a>
+                  ) : (
+                    <button
+                      onClick={(e) => handleLinkClick(e, item.label)}
+                      className={`text-sm text-left transition-colors flex items-center gap-2 ${
+                        clickedLink === item.label ? 'text-larp-red' : 'text-ivory-light/60 hover:text-ivory-light'
+                      }`}
+                    >
+                      {clickedLink === item.label ? '✗ ' : ''}{item.label}
+                      <span className="text-[10px] text-slate-light shrink-0">({item.note})</span>
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>
