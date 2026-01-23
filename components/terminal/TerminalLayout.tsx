@@ -39,12 +39,17 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
   const [alertsOpen, setAlertsOpen] = useState(false);
   const [showLoader, setShowLoader] = useState(true);
   const [booted, setBooted] = useState(false);
+  const [isFadingIn, setIsFadingIn] = useState(true);
   const [isFadingOut, setIsFadingOut] = useState(false);
 
   // Always play the boot animation for dramatic effect
   const handleBootComplete = () => {
     setShowLoader(false);
     setBooted(true);
+    // Start fade-in after a brief moment
+    setTimeout(() => {
+      setIsFadingIn(false);
+    }, 50);
   };
 
   // Fade out and navigate back to landing page
@@ -66,14 +71,20 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
   }
 
   return (
-    <div className="h-screen bg-slate-dark flex flex-col overflow-hidden">
-      {/* Construction stripe - matches landing page */}
+    <>
+      {/* Persistent black background to prevent flash */}
+      <div className="fixed inset-0 bg-black -z-10" />
+      <div
+        className="h-screen bg-slate-dark flex flex-col overflow-hidden transition-opacity duration-500 ease-out"
+        style={{ opacity: isFadingIn ? 0 : 1 }}
+      >
+        {/* Construction stripe - matches landing page */}
       <div className="construction-stripe h-3 shrink-0" />
 
       {/* Header */}
       <header className="shrink-0 border-b border-ivory-light/10 bg-slate-dark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
-          {/* Back + Logo */}
+          {/* Back + Logo + Demo + Nav */}
           <div className="flex items-center gap-3 shrink-0">
             <button
               onClick={handleBackToHome}
@@ -95,25 +106,24 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
                 DEMO
               </span>
             </div>
+            {/* Desktop Nav - next to demo badge */}
+            <nav className="hidden md:flex items-center gap-1 ml-2">
+              {NAV_ITEMS.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center gap-2 px-4 py-2 font-mono text-sm transition-colors ${
+                    isActive(item.href)
+                      ? 'text-danger-orange bg-danger-orange/10 border border-danger-orange/30'
+                      : 'text-ivory-light/70 hover:text-ivory-light hover:bg-ivory-light/5'
+                  }`}
+                >
+                  {item.icon}
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
           </div>
-
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-1">
-            {NAV_ITEMS.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-2 px-4 py-2 font-mono text-sm transition-colors ${
-                  isActive(item.href)
-                    ? 'text-danger-orange bg-danger-orange/10 border border-danger-orange/30'
-                    : 'text-ivory-light/70 hover:text-ivory-light hover:bg-ivory-light/5'
-                }`}
-              >
-                {item.icon}
-                {item.label}
-              </Link>
-            ))}
-          </nav>
 
           {/* Search + Actions */}
           <div className="hidden md:flex items-center gap-3 flex-1 justify-end max-w-lg">
@@ -337,12 +347,13 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
         </div>
       </footer>
 
-      {/* Fade out overlay */}
-      <div
-        className={`fixed inset-0 bg-black z-[150] pointer-events-none transition-opacity duration-500 ${
-          isFadingOut ? 'opacity-100' : 'opacity-0'
-        }`}
-      />
-    </div>
+        {/* Fade out overlay */}
+        <div
+          className={`fixed inset-0 bg-black z-[150] pointer-events-none transition-opacity duration-500 ${
+            isFadingOut ? 'opacity-100' : 'opacity-0'
+          }`}
+        />
+      </div>
+    </>
   );
 }

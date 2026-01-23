@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
 import Terminal from '@/components/Terminal';
+import { usePageTransition } from '@/components/ClientLayout';
 import ProductCarousel from '@/components/ProductCarousel';
 import Mascot from '@/components/Mascot';
 import DocsSection from '@/components/DocsSection';
@@ -55,6 +55,7 @@ type AnimationPhase = 'typing' | 'paused' | 'deleting';
 
 
 export default function Home() {
+  const { navigateWithFade } = usePageTransition();
   const [mounted, setMounted] = useState(false);
 
   // Terminal conversation animation states
@@ -86,6 +87,7 @@ export default function Home() {
   // CA copy state
   const [caCopied, setCaCopied] = useState(false);
   const CA_ADDRESS = 'GtwMkjRY8Vi5oGaLaEsd1xnsr3AkZ6ZYBqsG5ipTBAGS';
+
 
   // Terminal conversation typing animation
   useEffect(() => {
@@ -365,12 +367,13 @@ export default function Home() {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start mb-6 sm:mb-8 w-full max-w-full">
-                <Link
+                <a
                   href="/roadmap"
-                  className="btn-primary relative overflow-hidden group"
+                  onClick={(e) => { e.preventDefault(); navigateWithFade('/roadmap'); }}
+                  className="btn-primary relative overflow-hidden group cursor-pointer"
                 >
                   view roadmap
-                </Link>
+                </a>
                 <a
                   href="https://dexscreener.com/solana/6c71mun334bafcuvn3cwajfqnk6skztzk9vfzrthstwj"
                   target="_blank"

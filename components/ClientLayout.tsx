@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, createContext, useContext } from 'react';
+import { useState, useEffect, useCallback, createContext, useContext, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import ClarpAI from '@/components/ClarpAI';
@@ -28,41 +28,65 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
   const isTerminal = pathname?.startsWith('/terminal');
-  const [isFading, setIsFading] = useState(false);
+  const [isFadingOut, setIsFadingOut] = useState(false);
+  const [isFadingIn, setIsFadingIn] = useState(true);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
+  const prevPathname = useRef(pathname);
 
-  // Handle fade transition to terminal
+  // Determine if a path is a dark page (terminal)
+  const isDarkPage = (path: string | null) => path?.startsWith('/terminal');
+
+  // Handle fade transition navigation
   const navigateWithFade = useCallback((href: string) => {
-    if (href.startsWith('/terminal')) {
-      setIsFading(true);
-      setPendingNavigation(href);
-    } else {
-      router.push(href);
-    }
-  }, [router]);
+    // Don't fade if already on this page
+    if (href === pathname) return;
 
-  // Complete navigation after fade
+    setIsFadingOut(true);
+    setPendingNavigation(href);
+  }, [pathname]);
+
+  // Complete navigation after fade out
   useEffect(() => {
-    if (isFading && pendingNavigation) {
+    if (isFadingOut && pendingNavigation) {
       const timer = setTimeout(() => {
         router.push(pendingNavigation);
-        // Keep fade overlay until terminal loader takes over
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [isFading, pendingNavigation, router]);
+  }, [isFadingOut, pendingNavigation, router]);
 
-  // Reset fade state when arriving at terminal
+  // Fade in when route changes
   useEffect(() => {
-    if (isTerminal && isFading) {
-      // Small delay to let terminal loader mount first
+    if (pathname !== prevPathname.current) {
+      prevPathname.current = pathname;
+      // Reset states for new page
+      setIsFadingOut(false);
+      setPendingNavigation(null);
+      setIsFadingIn(true);
+
+      // Start fade in after brief delay
       const timer = setTimeout(() => {
-        setIsFading(false);
-        setPendingNavigation(null);
-      }, 100);
+        setIsFadingIn(false);
+      }, 50);
       return () => clearTimeout(timer);
     }
-  }, [isTerminal, isFading]);
+  }, [pathname]);
+
+  // Initial mount fade in
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsFadingIn(false);
+    }, 50);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Determine overlay opacity and color
+  const overlayOpacity = isFadingOut || isFadingIn ? 1 : 0;
+  // Use dark overlay when transitioning to/from terminal, light for other pages
+  const targetIsDark = pendingNavigation ? isDarkPage(pendingNavigation) : isDarkPage(pathname);
+  const currentIsDark = isDarkPage(pathname);
+  // When fading out, use color based on destination; when fading in, use color based on current page
+  const useDarkOverlay = isFadingOut ? targetIsDark : currentIsDark;
 
   return (
     <TransitionContext.Provider value={{ navigateWithFade }}>
@@ -70,11 +94,12 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
       {children}
       {!isTerminal && <ClarpAI />}
 
-      {/* Fade to black overlay */}
+      {/* Page transition overlay */}
       <div
-        className={`fixed inset-0 bg-black z-[150] pointer-events-none transition-opacity duration-500 ${
-          isFading ? 'opacity-100' : 'opacity-0'
+        className={`fixed inset-0 z-[300] pointer-events-none transition-opacity duration-500 ease-out ${
+          useDarkOverlay ? 'bg-black' : 'bg-ivory-light'
         }`}
+        style={{ opacity: overlayOpacity }}
       />
     </TransitionContext.Provider>
   );

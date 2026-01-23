@@ -75,12 +75,18 @@
 @layer components {
   /* Terminal styling - more industrial */
   .terminal {
-    @apply bg-slate-dark text-ivory-light font-mono overflow-hidden;
+    @apply bg-slate-dark text-ivory-light font-mono overflow-hidden transition-all duration-150;
     border: 2px solid var(--danger-orange);
     box-shadow:
-      0 0 0 1px rgba(255, 107, 53, 0.3),
-      0 0 30px rgba(255, 107, 53, 0.1),
+      4px 4px 0 var(--danger-orange),
       inset 0 0 60px rgba(0, 0, 0, 0.5);
+  }
+
+  .terminal:hover {
+    box-shadow:
+      2px 2px 0 var(--danger-orange),
+      inset 0 0 60px rgba(0, 0, 0, 0.5);
+    transform: translate(2px, 2px);
   }
 
   .terminal-header {
@@ -515,8 +521,8 @@ a, button, [role="button"] {
 /* Terminal CRT Power On/Off Animations */
 .terminal-crt-container {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: stretch;
+  justify-content: stretch;
 }
 
 .terminal-crt-screen {
@@ -526,11 +532,13 @@ a, button, [role="button"] {
   flex-direction: column;
   position: relative;
   overflow: hidden;
+  transform-origin: center center;
 }
 
 /* Power On Animation - CRT horizontal line expand */
 .terminal-power-on .terminal-crt-screen {
   animation: crt-power-on 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transform-origin: center center;
 }
 
 @keyframes crt-power-on {
@@ -565,6 +573,7 @@ a, button, [role="button"] {
 /* Power Off Animation - CRT collapse to horizontal line */
 .terminal-power-off .terminal-crt-screen {
   animation: crt-power-off 0.5s cubic-bezier(0.55, 0, 1, 0.45) forwards;
+  transform-origin: center center;
 }
 
 @keyframes crt-power-off {
@@ -694,6 +703,21 @@ a, button, [role="button"] {
     box-shadow: 2px 2px 0 black;
   }
 
+  /* Terminal touch handling */
+  .terminal:hover {
+    transform: none;
+    box-shadow:
+      4px 4px 0 var(--danger-orange),
+      inset 0 0 60px rgba(0, 0, 0, 0.5);
+  }
+
+  .terminal:active {
+    transform: translate(2px, 2px);
+    box-shadow:
+      2px 2px 0 var(--danger-orange),
+      inset 0 0 60px rgba(0, 0, 0, 0.5);
+  }
+
   /* Larger touch targets on mobile */
   .btn-primary,
   .btn-secondary,
@@ -791,9 +815,15 @@ button, input, textarea, select {
 
   .terminal {
     box-shadow:
-      0 0 0 1px rgba(255, 107, 53, 0.3),
-      0 0 20px rgba(255, 107, 53, 0.1),
+      3px 3px 0 var(--danger-orange),
       inset 0 0 30px rgba(0, 0, 0, 0.5);
+  }
+
+  .terminal:hover {
+    box-shadow:
+      1px 1px 0 var(--danger-orange),
+      inset 0 0 30px rgba(0, 0, 0, 0.5);
+    transform: translate(2px, 2px);
   }
 }
 
