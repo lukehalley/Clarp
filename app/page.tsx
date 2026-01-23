@@ -4,13 +4,9 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Terminal from '@/components/Terminal';
 import ProductCarousel from '@/components/ProductCarousel';
-import ProgressBar from '@/components/ProgressBar';
-import Badge from '@/components/Badge';
-import Button from '@/components/Button';
 import Mascot from '@/components/Mascot';
 import DocsSection from '@/components/DocsSection';
 import Footer from '@/components/Footer';
-import Clarp from '@/components/Clarp';
 import ActivityNotifications from '@/components/ActivityNotifications';
 import HallOfShame from '@/components/HallOfShame';
 import WarningTicker from '@/components/WarningTicker';
@@ -96,7 +92,6 @@ export default function Home() {
     if (!mounted) return;
 
     const conversation = TERMINAL_CONVERSATIONS[currentConversation];
-    const totalMessages = conversation.messages.length;
     let timeout: NodeJS.Timeout;
 
     if (phase === 'typing') {
@@ -216,7 +211,7 @@ export default function Home() {
   }, [konamiActivated]);
 
   // Easter egg: fake loading that cycles through messages and fails
-  const triggerFakeLoading = () => {
+  const _triggerFakeLoading = () => {
     setLoadingProgress(0);
     setLoadingFailed(false);
     setShowLoadingModal(true);
@@ -262,7 +257,7 @@ export default function Home() {
   };
 
   // Easter egg: footer link click
-  const handleFooterClick = (e: React.MouseEvent) => {
+  const _handleFooterClick = (e: React.MouseEvent) => {
     e.preventDefault();
     const msg = FOOTER_MESSAGES[Math.floor(Math.random() * FOOTER_MESSAGES.length)];
     setFooterMessage(msg);
@@ -380,8 +375,9 @@ export default function Home() {
                   href="https://dexscreener.com/solana/6c71mun334bafcuvn3cwajfqnk6skztzk9vfzrthstwj"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn-secondary hover:opacity-100 transition-opacity"
+                  className="btn-secondary hover:opacity-100 transition-opacity inline-flex items-center gap-2"
                 >
+                  <img src="/dexscreener-icon.svg" alt="" className="w-5 h-5" />
                   dexscreener
                 </a>
               </div>
