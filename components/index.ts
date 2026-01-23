@@ -7,3 +7,4 @@ export { default as ProductCarousel } from './ProductCarousel';
 export { default as Mascot } from './Mascot';
 export { default as DocsSection } from './DocsSection';
 export { default as Footer } from './Footer';
+export { default as ContractAvatar, ContractAvatarGallery } from './ContractAvatar';

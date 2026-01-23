@@ -12,9 +12,10 @@ interface ScoreDisplayProps {
   score: LarpScore;
   size?: 'sm' | 'md' | 'lg';
   showBreakdown?: boolean;
+  align?: 'left' | 'right';
 }
 
-export default function ScoreDisplay({ score, size = 'md', showBreakdown = false }: ScoreDisplayProps) {
+export default function ScoreDisplay({ score, size = 'md', showBreakdown = false, align = 'left' }: ScoreDisplayProps) {
   const scoreColor = getScoreColor(score.score);
   const riskColor = getRiskLevelColor(score.riskLevel);
 
@@ -41,8 +42,10 @@ export default function ScoreDisplay({ score, size = 'md', showBreakdown = false
 
   const classes = sizeClasses[size];
 
+  const alignClass = align === 'right' ? 'items-end' : 'items-start';
+
   return (
-    <div className={`flex flex-col ${classes.container}`}>
+    <div className={`flex flex-col ${classes.container} ${alignClass}`}>
       {/* Score number */}
       <div className="flex items-baseline gap-2">
         <span

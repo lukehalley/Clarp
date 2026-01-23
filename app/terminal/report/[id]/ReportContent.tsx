@@ -4,11 +4,11 @@ import Link from 'next/link';
 import {
   type Project,
   type LarpScore,
-  CHAIN_INFO,
   getScoreColor,
   getScoreLabel,
   getRiskLevelColor,
 } from '@/types/terminal';
+import ChainIcon from '@/components/terminal/ChainIcon';
 import {
   Share2,
   ExternalLink,
@@ -26,7 +26,6 @@ interface ReportContentProps {
 export default function ReportContent({ project, score }: ReportContentProps) {
   const [copied, setCopied] = useState(false);
 
-  const chainInfo = CHAIN_INFO[project.chain];
   const scoreColor = getScoreColor(score.score);
   const riskColor = getRiskLevelColor(score.riskLevel);
 
@@ -89,12 +88,9 @@ export default function ReportContent({ project, score }: ReportContentProps) {
               )}
             </div>
 
-            <span
-              className="inline-block text-sm font-mono px-3 py-1 border mt-2"
-              style={{ borderColor: chainInfo.color, color: chainInfo.color }}
-            >
-              {chainInfo.name}
-            </span>
+            <div className="mt-2">
+              <ChainIcon chain={project.chain} size={24} />
+            </div>
           </div>
 
           {/* Score - large and prominent */}

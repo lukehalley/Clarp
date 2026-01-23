@@ -4,10 +4,11 @@ import Link from 'next/link';
 import {
   type Project,
   type LarpScore,
-  CHAIN_INFO,
   getScoreColor,
 } from '@/types/terminal';
-import { Shield, AlertTriangle, TrendingUp, ExternalLink } from 'lucide-react';
+import { Shield, AlertTriangle, TrendingUp } from 'lucide-react';
+import ContractAvatar from '@/components/ContractAvatar';
+import ChainIcon from '@/components/terminal/ChainIcon';
 
 interface IntelCardProps {
   project: Project;
@@ -16,7 +17,6 @@ interface IntelCardProps {
 }
 
 export default function IntelCard({ project, score, scoreDelta24h }: IntelCardProps) {
-  const chainInfo = CHAIN_INFO[project.chain];
   // Never display 0 - minimum score is 1
   const displayScore = Math.max(1, score.score);
   const isTrusted = displayScore < 30 || (project.verified && displayScore < 50);
@@ -39,9 +39,20 @@ export default function IntelCard({ project, score, scoreDelta24h }: IntelCardPr
       href={`/terminal/project/${project.id}`}
       className="group block h-full"
     >
-      <div className="h-full border-2 border-ivory-light/20 bg-ivory-light/5 hover:border-danger-orange/30 transition-colors">
-        {/* Header */}
-        <div className="p-4 sm:p-5">
+      <div className="h-full flex border-2 border-ivory-light/20 bg-ivory-light/5 hover:border-danger-orange/30 transition-colors overflow-hidden">
+        {/* Left: Full-height Contract Avatar */}
+        {project.contract && (
+          <div className="shrink-0 self-stretch flex items-center justify-center bg-[#0a0a09] border-r border-ivory-light/10">
+            <ContractAvatar
+              address={project.contract}
+              size={100}
+              bgColor="transparent"
+            />
+          </div>
+        )}
+
+        {/* Content */}
+        <div className="flex-1 min-w-0 p-4 sm:p-5">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0 flex-1">
               {/* Project name and badges */}
@@ -58,12 +69,7 @@ export default function IntelCard({ project, score, scoreDelta24h }: IntelCardPr
 
               {/* Chain and status badges */}
               <div className="flex items-center gap-2 flex-wrap">
-                <span
-                  className="text-xs font-mono px-2 py-0.5 border"
-                  style={{ borderColor: chainInfo.color, color: chainInfo.color }}
-                >
-                  {chainInfo.shortName}
-                </span>
+                <ChainIcon chain={project.chain} size={18} />
                 {project.verified && (
                   <span className="text-xs font-mono px-2 py-0.5 bg-larp-green/20 text-larp-green border border-larp-green/30">
                     Verified
@@ -137,13 +143,6 @@ export default function IntelCard({ project, score, scoreDelta24h }: IntelCardPr
             </div>
           )}
 
-          {/* View link */}
-          <div className="mt-4 pt-4 border-t border-ivory-light/10">
-            <span className="flex items-center gap-2 text-xs font-mono text-ivory-light/40 group-hover:text-danger-orange transition-colors">
-              View full analysis
-              <ExternalLink size={12} />
-            </span>
-          </div>
         </div>
       </div>
     </Link>

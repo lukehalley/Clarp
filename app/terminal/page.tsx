@@ -8,7 +8,7 @@ import {
   getTrustedProjects,
   getRecentlyVerified,
 } from '@/lib/terminal/mock-data';
-import { CHAIN_INFO } from '@/types/terminal';
+import { CHAIN_INFO, Chain } from '@/types/terminal';
 import {
   Shield,
   AlertTriangle,
@@ -16,9 +16,19 @@ import {
   CheckCircle,
   Filter,
   RotateCcw,
+  ArrowUpDown,
 } from 'lucide-react';
+import ChainIcon from '@/components/terminal/ChainIcon';
 
 type CategoryFilter = 'all' | 'verified' | 'risk-spikes' | 'high-risk' | 'low-risk';
+type SortOption = 'score-high' | 'score-low' | 'name-asc' | 'name-desc';
+
+const SORT_OPTIONS: { id: SortOption; label: string }[] = [
+  { id: 'score-high', label: 'Risk: High to Low' },
+  { id: 'score-low', label: 'Risk: Low to High' },
+  { id: 'name-asc', label: 'Name: A to Z' },
+  { id: 'name-desc', label: 'Name: Z to A' },
+];
 
 const CATEGORY_FILTERS: { id: CategoryFilter; label: string; icon: React.ReactNode }[] = [
   { id: 'all', label: 'All Projects', icon: <Filter size={14} /> },
@@ -40,6 +50,7 @@ export default function TerminalDashboard() {
   const [selectedChains, setSelectedChains] = useState<string[]>([]);
   const [scoreRange, setScoreRange] = useState<[number, number]>([0, 100]);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [sortBy, setSortBy] = useState<SortOption>('score-high');
 
   const [riskSpikes, setRiskSpikes] = useState<ReturnType<typeof getRiskSpikes>>([]);
   const [trendingRisky, setTrendingRisky] = useState<ReturnType<typeof getTrendingRisky>>([]);
@@ -67,6 +78,7 @@ export default function TerminalDashboard() {
     setSelectedChains([]);
     setScoreRange([0, 100]);
     setVerifiedOnly(false);
+    setSortBy('score-high');
   };
 
   const getBaseProjects = () => {
@@ -92,45 +104,87 @@ export default function TerminalDashboard() {
     }
   };
 
-  const filteredProjects = getBaseProjects().filter(({ project, score }) => {
-    // Chain filter
-    if (selectedChains.length > 0 && !selectedChains.includes(project.chain)) {
-      return false;
-    }
-    // Score range filter
-    if (score.score < scoreRange[0] || score.score > scoreRange[1]) {
-      return false;
-    }
-    // Verified filter
-    if (verifiedOnly && !project.verified) {
-      return false;
-    }
-    return true;
-  });
+  const filteredProjects = getBaseProjects()
+    .filter(({ project, score }) => {
+      // Chain filter
+      if (selectedChains.length > 0 && !selectedChains.includes(project.chain)) {
+        return false;
+      }
+      // Score range filter
+      if (score.score < scoreRange[0] || score.score > scoreRange[1]) {
+        return false;
+      }
+      // Verified filter
+      if (verifiedOnly && !project.verified) {
+        return false;
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'score-high':
+          return b.score.score - a.score.score;
+        case 'score-low':
+          return a.score.score - b.score.score;
+        case 'name-asc':
+          return a.project.name.localeCompare(b.project.name);
+        case 'name-desc':
+          return b.project.name.localeCompare(a.project.name);
+        default:
+          return 0;
+      }
+    });
 
   const hasActiveFilters =
     categoryFilter !== 'all' ||
     selectedChains.length > 0 ||
     scoreRange[0] !== 0 ||
     scoreRange[1] !== 100 ||
-    verifiedOnly;
+    verifiedOnly ||
+    sortBy !== 'score-high';
 
   return (
     <div className="flex gap-6">
       {/* Sticky Sidebar */}
       <aside className="hidden lg:block w-64 shrink-0">
-        <div className="sticky top-6 space-y-6">
+        <div className="sticky top-6 space-y-4 max-h-[calc(100vh-8rem)] overflow-y-auto scrollbar-hide pb-4">
+          {/* Sort By */}
+          <div className="border-2 border-ivory-light/20 bg-ivory-light/5">
+            <div className="px-4 py-3 flex items-center gap-2">
+              <ArrowUpDown size={14} className="text-danger-orange" />
+              <span className="font-mono font-bold text-ivory-light text-sm">Sort By</span>
+            </div>
+            <div className="px-4 pb-4">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as SortOption)}
+                className="w-full px-3 py-2 bg-slate-dark border-2 border-ivory-light/20 text-ivory-light font-mono text-xs focus:border-danger-orange focus:outline-none cursor-pointer appearance-none"
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23FF6B35' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 10px center',
+                }}
+              >
+                {SORT_OPTIONS.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
           {/* Category */}
           <div className="border-2 border-ivory-light/20 bg-ivory-light/5">
-            <div className="px-4 py-3 border-b border-ivory-light/10">
-              <span className="font-mono font-bold text-ivory-light text-sm">Category</span>
+            <div className="px-3 py-2 border-b border-ivory-light/10">
+              <span className="font-mono font-bold text-ivory-light text-xs">Category</span>
             </div>
-            <div className="p-2">
+            <div className="p-1">
               {CATEGORY_FILTERS.map((filter) => (
                 <button
                   key={filter.id}
                   onClick={() => setCategoryFilter(filter.id)}
-                  className={`w-full flex items-center gap-2 px-3 py-2 font-mono text-xs transition-colors ${
+                  className={`w-full flex items-center gap-2 px-2 py-1.5 font-mono text-xs transition-colors ${
                     categoryFilter === filter.id
                       ? 'bg-danger-orange text-black font-bold'
                       : 'text-ivory-light/70 hover:text-ivory-light hover:bg-ivory-light/5'
@@ -145,23 +199,24 @@ export default function TerminalDashboard() {
 
           {/* Chains */}
           <div className="border-2 border-ivory-light/20 bg-ivory-light/5">
-            <div className="px-4 py-3 border-b border-ivory-light/10">
-              <span className="font-mono font-bold text-ivory-light text-sm">Chain</span>
+            <div className="px-3 py-2 border-b border-ivory-light/10">
+              <span className="font-mono font-bold text-ivory-light text-xs">Chain</span>
             </div>
-            <div className="p-2 space-y-1">
+            <div className="p-1">
               {CHAINS.map((chain) => (
                 <button
                   key={chain.id}
                   onClick={() => toggleChain(chain.id)}
-                  className={`w-full flex items-center gap-2 px-3 py-2 font-mono text-xs transition-colors ${
+                  className={`w-full flex items-center gap-2 px-2 py-1.5 font-mono text-xs transition-colors ${
                     selectedChains.includes(chain.id)
                       ? 'bg-ivory-light/10 text-ivory-light'
                       : 'text-ivory-light/50 hover:text-ivory-light hover:bg-ivory-light/5'
                   }`}
                 >
-                  <span
-                    className={`w-2 h-2 ${selectedChains.includes(chain.id) ? '' : 'opacity-50'}`}
-                    style={{ backgroundColor: chain.color }}
+                  <ChainIcon
+                    chain={chain.id as Chain}
+                    size={16}
+                    className={selectedChains.includes(chain.id) ? '' : 'opacity-50'}
                   />
                   {chain.name}
                   {selectedChains.includes(chain.id) && (
@@ -174,13 +229,13 @@ export default function TerminalDashboard() {
 
           {/* Score Range */}
           <div className="border-2 border-ivory-light/20 bg-ivory-light/5">
-            <div className="px-4 py-3 border-b border-ivory-light/10">
-              <span className="font-mono font-bold text-ivory-light text-sm">Risk Score</span>
+            <div className="px-3 py-2 border-b border-ivory-light/10">
+              <span className="font-mono font-bold text-ivory-light text-xs">Risk Score</span>
             </div>
-            <div className="p-4 space-y-3">
+            <div className="p-3 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="font-mono text-xs text-ivory-light/50">Min</span>
-                <span className="font-mono text-xs text-danger-orange">{scoreRange[0]}</span>
+                <span className="font-mono text-[10px] text-ivory-light/50">Min</span>
+                <span className="font-mono text-[10px] text-danger-orange">{scoreRange[0]}</span>
               </div>
               <input
                 type="range"
@@ -188,11 +243,11 @@ export default function TerminalDashboard() {
                 max="100"
                 value={scoreRange[0]}
                 onChange={(e) => setScoreRange([parseInt(e.target.value), scoreRange[1]])}
-                className="w-full accent-danger-orange"
+                className="w-full accent-danger-orange h-1"
               />
               <div className="flex items-center justify-between">
-                <span className="font-mono text-xs text-ivory-light/50">Max</span>
-                <span className="font-mono text-xs text-danger-orange">{scoreRange[1]}</span>
+                <span className="font-mono text-[10px] text-ivory-light/50">Max</span>
+                <span className="font-mono text-[10px] text-danger-orange">{scoreRange[1]}</span>
               </div>
               <input
                 type="range"
@@ -200,7 +255,7 @@ export default function TerminalDashboard() {
                 max="100"
                 value={scoreRange[1]}
                 onChange={(e) => setScoreRange([scoreRange[0], parseInt(e.target.value)])}
-                className="w-full accent-danger-orange"
+                className="w-full accent-danger-orange h-1"
               />
             </div>
           </div>
@@ -209,9 +264,9 @@ export default function TerminalDashboard() {
           <div className="border-2 border-ivory-light/20 bg-ivory-light/5">
             <button
               onClick={() => setVerifiedOnly(!verifiedOnly)}
-              className="w-full flex items-center justify-between px-4 py-3"
+              className="w-full flex items-center justify-between px-3 py-2"
             >
-              <span className="font-mono text-sm text-ivory-light">Verified Only</span>
+              <span className="font-mono text-xs text-ivory-light">Verified Only</span>
               <div
                 className={`w-10 h-5 border-2 transition-colors relative shrink-0 ${
                   verifiedOnly ? 'bg-larp-green border-larp-green' : 'bg-transparent border-ivory-light/30'

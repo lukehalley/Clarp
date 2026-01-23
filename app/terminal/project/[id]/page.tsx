@@ -6,8 +6,8 @@ import { useRouter } from 'next/navigation';
 import ScoreDisplay from '@/components/terminal/ScoreDisplay';
 import RiskCard from '@/components/terminal/RiskCard';
 import { getProjectById, getMockScore } from '@/lib/terminal/mock-data';
-import { CHAIN_INFO } from '@/types/terminal';
 import type { Project, LarpScore } from '@/types/terminal';
+import ChainIcon from '@/components/terminal/ChainIcon';
 import {
   Copy,
   Check,
@@ -86,8 +86,6 @@ export default function ProjectPage({ params }: PageProps) {
     );
   }
 
-  const chainInfo = CHAIN_INFO[project.chain];
-
   return (
     <div className="space-y-6">
       {/* Back button */}
@@ -113,12 +111,7 @@ export default function ProjectPage({ params }: PageProps) {
                   ${project.ticker}
                 </span>
               )}
-              <span
-                className="text-sm font-mono px-3 py-1 border"
-                style={{ borderColor: chainInfo.color, color: chainInfo.color }}
-              >
-                {chainInfo.name}
-              </span>
+              <ChainIcon chain={project.chain} size={24} />
               {project.verified && (
                 <span className="text-sm font-mono px-3 py-1 bg-larp-green/20 text-larp-green border border-larp-green/30">
                   Verified
@@ -171,8 +164,8 @@ export default function ProjectPage({ params }: PageProps) {
           </div>
 
           {/* Right: Score */}
-          <div className="lg:text-right">
-            <ScoreDisplay score={score} size="lg" />
+          <div>
+            <ScoreDisplay score={score} size="lg" align="right" />
           </div>
         </div>
 
