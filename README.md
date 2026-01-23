@@ -14,7 +14,7 @@
 
 <br>
 
-[Website](https://clarp.lol) · [Docs](#documentation) · [Whitepaper](#whitepaper) · [Discord](#community)
+[Website](https://clarp.lukehalley.com/) · [Docs](#documentation) · [Whitepaper](#whitepaper) · [Discord](#community)
 
 <sub>none of those links work btw</sub>
 
