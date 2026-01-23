@@ -15,7 +15,7 @@ const BOOT_SEQUENCE = [
   'READY.',
 ];
 
-const CHAR_DELAY = 18; // ms per character
+const CHAR_DELAY = 20; // ms per character
 const LINE_PAUSE = 150; // ms pause between lines
 
 interface TerminalLoaderProps {
@@ -27,6 +27,7 @@ export default function TerminalLoader({ onComplete }: TerminalLoaderProps) {
   const [lineProgress, setLineProgress] = useState<number[]>(BOOT_SEQUENCE.map(() => 0));
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
+  const [isFadingOut, setIsFadingOut] = useState(false);
   const [showCursor, setShowCursor] = useState(true);
   const [scanlineY, setScanlineY] = useState(0);
   const [glitchFrame, setGlitchFrame] = useState(0);
@@ -39,10 +40,14 @@ export default function TerminalLoader({ onComplete }: TerminalLoaderProps) {
 
     const tick = () => {
       if (currentLine >= BOOT_SEQUENCE.length) {
-        // All done - wait a moment then complete
+        // All done - wait a moment, then fade out, then complete
         setIsComplete(true);
         timer = setTimeout(() => {
-          onComplete();
+          setIsFadingOut(true);
+          // Wait for fade animation to complete before calling onComplete
+          setTimeout(() => {
+            onComplete();
+          }, 500);
         }, 600);
         return;
       }
@@ -70,7 +75,7 @@ export default function TerminalLoader({ onComplete }: TerminalLoaderProps) {
     };
 
     // Start typing
-    timer = setTimeout(tick, 300);
+    timer = setTimeout(tick, 100);
 
     return () => clearTimeout(timer);
   }, [onComplete]);
@@ -110,13 +115,18 @@ export default function TerminalLoader({ onComplete }: TerminalLoaderProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[200] bg-black flex items-center justify-center">
-      {/* CRT screen container */}
+    <div className="fixed inset-0 z-[200] bg-black">
+      {/* Fade to black overlay */}
       <div
-        className="relative w-full h-full max-w-4xl max-h-[80vh] mx-4 overflow-hidden"
+        className="absolute inset-0 z-50 bg-black transition-opacity duration-500 ease-out pointer-events-none"
+        style={{ opacity: isFadingOut ? 1 : 0 }}
+      />
+      {/* CRT screen container - fullscreen */}
+      <div
+        className="relative w-full h-full overflow-hidden"
         style={{
           background: 'radial-gradient(ellipse at center, #0a0a09 0%, #000000 100%)',
-          boxShadow: 'inset 0 0 100px rgba(0,0,0,0.9), 0 0 50px rgba(255, 107, 53, 0.1)',
+          boxShadow: 'inset 0 0 150px rgba(0,0,0,0.9)',
           transform: glitchFrame % 2 === 1 ? 'translateX(2px)' : 'none',
         }}
       >
@@ -143,9 +153,9 @@ export default function TerminalLoader({ onComplete }: TerminalLoaderProps) {
         />
 
         {/* Main content */}
-        <div className="relative z-0 p-8 sm:p-12 h-full flex flex-col justify-center">
+        <div className="relative z-0 p-8 sm:p-16 md:p-24 h-full flex flex-col justify-center items-center">
           {/* ASCII Logo */}
-          <pre className="text-danger-orange text-[8px] sm:text-[10px] md:text-xs font-mono leading-none mb-8 sm:mb-12 opacity-80">
+          <pre className="text-danger-orange text-[10px] sm:text-sm md:text-base lg:text-lg font-mono leading-none mb-8 sm:mb-12 md:mb-16 opacity-80">
 {` ██████╗██╗      █████╗ ██████╗ ██████╗
 ██╔════╝██║     ██╔══██╗██╔══██╗██╔══██╗
 ██║     ██║     ███████║██████╔╝██████╔╝
@@ -155,7 +165,7 @@ export default function TerminalLoader({ onComplete }: TerminalLoaderProps) {
           </pre>
 
           {/* Boot sequence lines - all lines exist from start for stable layout */}
-          <div className="space-y-1 font-mono text-xs sm:text-sm">
+          <div className="space-y-1 sm:space-y-2 font-mono text-sm sm:text-base md:text-lg w-full max-w-2xl">
             {BOOT_SEQUENCE.map((line, i) => {
               const typedChars = lineProgress[i];
               const displayText = line.slice(0, typedChars);
@@ -163,7 +173,7 @@ export default function TerminalLoader({ onComplete }: TerminalLoaderProps) {
               const isTypingLine = i === currentLineIndex && !lineComplete && line.length > 0;
 
               return (
-                <div key={i} className="h-5 flex items-center gap-2">
+                <div key={i} className="h-6 sm:h-7 md:h-8 flex items-center gap-2 sm:gap-3">
                   {/* Show icon for [OK] line only when typing starts */}
                   {line.startsWith('[OK]') && typedChars > 0 && (
                     <span className="text-larp-green">&#9632;</span>
@@ -174,7 +184,7 @@ export default function TerminalLoader({ onComplete }: TerminalLoaderProps) {
                   </span>
                   {/* Cursor on current line */}
                   {isTypingLine && showCursor && !isComplete && (
-                    <span className="w-2 h-4 bg-danger-orange inline-block" />
+                    <span className="w-2 sm:w-2.5 md:w-3 h-4 sm:h-5 md:h-6 bg-danger-orange inline-block" />
                   )}
                 </div>
               );
@@ -182,8 +192,8 @@ export default function TerminalLoader({ onComplete }: TerminalLoaderProps) {
           </div>
 
           {/* Progress bar */}
-          <div className="mt-8 sm:mt-12">
-            <div className="h-1 bg-slate-dark/50 overflow-hidden">
+          <div className="mt-8 sm:mt-12 md:mt-16 w-full max-w-2xl">
+            <div className="h-1 sm:h-1.5 bg-slate-dark/50 overflow-hidden">
               <div
                 className="h-full bg-danger-orange transition-all duration-200 ease-out"
                 style={{
@@ -191,7 +201,7 @@ export default function TerminalLoader({ onComplete }: TerminalLoaderProps) {
                 }}
               />
             </div>
-            <div className="flex justify-between mt-2 text-[10px] sm:text-xs font-mono text-ivory-light/40">
+            <div className="flex justify-between mt-2 sm:mt-3 text-xs sm:text-sm font-mono text-ivory-light/40">
               <span>SYSTEM BOOT</span>
               <span>{isComplete ? '100' : Math.floor(((currentLineIndex + 1) / BOOT_SEQUENCE.length) * 95)}%</span>
             </div>
@@ -199,22 +209,22 @@ export default function TerminalLoader({ onComplete }: TerminalLoaderProps) {
         </div>
 
         {/* Corner decorations */}
-        <div className="absolute top-4 left-4 w-4 h-4 border-l-2 border-t-2 border-danger-orange/30" />
-        <div className="absolute top-4 right-4 w-4 h-4 border-r-2 border-t-2 border-danger-orange/30" />
-        <div className="absolute bottom-4 left-4 w-4 h-4 border-l-2 border-b-2 border-danger-orange/30" />
-        <div className="absolute bottom-4 right-4 w-4 h-4 border-r-2 border-b-2 border-danger-orange/30" />
+        <div className="absolute top-6 sm:top-8 left-6 sm:left-8 w-6 sm:w-8 h-6 sm:h-8 border-l-2 border-t-2 border-danger-orange/30" />
+        <div className="absolute top-6 sm:top-8 right-6 sm:right-8 w-6 sm:w-8 h-6 sm:h-8 border-r-2 border-t-2 border-danger-orange/30" />
+        <div className="absolute bottom-6 sm:bottom-8 left-6 sm:left-8 w-6 sm:w-8 h-6 sm:h-8 border-l-2 border-b-2 border-danger-orange/30" />
+        <div className="absolute bottom-6 sm:bottom-8 right-6 sm:right-8 w-6 sm:w-8 h-6 sm:h-8 border-r-2 border-b-2 border-danger-orange/30" />
 
         {/* System info */}
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[8px] sm:text-[10px] font-mono text-ivory-light/20">
+        <div className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 text-[10px] sm:text-xs font-mono text-ivory-light/20 tracking-widest">
           CLARP TRUST INTELLIGENCE SYSTEM
         </div>
       </div>
 
-      {/* Vignette */}
+      {/* Vignette - subtle for fullscreen */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: 'radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.8) 100%)',
+          background: 'radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.6) 100%)',
         }}
       />
     </div>

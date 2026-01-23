@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { Send } from 'lucide-react';
 import Clarp from '@/components/Clarp';
 import PixelGithub from '@/components/PixelGithub';
@@ -26,10 +25,10 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { navigateWithFade } = usePageTransition();
 
-  const handleTerminalClick = (e: React.MouseEvent) => {
+  const handleNavClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
     setMobileMenuOpen(false);
-    navigateWithFade('/terminal');
+    navigateWithFade(href);
   };
 
   return (
@@ -37,19 +36,24 @@ export default function Navbar() {
       <div className="construction-stripe h-3" />
       <nav className="bg-ivory-light/95 backdrop-blur-sm border-b-2 border-slate-dark">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity">
+          <a
+            href="/"
+            onClick={(e) => handleNavClick(e, '/')}
+            className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity cursor-pointer"
+          >
             <Clarp size={28} className="sm:w-8 sm:h-8" />
             <span className="font-mono text-lg sm:text-xl font-bold text-slate-dark">$clarp</span>
-          </Link>
+          </a>
 
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-4">
-            <Link
+            <a
               href="/clarp-agent"
-              className="text-sm text-danger-orange hover:text-larp-red transition-colors font-mono font-bold preserve-case"
+              onClick={(e) => handleNavClick(e, '/clarp-agent')}
+              className="text-sm text-danger-orange hover:text-larp-red transition-colors font-mono font-bold preserve-case cursor-pointer"
             >
               C[LARP] AGENT
-            </Link>
+            </a>
             <div className="flex items-center gap-2 ml-2">
               <a
                 href="https://t.me/CLARPTG"
@@ -83,12 +87,12 @@ export default function Navbar() {
               </a>
             </div>
             <button
-              onClick={handleTerminalClick}
-              className="group relative ml-2 px-5 py-2.5 bg-black text-ivory-light font-mono font-bold text-sm border-2 border-danger-orange transition-all duration-150 overflow-hidden hover:border-larp-green cursor-pointer"
+              onClick={(e) => handleNavClick(e, '/terminal')}
+              className="group relative ml-2 px-5 py-2.5 bg-black text-ivory-light font-mono font-bold text-sm border-2 border-danger-orange transition-all duration-150 overflow-hidden cursor-pointer hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[1px_1px_0_#FF6B35] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none"
               style={{ boxShadow: '3px 3px 0 #FF6B35' }}
             >
               <span className="relative z-10 flex items-center gap-2">
-                <span className="w-1.5 h-1.5 bg-danger-orange group-hover:bg-larp-green animate-pulse" />
+                <span className="w-1.5 h-1.5 bg-danger-orange animate-pulse" />
                 terminal
               </span>
             </button>
@@ -112,13 +116,13 @@ export default function Navbar() {
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-slate-dark/20 bg-ivory-light">
             <div className="px-4 py-4 space-y-3">
-              <Link
+              <a
                 href="/clarp-agent"
-                className="block py-2 text-danger-orange hover:text-larp-red transition-colors font-mono font-bold preserve-case"
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={(e) => handleNavClick(e, '/clarp-agent')}
+                className="block py-2 text-danger-orange hover:text-larp-red transition-colors font-mono font-bold preserve-case cursor-pointer"
               >
                 C[LARP] AGENT
-              </Link>
+              </a>
               <div className="flex gap-3 pt-3 border-t border-slate-dark/10">
                 <a
                   href="https://t.me/CLARPTG"
@@ -155,8 +159,8 @@ export default function Navbar() {
                 </a>
               </div>
               <button
-                onClick={handleTerminalClick}
-                className="group relative block w-full text-center mt-2 px-5 py-3 bg-black text-ivory-light font-mono font-bold text-sm border-2 border-danger-orange transition-all duration-150 overflow-hidden cursor-pointer"
+                onClick={(e) => handleNavClick(e, '/terminal')}
+                className="group relative block w-full text-center mt-2 px-5 py-3 bg-black text-ivory-light font-mono font-bold text-sm border-2 border-danger-orange transition-all duration-150 overflow-hidden cursor-pointer active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_#FF6B35]"
                 style={{ boxShadow: '3px 3px 0 #FF6B35' }}
               >
                 <span className="relative z-10 flex items-center justify-center gap-2">

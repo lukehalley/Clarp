@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
 import Footer from '@/components/Footer';
 import WarningTicker from '@/components/WarningTicker';
 import Terminal from '@/components/Terminal';
+import { usePageTransition } from '@/components/ClientLayout';
 import {
   Terminal as TerminalIcon,
   Scan,
@@ -468,6 +468,7 @@ const HighlightedText = ({ text }: { text: string }) => {
 };
 
 export default function RoadmapPage() {
+  const { navigateWithFade } = usePageTransition();
   const [mounted, setMounted] = useState(false);
   const [bootMessages, setBootMessages] = useState<string[]>([]);
   const [bootComplete, setBootComplete] = useState(false);
@@ -1050,12 +1051,13 @@ export default function RoadmapPage() {
               <Twitter size={20} />
               JOIN EARLY
             </a>
-            <Link
+            <a
               href="/"
-              className="btn-secondary inline-flex items-center justify-center gap-2 text-base px-8 py-4"
+              onClick={(e) => { e.preventDefault(); navigateWithFade('/'); }}
+              className="btn-secondary inline-flex items-center justify-center gap-2 text-base px-8 py-4 cursor-pointer"
             >
               ← BACK
-            </Link>
+            </a>
           </div>
 
           <p className="text-base text-slate-dark font-mono mt-10">

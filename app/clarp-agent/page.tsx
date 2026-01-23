@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
 import WarningTicker from '@/components/WarningTicker';
 import Footer from '@/components/Footer';
+import { usePageTransition } from '@/components/ClientLayout';
 import { Skull, AlertTriangle, AlertCircle, CheckCircle, Sparkles, Bot, FileText, Ghost, ClipboardCopy, Users, FlaskConical, Loader2, ExternalLink } from 'lucide-react';
 
 interface Finding {
@@ -89,6 +89,7 @@ const getSeverityColor = (severity: Finding['severity']): string => {
 };
 
 export default function ClarpAgent() {
+  const { navigateWithFade } = usePageTransition();
   const [mounted, setMounted] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
@@ -214,14 +215,15 @@ export default function ClarpAgent() {
     <main className="min-h-screen overflow-x-hidden">
       {/* back button */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6">
-        <Link
+        <a
           href="/"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-slate-dark text-ivory-light font-mono text-sm border-2 border-slate-dark hover:bg-danger-orange hover:border-danger-orange hover:text-slate-dark transition-colors"
+          onClick={(e) => { e.preventDefault(); navigateWithFade('/'); }}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-slate-dark text-ivory-light font-mono text-sm border-2 border-slate-dark hover:bg-danger-orange hover:border-danger-orange hover:text-slate-dark transition-colors cursor-pointer"
           style={{ boxShadow: '3px 3px 0 #1a1a2e' }}
         >
           <span>←</span>
           <span>back to main</span>
-        </Link>
+        </a>
       </div>
 
       {/* hero section */}
@@ -607,9 +609,9 @@ export default function ClarpAgent() {
             >
               join $CLARP on x
             </a>
-            <Link href="/" className="btn-secondary">
+            <a href="/" onClick={(e) => { e.preventDefault(); navigateWithFade('/'); }} className="btn-secondary cursor-pointer">
               back to main site
-            </Link>
+            </a>
           </div>
 
           <p className="text-xs text-slate-light/50 mt-8 font-mono">
