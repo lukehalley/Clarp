@@ -13,27 +13,27 @@ import {
   MessageSquare,
   Link2,
   Network,
+  ChevronRight,
+  Share2,
+  ExternalLink,
 } from 'lucide-react';
-import ReputationScore from '@/components/terminal/xintel/ReputationScore';
 import RiskBadge from '@/components/terminal/xintel/RiskBadge';
-import KeyFindings from '@/components/terminal/xintel/KeyFindings';
-import ShillCard from '@/components/terminal/xintel/ShillCard';
+import ShillCard, { ShillTableHeader } from '@/components/terminal/xintel/ShillCard';
 import BacklashCard from '@/components/terminal/xintel/BacklashCard';
 import BehaviorGauge from '@/components/terminal/xintel/BehaviorGauge';
 import EntityList from '@/components/terminal/xintel/EntityList';
 import EvidenceDrawer from '@/components/terminal/xintel/EvidenceDrawer';
 import ShareButton from '@/components/terminal/xintel/ShareButton';
-import { XIntelReport, XIntelEvidence, KeyFinding } from '@/types/xintel';
+import { XIntelReport, XIntelEvidence, KeyFinding, getScoreColor, getScoreLabel, getRiskLevelColor, SCORE_FACTOR_CONFIG } from '@/types/xintel';
 
-type TabId = 'overview' | 'shills' | 'backlash' | 'behavior' | 'network' | 'entities';
+type TabId = 'shills' | 'backlash' | 'behavior' | 'network' | 'entities';
 
-const TABS: { id: TabId; label: string; icon: React.ReactNode }[] = [
-  { id: 'overview', label: 'Overview', icon: <TrendingUp size={16} /> },
-  { id: 'shills', label: 'Shills', icon: <MessageSquare size={16} /> },
-  { id: 'backlash', label: 'Backlash', icon: <AlertTriangle size={16} /> },
-  { id: 'behavior', label: 'Behavior', icon: <Users size={16} /> },
-  { id: 'network', label: 'Network', icon: <Network size={16} /> },
-  { id: 'entities', label: 'Entities', icon: <Link2 size={16} /> },
+const TABS: { id: TabId; label: string; icon: React.ReactNode; countKey?: string }[] = [
+  { id: 'shills', label: 'Shills', icon: <MessageSquare size={14} />, countKey: 'shilledEntities' },
+  { id: 'backlash', label: 'Backlash', icon: <AlertTriangle size={14} />, countKey: 'backlashEvents' },
+  { id: 'behavior', label: 'Behavior', icon: <Users size={14} /> },
+  { id: 'network', label: 'Network', icon: <Network size={14} /> },
+  { id: 'entities', label: 'Entities', icon: <Link2 size={14} />, countKey: 'linkedEntities' },
 ];
 
 interface PageProps {
@@ -45,7 +45,7 @@ export default function XIntelReportPage({ params }: PageProps) {
   const [report, setReport] = useState<XIntelReport | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<TabId>('overview');
+  const [activeTab, setActiveTab] = useState<TabId>('shills');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerTitle, setDrawerTitle] = useState('');
   const [drawerEvidence, setDrawerEvidence] = useState<XIntelEvidence[]>([]);
@@ -60,6 +60,7 @@ export default function XIntelReportPage({ params }: PageProps) {
           throw new Error(data.error || 'Failed to load report');
         }
 
+        // Token data is now enriched server-side
         setReport(data.report);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load report');
@@ -128,304 +129,360 @@ export default function XIntelReportPage({ params }: PageProps) {
 
   const { profile, score, keyFindings, shilledEntities, backlashEvents, behaviorMetrics, networkMetrics, linkedEntities } = report;
 
+  // Get active risk factors
+  const activeFactors = score.factors
+    .filter(f => f.points > 0)
+    .sort((a, b) => b.points - a.points);
+
+  const scoreColor = getScoreColor(score.overall);
+  const riskColor = getRiskLevelColor(score.riskLevel);
+
+  // Check if finding is positive
+  const isPositiveFinding = (finding: KeyFinding): boolean => {
+    const text = (finding.title + ' ' + finding.description).toLowerCase();
+    const positiveKeywords = [
+      'doxxed', 'verified', 'established', 'active github', 'real product',
+      'organic engagement', 'consistent history', 'credible', 'trustworthy',
+      'clean history', 'legitimate', 'transparent', 'professional',
+      'year-old account', 'years-old account', 'year old account',
+      'blue verified', 'no scam', 'no rug', 'no fraud', 'good standing'
+    ];
+    return positiveKeywords.some(keyword => text.includes(keyword));
+  };
+
+  // Tab counts
+  const getTabCount = (tabId: TabId): number | null => {
+    switch (tabId) {
+      case 'shills': return shilledEntities.length;
+      case 'backlash': return backlashEvents.length;
+      case 'entities': return linkedEntities.length;
+      default: return null;
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      {/* Back link */}
-      <Link
-        href="/terminal/xintel"
-        className="inline-flex items-center gap-2 text-ivory-light/60 hover:text-ivory-light font-mono text-sm transition-colors"
-      >
-        <ArrowLeft size={16} />
-        Back to Scanner
-      </Link>
+    <div className="h-[calc(100vh-140px)] flex flex-col">
+      {/* Compact Header Bar */}
+      <div className="flex items-center justify-between gap-4 pb-3 border-b border-ivory-light/10 shrink-0">
+        <div className="flex items-center gap-4 min-w-0">
+          <Link
+            href="/terminal/xintel"
+            className="text-ivory-light/40 hover:text-ivory-light transition-colors shrink-0"
+          >
+            <ArrowLeft size={18} />
+          </Link>
 
-      {/* Profile Header */}
-      <div className="p-6 border-2 border-ivory-light/20 bg-ivory-light/5">
-        <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
-          {/* Profile info */}
-          <div className="flex-1">
-            <div className="flex items-center gap-3 mb-3">
-              <h1 className="text-2xl sm:text-3xl font-mono font-bold text-ivory-light">
-                @{profile.handle}
-              </h1>
-              {profile.verified && (
-                <CheckCircle size={20} className="text-larp-green" />
-              )}
-              <RiskBadge level={score.riskLevel} />
-            </div>
+          <div className="flex items-center gap-3 min-w-0">
+            <h1 className="text-xl font-mono font-bold text-ivory-light truncate">
+              @{profile.handle}
+            </h1>
+            {profile.verified && (
+              <CheckCircle size={16} className="text-larp-green shrink-0" />
+            )}
+            <RiskBadge level={score.riskLevel} />
+          </div>
+        </div>
 
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="hidden lg:inline text-[9px] font-mono text-ivory-light/25 max-w-[200px] truncate" title={report.disclaimer}>
+            {report.disclaimer}
+          </span>
+          <div className="flex items-center gap-1.5 text-[10px] font-mono text-ivory-light/40">
+            <Clock size={11} />
+            <span className="hidden sm:inline">{formatDate(report.scanTime)}</span>
+          </div>
+          <ShareButton handle={profile.handle} score={score.overall} />
+        </div>
+      </div>
+
+      {/* Main Dashboard Grid */}
+      <div className="flex-1 grid grid-cols-12 gap-3 pt-3 min-h-0 overflow-hidden">
+
+        {/* Left Column - Profile + Score + Findings */}
+        <div className="col-span-12 lg:col-span-4 xl:col-span-3 flex flex-col gap-2 overflow-y-auto pr-1">
+          {/* Profile Card */}
+          <div className="p-2 border border-ivory-light/10 bg-ivory-light/[0.02]">
             {profile.displayName && (
-              <p className="font-mono text-ivory-light/70 text-lg mb-2">
-                {profile.displayName}
-              </p>
+              <p className="font-mono text-ivory-light/70 text-xs mb-0.5">{profile.displayName}</p>
             )}
-
             {profile.bio && (
-              <p className="font-mono text-ivory-light/50 text-sm mb-4 max-w-xl">
-                {profile.bio}
-              </p>
+              <p className="font-mono text-ivory-light/40 text-[10px] mb-1.5 line-clamp-2">{profile.bio}</p>
             )}
-
-            {/* Profile stats */}
-            <div className="flex flex-wrap items-center gap-4 text-sm font-mono text-ivory-light/50">
+            <div className="flex items-center gap-3 text-[10px] font-mono text-ivory-light/40">
               {profile.followers && (
-                <div className="flex items-center gap-1.5">
-                  <Users size={14} />
-                  <span>{profile.followers.toLocaleString()} followers</span>
-                </div>
+                <span className="flex items-center gap-1">
+                  <Users size={10} />
+                  {profile.followers.toLocaleString()}
+                </span>
               )}
               {profile.createdAt && (
-                <div className="flex items-center gap-1.5">
-                  <Calendar size={14} />
-                  <span>Joined {new Date(profile.createdAt).getFullYear()}</span>
-                </div>
+                <span className="flex items-center gap-1">
+                  <Calendar size={10} />
+                  {new Date(profile.createdAt).getFullYear()}
+                </span>
               )}
             </div>
           </div>
 
-          {/* Score */}
-          <div className="lg:text-right">
-            <ReputationScore score={score} size="md" />
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div className="flex items-center gap-3 mt-6 pt-6 border-t border-ivory-light/10">
-          <ShareButton handle={profile.handle} score={score.overall} />
-          <div className="flex items-center gap-2 text-xs font-mono text-ivory-light/40">
-            <Clock size={14} />
-            <span>Scanned {formatDate(report.scanTime)}</span>
-            {report.cached && (
-              <span className="px-2 py-0.5 bg-ivory-light/10 border border-ivory-light/20">
-                cached
+          {/* Score Display */}
+          <div className="p-2 border border-ivory-light/10 bg-ivory-light/[0.02]">
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-baseline gap-1.5">
+                <span
+                  className="font-mono font-bold text-3xl"
+                  style={{ color: scoreColor, textShadow: `0 0 15px ${scoreColor}30` }}
+                >
+                  {score.overall}
+                </span>
+                <span className="text-ivory-light/30 font-mono text-xs">/100</span>
+              </div>
+              <span
+                className="font-mono text-[9px] px-1.5 py-0.5 border"
+                style={{ borderColor: riskColor, color: riskColor, backgroundColor: `${riskColor}15` }}
+              >
+                {score.confidence}
               </span>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Key Findings (always visible) */}
-      <div>
-        <h2 className="font-mono font-bold text-ivory-light mb-3 flex items-center gap-2">
-          <AlertTriangle size={18} className="text-danger-orange" />
-          Key Findings
-        </h2>
-        <KeyFindings findings={keyFindings} onFindingClick={handleFindingClick} />
-      </div>
-
-      {/* Tabs */}
-      <div className="border-b border-ivory-light/10">
-        <div className="flex overflow-x-auto scrollbar-hide -mb-px">
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-3 font-mono text-sm whitespace-nowrap border-b-2 transition-colors ${
-                activeTab === tab.id
-                  ? 'text-danger-orange border-danger-orange'
-                  : 'text-ivory-light/50 border-transparent hover:text-ivory-light/70'
-              }`}
-            >
-              {tab.icon}
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Tab Content */}
-      <div className="min-h-[300px]">
-        {activeTab === 'overview' && (
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Score breakdown */}
-            <div>
-              <h3 className="font-mono font-bold text-ivory-light mb-3">Score Breakdown</h3>
-              <ReputationScore score={score} size="sm" showFactors />
             </div>
+            <p className="font-mono text-[10px] text-ivory-light/50 mb-2">{getScoreLabel(score.overall)}</p>
 
-            {/* Quick stats */}
-            <div>
-              <h3 className="font-mono font-bold text-ivory-light mb-3">Analysis Summary</h3>
-              <div className="space-y-2 text-sm font-mono">
-                <div className="flex justify-between p-3 bg-ivory-light/5 border border-ivory-light/10">
-                  <span className="text-ivory-light/60">Posts Analyzed</span>
-                  <span className="text-ivory-light">{report.postsAnalyzed}</span>
-                </div>
-                <div className="flex justify-between p-3 bg-ivory-light/5 border border-ivory-light/10">
-                  <span className="text-ivory-light/60">Tokens Promoted</span>
-                  <span className="text-ivory-light">{shilledEntities.length}</span>
-                </div>
-                <div className="flex justify-between p-3 bg-ivory-light/5 border border-ivory-light/10">
-                  <span className="text-ivory-light/60">Backlash Events</span>
-                  <span className="text-ivory-light">{backlashEvents.length}</span>
-                </div>
-                <div className="flex justify-between p-3 bg-ivory-light/5 border border-ivory-light/10">
-                  <span className="text-ivory-light/60">Linked Entities</span>
-                  <span className="text-ivory-light">{linkedEntities.length}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'shills' && (
-          <div>
-            <h3 className="font-mono font-bold text-ivory-light mb-4">
-              Promoted Tokens/Projects ({shilledEntities.length})
-            </h3>
-            {shilledEntities.length === 0 ? (
-              <div className="p-6 border border-ivory-light/10 bg-ivory-light/5 text-center">
-                <p className="font-mono text-ivory-light/50">No promotional activity detected</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {shilledEntities.map((entity, i) => (
-                  <ShillCard
-                    key={entity.id}
-                    entity={entity}
-                    rank={i + 1}
-                    onClick={() => openEvidence(`${entity.entityName} Promotions`, entity.evidenceIds)}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'backlash' && (
-          <div>
-            <h3 className="font-mono font-bold text-ivory-light mb-4">
-              Backlash Timeline ({backlashEvents.length})
-            </h3>
-            {backlashEvents.length === 0 ? (
-              <div className="p-6 border border-larp-green/30 bg-larp-green/5 text-center">
-                <p className="font-mono text-larp-green">No strong backlash signals detected</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {backlashEvents.map((event) => (
-                  <BacklashCard
-                    key={event.id}
-                    event={event}
-                    onClick={() => openEvidence(event.summary, event.evidenceIds)}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'behavior' && (
-          <div className="grid md:grid-cols-2 gap-4">
-            <BehaviorGauge
-              label="Toxicity"
-              score={behaviorMetrics.toxicity.score}
-              examples={behaviorMetrics.toxicity.examples}
-              description="Profanity and hostile language patterns"
-              onExampleClick={() => openEvidence('Toxicity Examples', [])}
-            />
-            <BehaviorGauge
-              label="Hype Intensity"
-              score={behaviorMetrics.hype.score}
-              examples={behaviorMetrics.hype.examples}
-              keywords={behaviorMetrics.hype.keywords}
-              description='"100x", "guaranteed", "ape now" patterns'
-              onExampleClick={() => openEvidence('Hype Examples', [])}
-            />
-            <BehaviorGauge
-              label="Aggression"
-              score={behaviorMetrics.aggression.score}
-              examples={behaviorMetrics.aggression.examples}
-              description="Targeted harassment and attack patterns"
-              onExampleClick={() => openEvidence('Aggression Examples', [])}
-            />
-            <BehaviorGauge
-              label="Consistency"
-              score={behaviorMetrics.consistency.score}
-              invertColor
-              description={`Topic drift: ${behaviorMetrics.consistency.topicDrift}%`}
-              examples={behaviorMetrics.consistency.contradictions}
-              onExampleClick={() => openEvidence('Consistency Issues', [])}
-            />
-          </div>
-        )}
-
-        {activeTab === 'network' && (
-          <div>
-            <h3 className="font-mono font-bold text-ivory-light mb-4">Top Interactions</h3>
-
-            {networkMetrics.topInteractions.length === 0 ? (
-              <div className="p-6 border border-ivory-light/10 bg-ivory-light/5 text-center">
-                <p className="font-mono text-ivory-light/50">No significant interactions detected</p>
-              </div>
-            ) : (
-              <div className="space-y-2 mb-6">
-                {networkMetrics.topInteractions.map((account, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between p-3 border border-ivory-light/10 bg-ivory-light/5"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="font-mono text-danger-orange">#{i + 1}</span>
-                      <div>
-                        <span className="font-mono text-ivory-light">@{account.handle}</span>
-                        {account.displayName && (
-                          <span className="font-mono text-ivory-light/50 text-sm ml-2">
-                            {account.displayName}
-                          </span>
-                        )}
-                      </div>
+            {/* Risk Factors Mini */}
+            {activeFactors.length > 0 && (
+              <div className="pt-2 border-t border-ivory-light/10 space-y-1">
+                {activeFactors.slice(0, 3).map((factor) => {
+                  const config = SCORE_FACTOR_CONFIG[factor.type];
+                  return (
+                    <div key={factor.type} className="flex items-center justify-between text-[10px] font-mono">
+                      <span className="text-ivory-light/50 truncate">{config.label}</span>
+                      <span className="text-danger-orange shrink-0">-{factor.points}</span>
                     </div>
-                    <div className="flex items-center gap-4 text-xs font-mono">
-                      <span className="text-ivory-light/50">
-                        {account.followers?.toLocaleString()} followers
-                      </span>
-                      <span className="text-danger-orange">
-                        {account.interactionCount} {account.interactionType}s
-                      </span>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
+          </div>
 
-            {/* Engagement heuristics */}
-            {networkMetrics.engagementHeuristics.suspiciousPatterns.length > 0 && (
-              <div className="mt-6">
-                <h4 className="font-mono font-bold text-ivory-light mb-3 flex items-center gap-2">
-                  <AlertTriangle size={16} className="text-danger-orange" />
-                  Suspicious Patterns
-                </h4>
-                <div className="space-y-2">
-                  {networkMetrics.engagementHeuristics.suspiciousPatterns.map((pattern, i) => (
-                    <div
-                      key={i}
-                      className="p-3 border border-danger-orange/30 bg-danger-orange/5 font-mono text-sm text-danger-orange"
+          {/* Key Findings */}
+          <div className="p-2 border border-ivory-light/10 bg-ivory-light/[0.02]">
+            <h3 className="font-mono text-[10px] text-ivory-light/40 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+              <AlertTriangle size={10} className="text-danger-orange" />
+              Findings
+            </h3>
+            {keyFindings.length === 0 ? (
+              <p className="font-mono text-[10px] text-larp-green">No major concerns</p>
+            ) : (
+              <div className="space-y-1">
+                {keyFindings.slice(0, 3).map((finding) => {
+                  const isPositive = isPositiveFinding(finding);
+                  const color = isPositive ? '#22c55e' : finding.severity === 'critical' ? '#dc2626' : '#f97316';
+                  return (
+                    <button
+                      key={finding.id}
+                      onClick={() => handleFindingClick(finding)}
+                      className="w-full text-left p-1.5 bg-ivory-light/[0.03] hover:bg-ivory-light/[0.06] border border-ivory-light/5 hover:border-ivory-light/10 transition-all group"
                     >
-                      {pattern}
-                    </div>
-                  ))}
-                </div>
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-1 h-1 rounded-full shrink-0" style={{ backgroundColor: color }} />
+                        <p className="font-mono text-[10px] text-ivory-light/70 truncate flex-1">{finding.title}</p>
+                        <ChevronRight size={10} className="text-ivory-light/20 group-hover:text-danger-orange shrink-0" />
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
-        )}
 
-        {activeTab === 'entities' && (
-          <div>
-            <h3 className="font-mono font-bold text-ivory-light mb-4">
-              Linked Entities ({linkedEntities.length})
-            </h3>
-            <EntityList entities={linkedEntities} />
+          {/* Quick Stats */}
+          <div className="flex gap-2">
+            <div className="flex-1 p-1.5 border border-ivory-light/10 bg-ivory-light/[0.02] text-center">
+              <p className="font-mono text-sm text-ivory-light">{report.postsAnalyzed}</p>
+              <p className="font-mono text-[9px] text-ivory-light/40">posts</p>
+            </div>
+            <div className="flex-1 p-1.5 border border-ivory-light/10 bg-ivory-light/[0.02] text-center">
+              <p className="font-mono text-sm text-ivory-light">{shilledEntities.length}</p>
+              <p className="font-mono text-[9px] text-ivory-light/40">tokens</p>
+            </div>
+            <div className="flex-1 p-1.5 border border-ivory-light/10 bg-ivory-light/[0.02] text-center">
+              <p className="font-mono text-sm text-ivory-light">{backlashEvents.length}</p>
+              <p className="font-mono text-[9px] text-ivory-light/40">backlash</p>
+            </div>
           </div>
-        )}
-      </div>
+        </div>
 
-      {/* Disclaimer */}
-      <div className="p-4 border border-ivory-light/10 bg-ivory-light/5 mt-8">
-        <p className="font-mono text-xs text-ivory-light/40">
-          <strong className="text-ivory-light/60">Disclaimer:</strong> {report.disclaimer}
-        </p>
+        {/* Right Column - Tabs + Content */}
+        <div className="col-span-12 lg:col-span-8 xl:col-span-9 flex flex-col min-h-0 overflow-hidden">
+          {/* Compact Tabs */}
+          <div className="flex items-center gap-1 pb-2 border-b border-ivory-light/10 shrink-0 overflow-x-auto">
+            {TABS.map((tab) => {
+              const count = getTabCount(tab.id);
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 font-mono text-xs whitespace-nowrap border transition-all ${
+                    activeTab === tab.id
+                      ? 'text-danger-orange border-danger-orange bg-danger-orange/10'
+                      : 'text-ivory-light/50 border-ivory-light/10 hover:border-ivory-light/20 hover:text-ivory-light/70'
+                  }`}
+                >
+                  {tab.icon}
+                  {tab.label}
+                  {count !== null && (
+                    <span className={`px-1.5 py-0.5 text-[10px] ${
+                      activeTab === tab.id ? 'bg-danger-orange/20' : 'bg-ivory-light/10'
+                    }`}>
+                      {count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Tab Content - Scrollable */}
+          <div className="flex-1 overflow-y-auto pt-2">
+                {activeTab === 'shills' && (
+              <div>
+                {shilledEntities.length === 0 ? (
+                  <div className="p-4 border border-ivory-light/10 bg-ivory-light/[0.02] text-center">
+                    <p className="font-mono text-xs text-ivory-light/50">No promotional activity detected</p>
+                  </div>
+                ) : (
+                  <div className="border border-ivory-light/10">
+                    <ShillTableHeader />
+                    {shilledEntities.map((entity, i) => (
+                      <ShillCard
+                        key={entity.id}
+                        entity={entity}
+                        rank={i + 1}
+                        onClick={() => openEvidence(`${entity.entityName} Promotions`, entity.evidenceIds)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'backlash' && (
+              <div>
+                {backlashEvents.length === 0 ? (
+                  <div className="p-4 border border-larp-green/20 bg-larp-green/5 text-center">
+                    <p className="font-mono text-xs text-larp-green">No strong backlash signals detected</p>
+                  </div>
+                ) : (
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {backlashEvents.map((event) => (
+                      <BacklashCard
+                        key={event.id}
+                        event={event}
+                        onClick={() => openEvidence(event.summary, event.evidenceIds)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'behavior' && (
+              <div className="grid grid-cols-2 xl:grid-cols-4 gap-2">
+                <BehaviorGauge
+                  label="Toxicity"
+                  score={behaviorMetrics.toxicity.score}
+                  examples={behaviorMetrics.toxicity.examples}
+                  description="Profanity and hostile language"
+                  onExampleClick={() => openEvidence('Toxicity Examples', [])}
+                  compact
+                />
+                <BehaviorGauge
+                  label="Hype Intensity"
+                  score={behaviorMetrics.hype.score}
+                  examples={behaviorMetrics.hype.examples}
+                  keywords={behaviorMetrics.hype.keywords}
+                  description='"100x", "ape now" patterns'
+                  onExampleClick={() => openEvidence('Hype Examples', [])}
+                  compact
+                />
+                <BehaviorGauge
+                  label="Aggression"
+                  score={behaviorMetrics.aggression.score}
+                  examples={behaviorMetrics.aggression.examples}
+                  description="Harassment patterns"
+                  onExampleClick={() => openEvidence('Aggression Examples', [])}
+                  compact
+                />
+                <BehaviorGauge
+                  label="Consistency"
+                  score={behaviorMetrics.consistency.score}
+                  invertColor
+                  description={`Drift: ${behaviorMetrics.consistency.topicDrift}%`}
+                  examples={behaviorMetrics.consistency.contradictions}
+                  onExampleClick={() => openEvidence('Consistency Issues', [])}
+                  compact
+                />
+              </div>
+            )}
+
+            {activeTab === 'network' && (
+              <div className="grid lg:grid-cols-2 gap-4">
+                {/* Top Interactions */}
+                <div>
+                  <h4 className="font-mono text-xs text-ivory-light/40 uppercase tracking-wider mb-2">Top Interactions</h4>
+                  {networkMetrics.topInteractions.length === 0 ? (
+                    <div className="p-3 border border-ivory-light/10 bg-ivory-light/[0.02] text-center">
+                      <p className="font-mono text-xs text-ivory-light/50">No significant interactions</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-1">
+                      {networkMetrics.topInteractions.slice(0, 6).map((account, i) => (
+                        <div
+                          key={i}
+                          className="flex items-center justify-between p-2 border border-ivory-light/10 bg-ivory-light/[0.02] hover:bg-ivory-light/[0.04] transition-colors"
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="font-mono text-xs text-danger-orange shrink-0">#{i + 1}</span>
+                            <span className="font-mono text-xs text-ivory-light truncate">@{account.handle}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-[10px] font-mono shrink-0">
+                            <span className="text-ivory-light/40">{account.followers?.toLocaleString()}</span>
+                            <span className="text-danger-orange">{account.interactionCount}×</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Suspicious Patterns */}
+                <div>
+                  <h4 className="font-mono text-xs text-ivory-light/40 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <AlertTriangle size={11} className="text-danger-orange" />
+                    Suspicious Patterns
+                  </h4>
+                  {networkMetrics.engagementHeuristics.suspiciousPatterns.length === 0 ? (
+                    <div className="p-3 border border-larp-green/20 bg-larp-green/5 text-center">
+                      <p className="font-mono text-xs text-larp-green">No suspicious patterns detected</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-1">
+                      {networkMetrics.engagementHeuristics.suspiciousPatterns.map((pattern, i) => (
+                        <div
+                          key={i}
+                          className="p-2 border border-danger-orange/20 bg-danger-orange/5 font-mono text-xs text-danger-orange"
+                        >
+                          {pattern}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'entities' && (
+              <EntityList entities={linkedEntities} />
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Evidence Drawer */}

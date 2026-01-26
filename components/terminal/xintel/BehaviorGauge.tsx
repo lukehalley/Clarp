@@ -11,6 +11,7 @@ interface BehaviorGaugeProps {
   description?: string;
   invertColor?: boolean; // For consistency score where higher = better
   onExampleClick?: (example: BehaviorExample) => void;
+  compact?: boolean;
 }
 
 export default function BehaviorGauge({
@@ -22,6 +23,7 @@ export default function BehaviorGauge({
   description,
   invertColor = false,
   onExampleClick,
+  compact = false,
 }: BehaviorGaugeProps) {
   const percentage = Math.min(100, (score / maxScore) * 100);
 
@@ -43,6 +45,42 @@ export default function BehaviorGauge({
     });
   };
 
+  // Compact mode
+  if (compact) {
+    return (
+      <div className="p-3 border border-ivory-light/10 bg-ivory-light/[0.02] hover:bg-ivory-light/[0.04] transition-colors">
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="font-mono font-bold text-ivory-light text-xs truncate">{label}</span>
+          <span className="font-mono font-bold text-sm" style={{ color }}>
+            {score}
+          </span>
+        </div>
+        <div className="h-1 bg-ivory-light/10 overflow-hidden mb-1.5">
+          <div
+            className="h-full transition-all duration-700 ease-out"
+            style={{ width: `${percentage}%`, backgroundColor: color }}
+          />
+        </div>
+        {description && (
+          <p className="text-[10px] font-mono text-ivory-light/40 truncate">{description}</p>
+        )}
+        {keywords.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-2">
+            {keywords.slice(0, 3).map((keyword, i) => (
+              <span
+                key={i}
+                className="font-mono text-[9px] px-1 py-0.5 bg-danger-orange/10 text-danger-orange border border-danger-orange/20"
+              >
+                {keyword}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Full mode
   return (
     <div className="p-4 border border-ivory-light/10 bg-ivory-light/5">
       {/* Header */}

@@ -14,15 +14,16 @@ interface ScanStepperProps {
 const STEP_RANGES: Record<ScanStatus, { min: number; max: number }> = {
   queued: { min: 0, max: 10 },
   fetching: { min: 10, max: 25 },
-  extracting: { min: 25, max: 45 },
-  analyzing: { min: 45, max: 80 },
-  scoring: { min: 80, max: 100 },
+  extracting: { min: 25, max: 40 },
+  analyzing: { min: 40, max: 70 },
+  scoring: { min: 70, max: 85 },
+  enriching: { min: 85, max: 100 },
   complete: { min: 100, max: 100 },
   failed: { min: 0, max: 0 },
   cached: { min: 100, max: 100 },
 };
 
-const STEPS: ScanStatus[] = ['fetching', 'extracting', 'analyzing', 'scoring'];
+const STEPS: ScanStatus[] = ['fetching', 'extracting', 'analyzing', 'scoring', 'enriching'];
 
 export default function ScanStepper({ status, progress, statusMessage, error }: ScanStepperProps) {
   // Use provided progress or fall back to the minimum for the current status

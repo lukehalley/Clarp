@@ -11,6 +11,21 @@ export interface XIntelReportRow {
   expires_at: string;
 }
 
+// Database types for token_cache table
+export interface TokenCacheRow {
+  id: string;
+  ticker: string;
+  chain: string;
+  token_address: string;
+  pool_address: string | null;
+  name: string | null;
+  symbol: string | null;
+  image_url: string | null;
+  dex_type: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 // Singleton client instance
 let supabaseClient: SupabaseClient | null = null;
 
@@ -217,5 +232,160 @@ export async function cleanupExpiredReports(): Promise<number> {
   } catch (err) {
     console.error('[Supabase] Failed to cleanup expired reports:', err);
     return 0;
+  }
+}
+
+// ============================================================================
+// TOKEN CACHE FUNCTIONS
+// ============================================================================
+
+/**
+ * Get cached token by ticker
+ */
+export async function getCachedToken(
+  ticker: string,
+  chain: string = 'solana'
+): Promise<TokenCacheRow | null> {
+  const client = getSupabaseClient();
+  if (!client) return null;
+
+  // Normalize ticker (uppercase, no $ prefix)
+  const normalizedTicker = ticker.replace(/^\$/, '').toUpperCase();
+
+  try {
+    const { data, error } = await client
+      .from('token_cache')
+      .select('*')
+      .eq('ticker', normalizedTicker)
+      .eq('chain', chain)
+      .single();
+
+    if (error) {
+      if (error.code !== 'PGRST116') {
+        console.error('[Supabase] Error fetching cached token:', error.message);
+      }
+      return null;
+    }
+
+    return data as TokenCacheRow;
+  } catch (err) {
+    console.error('[Supabase] Failed to fetch cached token:', err);
+    return null;
+  }
+}
+
+/**
+ * Get cached token by address
+ */
+export async function getCachedTokenByAddress(
+  tokenAddress: string,
+  chain: string = 'solana'
+): Promise<TokenCacheRow | null> {
+  const client = getSupabaseClient();
+  if (!client) return null;
+
+  try {
+    const { data, error } = await client
+      .from('token_cache')
+      .select('*')
+      .eq('token_address', tokenAddress)
+      .eq('chain', chain)
+      .single();
+
+    if (error) {
+      if (error.code !== 'PGRST116') {
+        console.error('[Supabase] Error fetching cached token by address:', error.message);
+      }
+      return null;
+    }
+
+    return data as TokenCacheRow;
+  } catch (err) {
+    console.error('[Supabase] Failed to fetch cached token by address:', err);
+    return null;
+  }
+}
+
+/**
+ * Cache a token mapping
+ */
+export async function cacheToken(token: {
+  ticker: string;
+  chain?: string;
+  tokenAddress: string;
+  poolAddress?: string;
+  name?: string;
+  symbol?: string;
+  imageUrl?: string;
+  dexType?: string;
+}): Promise<boolean> {
+  const client = getSupabaseClient();
+  if (!client) return false;
+
+  // Normalize ticker
+  const normalizedTicker = token.ticker.replace(/^\$/, '').toUpperCase();
+
+  try {
+    const { error } = await client.from('token_cache').upsert(
+      {
+        ticker: normalizedTicker,
+        chain: token.chain || 'solana',
+        token_address: token.tokenAddress,
+        pool_address: token.poolAddress || null,
+        name: token.name || null,
+        symbol: token.symbol || null,
+        image_url: token.imageUrl || null,
+        dex_type: token.dexType || null,
+      },
+      { onConflict: 'ticker,chain' }
+    );
+
+    if (error) {
+      console.error('[Supabase] Error caching token:', error.message);
+      return false;
+    }
+
+    console.log(`[Supabase] Cached token $${normalizedTicker} -> ${token.tokenAddress}`);
+    return true;
+  } catch (err) {
+    console.error('[Supabase] Failed to cache token:', err);
+    return false;
+  }
+}
+
+/**
+ * Get multiple cached tokens by tickers
+ */
+export async function getCachedTokens(
+  tickers: string[],
+  chain: string = 'solana'
+): Promise<Map<string, TokenCacheRow>> {
+  const client = getSupabaseClient();
+  const result = new Map<string, TokenCacheRow>();
+  if (!client || tickers.length === 0) return result;
+
+  // Normalize tickers
+  const normalizedTickers = tickers.map(t => t.replace(/^\$/, '').toUpperCase());
+
+  try {
+    const { data, error } = await client
+      .from('token_cache')
+      .select('*')
+      .in('ticker', normalizedTickers)
+      .eq('chain', chain);
+
+    if (error) {
+      console.error('[Supabase] Error fetching cached tokens:', error.message);
+      return result;
+    }
+
+    for (const row of data || []) {
+      result.set(row.ticker, row as TokenCacheRow);
+    }
+
+    return result;
+  } catch (err) {
+    console.error('[Supabase] Failed to fetch cached tokens:', err);
+    return result;
   }
 }

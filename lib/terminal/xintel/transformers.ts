@@ -14,7 +14,16 @@ import type {
   BehaviorMetrics,
   NetworkMetrics,
   LinkedEntity,
+  ShilledEntity,
+  TokenMarketData,
 } from '@/types/xintel';
+import { lookupToken } from './tokenLookup';
+import {
+  isSupabaseAvailable,
+  getCachedTokens,
+  cacheToken,
+  type TokenCacheRow,
+} from '@/lib/supabase/client';
 
 // ============================================================================
 // GROK ANALYSIS → XINTEL REPORT (Simplified for Responses API)
@@ -446,4 +455,190 @@ export function calculateAccountAgeDays(createdAt: string | Date): number {
 
 export function isNewAccount(createdAt: string | Date, thresholdDays: number = 90): boolean {
   return calculateAccountAgeDays(createdAt) < thresholdDays;
+}
+
+// ============================================================================
+// TOKEN DATA ENRICHMENT
+// ============================================================================
+
+/**
+ * Enrich shilled entities with token market data from DexScreener
+ * Uses Supabase cache for ticker -> address mappings to avoid repeated lookups
+ * This should be called server-side (in the API route)
+ */
+export async function enrichShilledEntitiesWithTokenData(
+  report: XIntelReport
+): Promise<XIntelReport> {
+  if (!report.shilledEntities || report.shilledEntities.length === 0) {
+    return report;
+  }
+
+  // Collect all tickers to look up
+  const tickers = report.shilledEntities
+    .map(e => e.ticker || e.entityName)
+    .filter((t): t is string => !!t);
+
+  // Step 1: Check Supabase cache for known tickers
+  let cachedTokens = new Map<string, TokenCacheRow>();
+  if (isSupabaseAvailable() && tickers.length > 0) {
+    cachedTokens = await getCachedTokens(tickers);
+    console.log(`[TokenEnrich] Found ${cachedTokens.size}/${tickers.length} tokens in cache`);
+  }
+
+  // Step 2: Enrich each entity
+  const enrichedEntities: ShilledEntity[] = await Promise.all(
+    report.shilledEntities.map(async (entity) => {
+      const searchQuery = entity.ticker || entity.entityName;
+      if (!searchQuery) return entity;
+
+      const normalizedTicker = searchQuery.replace(/^\$/, '').toUpperCase();
+
+      try {
+        // Check if we have this token cached
+        const cached = cachedTokens.get(normalizedTicker);
+
+        if (cached) {
+          // We have the address cached - fetch live data by address
+          console.log(`[TokenEnrich] Using cached address for $${normalizedTicker}: ${cached.token_address}`);
+          const result = await lookupToken(cached.token_address);
+
+          if (result.found && result.token) {
+            return {
+              ...entity,
+              tokenData: mapTokenToMarketData(result.token),
+            };
+          }
+
+          // Fallback: use cached metadata without live prices
+          return {
+            ...entity,
+            tokenData: {
+              tokenAddress: cached.token_address,
+              poolAddress: cached.pool_address || undefined,
+              priceUsd: 0,
+              imageUrl: cached.image_url || undefined,
+              dexType: (cached.dex_type as TokenMarketData['dexType']) || undefined,
+              dexScreenerUrl: `https://dexscreener.com/solana/${cached.token_address}`,
+            },
+          };
+        }
+
+        // Not in cache - search DexScreener (strip $ prefix as it breaks DexScreener search)
+        const cleanQuery = searchQuery.replace(/^\$/, '');
+        const result = await lookupToken(cleanQuery);
+
+        if (result.found && result.token) {
+          // Cache this token for future lookups
+          if (isSupabaseAvailable()) {
+            cacheToken({
+              ticker: normalizedTicker,
+              tokenAddress: result.token.address,
+              poolAddress: result.token.poolAddress,
+              name: result.token.name,
+              symbol: result.token.symbol,
+              imageUrl: result.token.imageUrl,
+              dexType: result.token.dexType,
+            }).catch(err => console.error('[TokenEnrich] Failed to cache token:', err));
+          }
+
+          return {
+            ...entity,
+            tokenData: mapTokenToMarketData(result.token),
+          };
+        }
+      } catch (error) {
+        console.error(`[TokenEnrich] Failed to lookup token for ${searchQuery}:`, error);
+      }
+
+      return entity;
+    })
+  );
+
+  return {
+    ...report,
+    shilledEntities: enrichedEntities,
+  };
+}
+
+/**
+ * Helper to map TokenData to TokenMarketData
+ */
+function mapTokenToMarketData(token: {
+  address: string;
+  poolAddress: string;
+  priceUsd: number;
+  priceChange5m?: number;
+  priceChange1h?: number;
+  priceChange6h?: number;
+  priceChange24h: number;
+  volume24h: number;
+  liquidity: number;
+  marketCap: number;
+  dexType: string;
+  buys24h?: number;
+  sells24h?: number;
+  imageUrl?: string;
+  pairCreatedAt?: number;
+}): TokenMarketData {
+  return {
+    tokenAddress: token.address,
+    poolAddress: token.poolAddress,
+    priceUsd: token.priceUsd,
+    priceChange5m: token.priceChange5m,
+    priceChange1h: token.priceChange1h,
+    priceChange6h: token.priceChange6h,
+    priceChange24h: token.priceChange24h,
+    volume24h: token.volume24h,
+    liquidity: token.liquidity,
+    marketCap: token.marketCap,
+    dexType: token.dexType as TokenMarketData['dexType'],
+    buys24h: token.buys24h,
+    sells24h: token.sells24h,
+    imageUrl: token.imageUrl,
+    pairCreatedAt: token.pairCreatedAt,
+    dexScreenerUrl: `https://dexscreener.com/solana/${token.address}`,
+  };
+}
+
+/**
+ * Look up token data for a single shilled entity
+ * Uses cache if available
+ */
+export async function lookupTokenForEntity(
+  entity: ShilledEntity
+): Promise<ShilledEntity> {
+  const searchQuery = entity.ticker || entity.entityName;
+
+  if (!searchQuery) {
+    return entity;
+  }
+
+  try {
+    const result = await lookupToken(searchQuery);
+
+    if (result.found && result.token) {
+      // Cache this token for future lookups
+      if (isSupabaseAvailable() && entity.ticker) {
+        const normalizedTicker = entity.ticker.replace(/^\$/, '').toUpperCase();
+        cacheToken({
+          ticker: normalizedTicker,
+          tokenAddress: result.token.address,
+          poolAddress: result.token.poolAddress,
+          name: result.token.name,
+          symbol: result.token.symbol,
+          imageUrl: result.token.imageUrl,
+          dexType: result.token.dexType,
+        }).catch(err => console.error('[TokenEnrich] Failed to cache token:', err));
+      }
+
+      return {
+        ...entity,
+        tokenData: mapTokenToMarketData(result.token),
+      };
+    }
+  } catch (error) {
+    console.error(`Failed to lookup token for ${searchQuery}:`, error);
+  }
+
+  return entity;
 }

@@ -9,7 +9,7 @@ import {
   SCAN_STATUS_PROGRESS,
 } from '@/types/xintel';
 import { getGrokClient, isGrokAvailable, GrokApiError } from '@/lib/grok/client';
-import { grokAnalysisToReport } from './transformers';
+import { grokAnalysisToReport, enrichShilledEntitiesWithTokenData } from './transformers';
 import {
   isSupabaseAvailable,
   getCachedReportFromSupabase,
@@ -267,18 +267,38 @@ async function processRealScan(job: ScanJob): Promise<void> {
 
     // Stage 5: Building report
     console.log(`[XIntel] Stage 5: Building report for @${job.handle}`);
-    updateJobStatus(job, 'scoring', 80, 'Calculating risk score...');
+    updateJobStatus(job, 'scoring', 70, 'Calculating risk score...');
     await sleep(200);
-    updateJobStatus(job, 'scoring', 85, 'Compiling evidence...');
+    updateJobStatus(job, 'scoring', 75, 'Compiling evidence...');
     await sleep(200);
-    updateJobStatus(job, 'scoring', 90, 'Generating key findings...');
-    const report = grokAnalysisToReport(analysis);
-    await sleep(200);
-    updateJobStatus(job, 'scoring', 95, 'Finalizing report...');
+    updateJobStatus(job, 'scoring', 80, 'Generating key findings...');
+    let report = grokAnalysisToReport(analysis);
     await sleep(200);
 
-    // Stage 6: Complete
-    console.log(`[XIntel] Stage 6: Complete for @${job.handle}`);
+    // Stage 6: Enriching token data
+    console.log(`[XIntel] Stage 6: Enriching token data for @${job.handle}`);
+    updateJobStatus(job, 'enriching', 85, 'Looking up token data...');
+
+    if (report.shilledEntities && report.shilledEntities.length > 0) {
+      const tokenCount = report.shilledEntities.length;
+      updateJobStatus(job, 'enriching', 88, `Fetching data for ${tokenCount} token${tokenCount > 1 ? 's' : ''}...`);
+
+      try {
+        report = await enrichShilledEntitiesWithTokenData(report);
+        const enrichedCount = report.shilledEntities.filter(e => e.tokenData).length;
+        console.log(`[XIntel] Enriched ${enrichedCount}/${tokenCount} tokens with market data`);
+        updateJobStatus(job, 'enriching', 95, `Enriched ${enrichedCount} token${enrichedCount !== 1 ? 's' : ''}`);
+      } catch (err) {
+        console.error(`[XIntel] Token enrichment failed:`, err);
+        updateJobStatus(job, 'enriching', 95, 'Token enrichment partial');
+      }
+    } else {
+      updateJobStatus(job, 'enriching', 95, 'No tokens to enrich');
+    }
+    await sleep(200);
+
+    // Stage 7: Complete
+    console.log(`[XIntel] Stage 7: Complete for @${job.handle}`);
     updateJobStatus(job, 'complete', 100, 'Scan complete!');
     job.completedAt = new Date();
     scanJobs.set(job.id, job);
