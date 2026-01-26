@@ -228,47 +228,122 @@ async function processScanJob(jobId: string): Promise<void> {
 async function processRealScan(job: ScanJob): Promise<void> {
   const grokClient = getGrokClient();
 
-  // Stage 1: Starting analysis
-  console.log(`[XIntel] Stage 1: Fetching for @${job.handle}`);
-  updateJobStatus(job, 'fetching', 10);
+  // Stage 1: Initialize
+  console.log(`[XIntel] Stage 1: Initializing for @${job.handle}`);
+  updateJobStatus(job, 'queued', 5, 'Initializing scan...');
+  await sleep(200);
 
-  // Stage 2: Grok analyzes the profile using x_search
-  console.log(`[XIntel] Stage 2: Analyzing @${job.handle} with Grok...`);
-  updateJobStatus(job, 'analyzing', 30);
-  const analysis = await grokClient.analyzeProfile(job.handle);
-  console.log(`[XIntel] Grok analysis complete for @${job.handle}, risk: ${analysis.riskLevel}`);
+  // Stage 2: Fetching profile
+  console.log(`[XIntel] Stage 2: Fetching for @${job.handle}`);
+  updateJobStatus(job, 'fetching', 10, 'Connecting to X API...');
+  await sleep(300);
+  updateJobStatus(job, 'fetching', 15, 'Fetching profile metadata...');
+  await sleep(200);
+  updateJobStatus(job, 'fetching', 20, 'Loading recent posts...');
+  await sleep(200);
 
-  // Stage 3: Build report from Grok analysis
-  console.log(`[XIntel] Stage 3: Building report for @${job.handle}`);
-  updateJobStatus(job, 'scoring', 80);
-  const report = grokAnalysisToReport(analysis);
+  // Stage 3: Extracting data
+  console.log(`[XIntel] Stage 3: Extracting data for @${job.handle}`);
+  updateJobStatus(job, 'extracting', 25, 'Extracting mentioned entities...');
+  await sleep(200);
+  updateJobStatus(job, 'extracting', 30, 'Parsing linked accounts...');
+  await sleep(200);
+  updateJobStatus(job, 'extracting', 35, 'Identifying promoted tokens...');
+  await sleep(200);
+  updateJobStatus(job, 'extracting', 40, 'Mapping engagement patterns...');
+  await sleep(200);
 
-  // Stage 4: Complete
-  console.log(`[XIntel] Stage 4: Complete for @${job.handle}`);
-  updateJobStatus(job, 'complete', 100);
-  job.completedAt = new Date();
-  scanJobs.set(job.id, job);
+  // Stage 4: AI Analysis (this is the long-running part)
+  console.log(`[XIntel] Stage 4: Analyzing @${job.handle} with Grok...`);
+  updateJobStatus(job, 'analyzing', 45, 'Starting AI analysis...');
 
-  // Cache the report in both Supabase and in-memory
-  const cachedAt = new Date();
-  reportCache.set(job.handle, { report, cachedAt });
+  // Start a progress simulation while waiting for Grok
+  const progressInterval = startAnalysisProgress(job);
 
-  // Async cache to Supabase (don't block on this)
-  if (isSupabaseAvailable()) {
-    cacheReportInSupabase(
-      job.handle,
-      report as unknown as Record<string, unknown>,
-      CACHE_TTL_MS
-    ).catch(err => console.error('[XIntel] Failed to cache to Supabase:', err));
+  try {
+    const analysis = await grokClient.analyzeProfile(job.handle);
+    clearInterval(progressInterval);
+    console.log(`[XIntel] Grok analysis complete for @${job.handle}, risk: ${analysis.riskLevel}`);
+
+    // Stage 5: Building report
+    console.log(`[XIntel] Stage 5: Building report for @${job.handle}`);
+    updateJobStatus(job, 'scoring', 80, 'Calculating risk score...');
+    await sleep(200);
+    updateJobStatus(job, 'scoring', 85, 'Compiling evidence...');
+    await sleep(200);
+    updateJobStatus(job, 'scoring', 90, 'Generating key findings...');
+    const report = grokAnalysisToReport(analysis);
+    await sleep(200);
+    updateJobStatus(job, 'scoring', 95, 'Finalizing report...');
+    await sleep(200);
+
+    // Stage 6: Complete
+    console.log(`[XIntel] Stage 6: Complete for @${job.handle}`);
+    updateJobStatus(job, 'complete', 100, 'Scan complete!');
+    job.completedAt = new Date();
+    scanJobs.set(job.id, job);
+
+    // Cache the report in both Supabase and in-memory
+    const cachedAt = new Date();
+    reportCache.set(job.handle, { report, cachedAt });
+
+    // Async cache to Supabase (don't block on this)
+    if (isSupabaseAvailable()) {
+      cacheReportInSupabase(
+        job.handle,
+        report as unknown as Record<string, unknown>,
+        CACHE_TTL_MS
+      ).catch(err => console.error('[XIntel] Failed to cache to Supabase:', err));
+    }
+  } catch (error) {
+    clearInterval(progressInterval);
+    throw error;
   }
+}
+
+/**
+ * Start a progress simulation during the long-running analysis phase
+ * This gives users visual feedback while waiting for Grok
+ */
+function startAnalysisProgress(job: ScanJob): ReturnType<typeof setInterval> {
+  const analysisSteps = [
+    { progress: 48, message: 'Searching X for recent activity...' },
+    { progress: 52, message: 'Analyzing post history...' },
+    { progress: 55, message: 'Detecting promotional patterns...' },
+    { progress: 58, message: 'Searching for controversies...' },
+    { progress: 62, message: 'Checking backlash mentions...' },
+    { progress: 65, message: 'Analyzing engagement authenticity...' },
+    { progress: 68, message: 'Evaluating follower quality...' },
+    { progress: 72, message: 'Cross-referencing with web sources...' },
+    { progress: 75, message: 'Building behavior profile...' },
+    { progress: 78, message: 'Finalizing analysis...' },
+  ];
+
+  let stepIndex = 0;
+
+  return setInterval(() => {
+    if (stepIndex < analysisSteps.length) {
+      const step = analysisSteps[stepIndex];
+      updateJobStatus(job, 'analyzing', step.progress, step.message);
+      stepIndex++;
+    }
+  }, 1500); // Update every 1.5 seconds
+}
+
+/**
+ * Simple sleep helper
+ */
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 /**
  * Update job status and progress
  */
-function updateJobStatus(job: ScanJob, status: ScanStatus, progress?: number): void {
+function updateJobStatus(job: ScanJob, status: ScanStatus, progress?: number, message?: string): void {
   job.status = status;
   job.progress = progress ?? SCAN_STATUS_PROGRESS[status];
+  job.statusMessage = message;
   scanJobs.set(job.id, job);
 }
 

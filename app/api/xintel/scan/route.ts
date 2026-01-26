@@ -73,6 +73,7 @@ export async function GET(request: NextRequest) {
     handle: job.handle,
     status: job.status,
     progress: job.progress,
+    statusMessage: job.statusMessage,
     startedAt: job.startedAt,
     completedAt: job.completedAt,
     error: job.error,

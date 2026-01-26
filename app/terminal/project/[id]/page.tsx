@@ -81,10 +81,10 @@ export default function ProjectPage({ params }: PageProps) {
       <div className="text-center py-12">
         <p className="text-ivory-light/50 font-mono text-lg mb-4">Project not found</p>
         <Link
-          href="/terminal"
+          href="/terminal/projects"
           className="text-danger-orange font-mono hover:underline"
         >
-          ← Back to dashboard
+          ← Back to projects
         </Link>
       </div>
     );
@@ -115,7 +115,7 @@ export default function ProjectPage({ params }: PageProps) {
                   ${project.ticker}
                 </span>
               )}
-              <ChainIcon chain={project.chain} size={24} />
+              <ChainIcon size={24} />
               {project.verified && (
                 <span className="text-sm font-mono px-3 py-1 bg-larp-green/20 text-larp-green border border-larp-green/30">
                   Verified

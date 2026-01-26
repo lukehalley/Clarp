@@ -76,8 +76,12 @@ evidence: 127 posts analyzed
 | framework | Next.js 16 |
 | frontend | React 19, TailwindCSS |
 | language | TypeScript |
-| chain | Solana |
-| AI | Anthropic SDK |
+| chain | **Solana only** |
+| auth | Phantom wallet (Supabase Web3 Auth) |
+| database | Supabase (Postgres) |
+| AI | Anthropic SDK, xAI Grok |
+
+> **Note:** This app is Solana-only. Authentication uses Phantom wallet via Supabase's native Web3 sign-in. No other chains or wallets are supported.
 
 <br>
 

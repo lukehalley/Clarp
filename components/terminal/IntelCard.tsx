@@ -69,7 +69,7 @@ export default function IntelCard({ project, score, scoreDelta24h }: IntelCardPr
 
               {/* Chain and status badges */}
               <div className="flex items-center gap-2 flex-wrap">
-                <ChainIcon chain={project.chain} size={18} />
+                <ChainIcon size={18} />
                 {project.verified && (
                   <span className="text-xs font-mono px-2 py-0.5 bg-larp-green/20 text-larp-green border border-larp-green/30">
                     Verified

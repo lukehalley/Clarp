@@ -1,10 +1,7 @@
-import type { ResolvedEntity, Chain } from '@/types/terminal';
+import type { ResolvedEntity } from '@/types/terminal';
 
 // Solana address: 32-44 base58 characters (no 0, O, I, l)
 const SOLANA_ADDRESS_REGEX = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
-
-// EVM address: 0x followed by 40 hex characters
-const EVM_ADDRESS_REGEX = /^0x[a-fA-F0-9]{40}$/;
 
 // X/Twitter handle patterns
 const X_HANDLE_REGEX = /^@?[a-zA-Z0-9_]{1,15}$/;
@@ -12,9 +9,6 @@ const X_URL_REGEX = /(?:x\.com|twitter\.com)\/([a-zA-Z0-9_]{1,15})/;
 
 // Domain pattern (simplified)
 const DOMAIN_REGEX = /^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z]{2,})+$/;
-
-// ENS pattern
-const ENS_REGEX = /^[a-zA-Z0-9-]+\.eth$/;
 
 // Ticker pattern
 const TICKER_REGEX = /^\$?[A-Za-z][A-Za-z0-9]{0,9}$/;
@@ -51,16 +45,6 @@ export function resolveEntity(query: string): ResolvedEntity | null {
     };
   }
 
-  // Check for EVM address
-  if (EVM_ADDRESS_REGEX.test(trimmed)) {
-    return {
-      type: 'contract',
-      value: trimmed,
-      normalized: trimmed.toLowerCase(),
-      chain: detectEVMChain(trimmed),
-    };
-  }
-
   // Check for X/Twitter URL
   const xUrlMatch = trimmed.match(X_URL_REGEX);
   if (xUrlMatch) {
@@ -83,18 +67,8 @@ export function resolveEntity(query: string): ResolvedEntity | null {
     }
   }
 
-  // Check for ENS name
-  if (ENS_REGEX.test(trimmed)) {
-    return {
-      type: 'ens',
-      value: trimmed,
-      normalized: trimmed.toLowerCase(),
-      chain: 'ethereum',
-    };
-  }
-
   // Check for domain
-  if (DOMAIN_REGEX.test(trimmed) && !trimmed.endsWith('.eth')) {
+  if (DOMAIN_REGEX.test(trimmed)) {
     // Remove protocol if present
     const normalized = trimmed
       .replace(/^https?:\/\//, '')
@@ -129,26 +103,10 @@ export function resolveEntity(query: string): ResolvedEntity | null {
 }
 
 /**
- * Detect EVM chain from address (placeholder - would need actual lookup)
- */
-function detectEVMChain(_address: string): Chain {
-  // In a real implementation, we would query multiple chains
-  // For now, default to Ethereum
-  return 'ethereum';
-}
-
-/**
  * Validate if a string is a valid Solana address
  */
 export function isValidSolanaAddress(address: string): boolean {
   return SOLANA_ADDRESS_REGEX.test(address);
-}
-
-/**
- * Validate if a string is a valid EVM address
- */
-export function isValidEVMAddress(address: string): boolean {
-  return EVM_ADDRESS_REGEX.test(address);
 }
 
 /**
@@ -157,13 +115,6 @@ export function isValidEVMAddress(address: string): boolean {
 export function isValidXHandle(handle: string): boolean {
   const normalized = handle.startsWith('@') ? handle.slice(1) : handle;
   return X_HANDLE_REGEX.test(normalized);
-}
-
-/**
- * Validate if a string is a valid ENS name
- */
-export function isValidENS(name: string): boolean {
-  return ENS_REGEX.test(name);
 }
 
 /**
@@ -212,8 +163,6 @@ export function formatEntity(entity: ResolvedEntity): string {
       return `${entity.normalized.slice(0, 6)}...${entity.normalized.slice(-4)}`;
     case 'domain':
       return entity.normalized;
-    case 'ens':
-      return entity.normalized;
     default:
       return entity.value;
   }
@@ -244,11 +193,6 @@ export function getSuggestions(query: string): string[] {
   // If looks like partial domain, suggest .com
   if (/^[a-zA-Z0-9-]+$/.test(trimmed) && trimmed.length > 2) {
     suggestions.push(`${trimmed.toLowerCase()}.com`);
-  }
-
-  // If ends with .et, suggest .eth
-  if (trimmed.endsWith('.et')) {
-    suggestions.push(`${trimmed}h`);
   }
 
   return suggestions.slice(0, 3);

@@ -105,7 +105,7 @@ export default function ProjectCard({
 
             {/* Chain badge row */}
             <div className="flex items-center gap-2 mt-2">
-              <ChainIcon chain={project.chain} size={18} />
+              <ChainIcon size={18} />
 
               {project.verified && (
                 <span className="text-xs font-mono px-2 py-0.5 bg-larp-green/20 text-larp-green border border-larp-green/30 flex items-center gap-1">

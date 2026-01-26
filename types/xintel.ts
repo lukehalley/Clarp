@@ -23,6 +23,7 @@ export interface ScanJob {
   depth: number;
   status: ScanStatus;
   progress: number; // 0-100
+  statusMessage?: string; // Detailed step description
   startedAt: Date;
   completedAt?: Date;
   error?: string;

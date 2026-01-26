@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import SearchInput from './SearchInput';
 import TerminalLoader from './TerminalLoader';
 import {
-  LayoutDashboard,
+  FolderKanban,
   Bookmark,
   Bell,
   Menu,
@@ -16,6 +16,7 @@ import {
   Radar,
   Settings,
 } from 'lucide-react';
+import ConnectWallet from '@/components/ConnectWallet';
 
 interface NavItem {
   href: string;
@@ -24,7 +25,7 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: '/terminal', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
+  { href: '/terminal/projects', label: 'Projects', icon: <FolderKanban size={18} /> },
   { href: '/terminal/xintel', label: 'X Intel', icon: <Radar size={18} /> },
 ];
 
@@ -61,7 +62,9 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
   };
 
   const isActive = (href: string) => {
-    if (href === '/terminal') return pathname === '/terminal';
+    if (href === '/terminal/projects') {
+      return pathname === '/terminal/projects' || pathname.startsWith('/terminal/project/');
+    }
     return pathname.startsWith(href);
   };
 
@@ -130,6 +133,9 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
             <div className="hidden lg:block flex-1">
               <SearchInput compact />
             </div>
+
+            {/* Connect Wallet Button */}
+            <ConnectWallet compact />
 
             {/* Watchlist Button */}
             <Link
@@ -259,6 +265,10 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
                   <ChevronRight size={16} className="text-ivory-light/30" />
                 </Link>
               ))}
+              {/* Mobile Connect Wallet */}
+              <div className="px-4 py-3">
+                <ConnectWallet className="w-full" />
+              </div>
               {/* Mobile Action Buttons */}
               <div className="flex gap-3 px-4 py-3">
                 <Link

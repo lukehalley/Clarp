@@ -1,28 +1,18 @@
 'use client';
 
-import { Chain } from '@/types/terminal';
 import Image from 'next/image';
 
-const CHAIN_ICONS: Record<Chain, string> = {
-  ethereum: '/icons/chains/eth.svg',
-  solana: '/icons/chains/sol.svg',
-  base: '/icons/chains/base.svg',
-  arbitrum: '/icons/chains/arb.svg',
-};
-
 interface ChainIconProps {
-  chain: Chain;
   size?: number;
   className?: string;
 }
 
-export default function ChainIcon({ chain, size = 16, className = '' }: ChainIconProps) {
-  const iconPath = CHAIN_ICONS[chain];
-
+// Solana-only app - simplified chain icon
+export default function ChainIcon({ size = 16, className = '' }: ChainIconProps) {
   return (
     <Image
-      src={iconPath}
-      alt={chain}
+      src="/icons/chains/sol.svg"
+      alt="Solana"
       width={size}
       height={size}
       className={className}

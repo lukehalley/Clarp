@@ -1,16 +1,13 @@
 // CLARP Terminal - TypeScript Types
 
 // ============================================================================
-// CHAINS
+// CHAIN (Solana only)
 // ============================================================================
 
-export type Chain = 'solana' | 'ethereum' | 'base' | 'arbitrum';
+export type Chain = 'solana';
 
 export const CHAIN_INFO: Record<Chain, { name: string; shortName: string; color: string }> = {
   solana: { name: 'Solana', shortName: 'SOL', color: '#9945FF' },
-  ethereum: { name: 'Ethereum', shortName: 'ETH', color: '#627EEA' },
-  base: { name: 'Base', shortName: 'BASE', color: '#0052FF' },
-  arbitrum: { name: 'Arbitrum', shortName: 'ARB', color: '#28A0F0' },
 };
 
 // ============================================================================
@@ -208,14 +205,13 @@ export interface Alert {
 // SEARCH & ENTITY RESOLUTION
 // ============================================================================
 
-export type EntityType = 'ticker' | 'contract' | 'x_handle' | 'domain' | 'ens';
+export type EntityType = 'ticker' | 'contract' | 'x_handle' | 'domain';
 
 export const ENTITY_TYPE_LABELS: Record<EntityType, string> = {
   ticker: 'Token Ticker',
   contract: 'Contract Address',
   x_handle: 'X Handle',
   domain: 'Website Domain',
-  ens: 'ENS Name',
 };
 
 export interface ResolvedEntity {

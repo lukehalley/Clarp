@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, X, Hash, Wallet, AtSign, Globe, Sparkles } from 'lucide-react';
+import { Search, X, Hash, Wallet, AtSign, Globe } from 'lucide-react';
 import type { EntityType } from '@/types/terminal';
 
 interface SearchInputProps {
@@ -16,7 +16,6 @@ const ENTITY_ICONS: Record<EntityType, React.ReactNode> = {
   contract: <Wallet size={14} />,
   x_handle: <AtSign size={14} />,
   domain: <Globe size={14} />,
-  ens: <Sparkles size={14} />,
 };
 
 const RECENT_SEARCHES_KEY = 'clarp-recent-searches';
@@ -27,7 +26,6 @@ const PLACEHOLDER_OPTIONS = [
   'Search contract...',
   'Search @handle...',
   'Search domain...',
-  'Search ENS...',
 ];
 
 export default function SearchInput({ compact, initialValue = '', onSearch }: SearchInputProps) {
@@ -142,9 +140,7 @@ export default function SearchInput({ compact, initialValue = '', onSearch }: Se
     if (!q) return null;
     if (q.startsWith('$') || q.startsWith('#')) return 'ticker';
     if (q.startsWith('@') || q.includes('x.com/') || q.includes('twitter.com/')) return 'x_handle';
-    if (q.endsWith('.eth')) return 'ens';
     if (/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(q)) return 'contract'; // Solana
-    if (/^0x[a-fA-F0-9]{40}$/.test(q)) return 'contract'; // EVM
     if (q.includes('.') && !q.includes(' ')) return 'domain';
     return null;
   };
@@ -249,8 +245,8 @@ export default function SearchInput({ compact, initialValue = '', onSearch }: Se
             <div className="grid grid-cols-2 gap-1 text-xs font-mono text-ivory-light/50 px-2">
               <span className="flex items-center gap-1">{ENTITY_ICONS.ticker} $TICKER</span>
               <span className="flex items-center gap-1">{ENTITY_ICONS.x_handle} @handle</span>
-              <span className="flex items-center gap-1">{ENTITY_ICONS.contract} 0x... / Sol...</span>
-              <span className="flex items-center gap-1">{ENTITY_ICONS.ens} name.eth</span>
+              <span className="flex items-center gap-1">{ENTITY_ICONS.contract} Solana address</span>
+              <span className="flex items-center gap-1">{ENTITY_ICONS.domain} domain.com</span>
             </div>
           </div>
         </div>

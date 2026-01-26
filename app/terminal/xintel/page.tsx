@@ -16,6 +16,8 @@ function XIntelContent() {
   const [error, setError] = useState('');
   const [isScanning, setIsScanning] = useState(false);
   const [scanStatus, setScanStatus] = useState<ScanStatus>('queued');
+  const [scanProgress, setScanProgress] = useState(0);
+  const [scanStatusMessage, setScanStatusMessage] = useState('');
   const [scanError, setScanError] = useState('');
   const [availableHandles, setAvailableHandles] = useState<string[]>([]);
   const hasAutoSubmitted = useRef(false);
@@ -56,6 +58,8 @@ function XIntelContent() {
 
     setIsScanning(true);
     setScanStatus('queued');
+    setScanProgress(0);
+    setScanStatusMessage('Initializing scan...');
 
     try {
       const response = await fetch('/api/xintel/scan', {
@@ -76,7 +80,7 @@ function XIntelContent() {
         return;
       }
 
-      // Poll for completion
+      // Poll for completion (faster polling for smoother progress)
       const jobId = data.jobId;
       const pollInterval = setInterval(async () => {
         try {
@@ -84,6 +88,8 @@ function XIntelContent() {
           const statusData = await statusResponse.json();
 
           setScanStatus(statusData.status);
+          setScanProgress(statusData.progress ?? 0);
+          setScanStatusMessage(statusData.statusMessage ?? '');
 
           if (statusData.status === 'complete') {
             clearInterval(pollInterval);
@@ -100,7 +106,7 @@ function XIntelContent() {
           setScanError('Failed to check scan status');
           setIsScanning(false);
         }
-      }, 500);
+      }, 300); // Poll every 300ms for smooth progress updates
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to start scan');
       setIsScanning(false);
@@ -220,7 +226,12 @@ function XIntelContent() {
         </div>
       ) : (
         <div className="max-w-lg mx-auto">
-          <ScanStepper status={scanStatus} error={scanError} />
+          <ScanStepper
+            status={scanStatus}
+            progress={scanProgress}
+            statusMessage={scanStatusMessage}
+            error={scanError}
+          />
 
           <div className="mt-4 text-center">
             <p className="font-mono text-xs text-ivory-light/40">

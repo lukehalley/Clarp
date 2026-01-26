@@ -132,10 +132,10 @@ export default function ProfilePage({ params }: PageProps) {
       <div className="text-center py-12">
         <p className="text-ivory-light/50 font-mono text-lg mb-4">Profile not found</p>
         <Link
-          href="/terminal"
+          href="/terminal/projects"
           className="text-danger-orange font-mono hover:underline"
         >
-          ← Back to dashboard
+          ← Back to projects
         </Link>
       </div>
     );

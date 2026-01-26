@@ -89,7 +89,7 @@ export default function ReportContent({ project, score }: ReportContentProps) {
             </div>
 
             <div className="mt-2">
-              <ChainIcon chain={project.chain} size={24} />
+              <ChainIcon size={24} />
             </div>
           </div>
 
