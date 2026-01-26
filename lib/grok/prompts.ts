@@ -11,81 +11,118 @@ import type { GrokTweetInput, GrokProfileInput } from './types';
  * Prompt for analyzing X profiles using Grok's live x_search capability
  * This is used with the Responses API and grok-4-1-fast model
  */
-export const ANALYSIS_PROMPT = `You are a crypto project researcher. Use your X search and web search capabilities to thoroughly research the X/Twitter account @{handle}.
+export const ANALYSIS_PROMPT = `You are an investigative crypto researcher. Perform EXHAUSTIVE research on @{handle}.
 
-Research this account and respond with a JSON object. Be fair and objective - not everyone in crypto is a scammer. Look for BOTH positive and negative indicators.
+REQUIRED RESEARCH (do ALL of these searches):
+1. Search "from:@{handle}" - Get 50+ posts going back 6-12 months
+2. Search "@{handle} scam OR rug OR fraud" - Check for allegations
+3. Search "@{handle}" - What do others say about them?
+4. Search for any tokens/projects they've promoted with outcomes
 
-IMPORTANT SCORING GUIDANCE:
-- Doxxed developers with real work history = TRUSTWORTHY
-- Projects with active GitHub repos = TRUSTWORTHY
-- Long-standing accounts (1+ years) with consistent activity = TRUSTWORTHY
-- Verified accounts with real engagement = TRUSTWORTHY
-- Anonymous teams promoting tokens with hype = SUSPICIOUS
-- New accounts with aggressive promotion = SUSPICIOUS
-- Accounts with scam allegations from credible sources = HIGH RISK
-
-Respond with this exact JSON structure:
+BUILD A COMPLETE PROFILE:
 
 {
-  "handle": "the_handle",
+  "handle": "",
+  "postsAnalyzed": 50,
   "profile": {
-    "displayName": "Display Name",
-    "bio": "Bio text",
-    "verified": true/false,
-    "followers": 12345,
-    "following": 123,
-    "createdAt": "YYYY-MM-DD",
-    "xUrl": "https://x.com/handle"
+    "displayName": "",
+    "bio": "",
+    "verified": false,
+    "followers": 0,
+    "following": 0,
+    "createdAt": "YYYY-MM-DD"
   },
   "positiveIndicators": {
-    "isDoxxed": true/false,
+    "isDoxxed": false,
     "doxxedDetails": "Name, work history, LinkedIn, etc. or null",
-    "hasActiveGithub": true/false,
+    "hasActiveGithub": false,
     "githubUrl": "url or null",
-    "githubActivity": "description of repo activity or null",
-    "hasRealProduct": true/false,
+    "githubActivity": "description or null",
+    "hasRealProduct": false,
     "productDetails": "what they've built or null",
-    "accountAgeDays": 365,
-    "hasConsistentHistory": true/false,
-    "hasOrganicEngagement": true/false,
-    "hasCredibleBackers": true/false,
+    "accountAgeDays": 0,
+    "hasConsistentHistory": false,
+    "hasOrganicEngagement": false,
+    "hasCredibleBackers": false,
     "backersDetails": "who backs them or null",
-    "teamMembers": [{"name": "Name", "role": "Role", "xHandle": "@handle", "isDoxxed": true}]
+    "teamMembers": []
   },
   "negativeIndicators": {
     "hasScamAllegations": false,
-    "scamDetails": "specific allegations or null",
+    "scamDetails": "specific allegations with sources or null",
     "hasRugHistory": false,
     "rugDetails": "details or null",
-    "isAnonymousTeam": false,
+    "isAnonymousTeam": true,
     "hasHypeLanguage": false,
-    "hypeExamples": ["example tweets"] or [],
+    "hypeExamples": [],
     "hasSuspiciousFollowers": false,
-    "suspiciousDetails": "bought followers, bots, etc. or null",
+    "suspiciousDetails": "null",
     "hasPreviousRebrand": false,
-    "rebrandDetails": "previous name or null",
+    "rebrandDetails": "null",
     "hasAggressivePromotion": false,
-    "promotionDetails": "details or null"
+    "promotionDetails": "null"
+  },
+  "theStory": "Write 2-3 paragraphs telling who this person is, their evolution over time, key events, and reputation. Include specific dates and cite tweets.",
+  "timeline": [
+    {
+      "period": "Month YYYY",
+      "activity": "What they were doing",
+      "promotedProjects": ["$TOKEN"],
+      "notableEvents": ["event"],
+      "sentiment": "how others perceived them"
+    }
+  ],
+  "promotionHistory": [
+    {
+      "project": "",
+      "ticker": "$XXX",
+      "role": "founder/advisor/paid/organic",
+      "period": "start - end",
+      "claims": ["what they claimed"],
+      "outcome": "success/failed/rugged/unknown",
+      "evidenceUrls": ["tweet urls"]
+    }
+  ],
+  "reputation": {
+    "supporters": [{ "who": "@handle", "what": "what they said", "url": "" }],
+    "critics": [{ "who": "@handle", "accusation": "what they alleged", "url": "" }],
+    "controversies": [{ "date": "", "summary": "", "resolution": "" }]
+  },
+  "keyFindings": ["important findings - both positive and negative"],
+  "evidence": [
+    {
+      "date": "YYYY-MM-DD",
+      "tweetExcerpt": "actual tweet text (280 chars max)",
+      "tweetUrl": "https://x.com/...",
+      "label": "promotion|controversy|claim|scam_warning|milestone|neutral|positive",
+      "relevance": "why this matters"
+    }
+  ],
+  "verdict": {
+    "trustLevel": 7,
+    "riskLevel": "low/medium/high",
+    "confidence": "low/medium/high",
+    "summary": "2-3 sentence verdict"
   },
   "website": "https://... or null",
   "github": "https://github.com/... or null",
-  "contract": {
-    "address": "0x... or null",
-    "chain": "ethereum/solana/etc"
-  } or null,
-  "controversies": ["list of specific controversies with sources"] or [],
-  "keyFindings": ["important findings - both positive and negative"],
-  "overallAssessment": "Brief 1-2 sentence assessment",
-  "riskLevel": "low/medium/high",
-  "confidence": "low/medium/high"
+  "contract": { "address": "0x... or null", "chain": "ethereum/solana/etc" }
 }
 
-CRITICAL: Base riskLevel on EVIDENCE, not assumptions:
-- "low" = Doxxed team OR established account with clean history OR active development
-- "medium" = Some concerns but no major red flags, or insufficient information
-- "high" = Credible scam allegations OR confirmed rug history OR clear fraud indicators
+SCORING GUIDANCE:
+- Doxxed developers with real work history = TRUSTWORTHY (trustLevel 8-10)
+- Projects with active GitHub repos = TRUSTWORTHY
+- Long-standing accounts (1+ years) with clean history = TRUSTWORTHY
+- Anonymous teams promoting tokens with hype = SUSPICIOUS (trustLevel 4-6)
+- Accounts with credible scam allegations = HIGH RISK (trustLevel 1-3)
 
-Return ONLY valid JSON, no markdown or explanation.`;
+CRITICAL:
+- Include 10+ evidence items with actual tweet content
+- Search multiple times to cover 6-12 months of history
+- Capture BOTH supporters and critics
+- Base riskLevel on EVIDENCE, not assumptions
+
+Return ONLY valid JSON, no markdown.`;
 
 // ============================================================================
 // SYSTEM PROMPT

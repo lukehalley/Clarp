@@ -1,11 +1,24 @@
 'use client';
 
 import { KeyFinding } from '@/types/xintel';
-import { AlertTriangle, AlertCircle, Info, ChevronRight } from 'lucide-react';
+import { AlertTriangle, AlertCircle, Info, CheckCircle, ChevronRight } from 'lucide-react';
 
 interface KeyFindingsProps {
   findings: KeyFinding[];
   onFindingClick?: (finding: KeyFinding) => void;
+}
+
+// Check if a finding is positive based on content
+function isPositiveFinding(finding: KeyFinding): boolean {
+  const text = (finding.title + ' ' + finding.description).toLowerCase();
+  const positiveKeywords = [
+    'doxxed', 'verified', 'established', 'active github', 'real product',
+    'organic engagement', 'consistent history', 'credible', 'trustworthy',
+    'clean history', 'legitimate', 'transparent', 'professional',
+    'year-old account', 'years-old account', 'year old account',
+    'blue verified', 'no scam', 'no rug', 'no fraud', 'good standing'
+  ];
+  return positiveKeywords.some(keyword => text.includes(keyword));
 }
 
 export default function KeyFindings({ findings, onFindingClick }: KeyFindingsProps) {
@@ -21,6 +34,12 @@ export default function KeyFindings({ findings, onFindingClick }: KeyFindingsPro
   }
 
   const severityConfig = {
+    positive: {
+      icon: CheckCircle,
+      color: '#22c55e',
+      bg: 'bg-larp-green/10',
+      border: 'border-larp-green/30',
+    },
     critical: {
       icon: AlertTriangle,
       color: '#dc2626',
@@ -44,7 +63,9 @@ export default function KeyFindings({ findings, onFindingClick }: KeyFindingsPro
   return (
     <div className="space-y-2">
       {findings.slice(0, 3).map((finding) => {
-        const config = severityConfig[finding.severity];
+        // Use positive config if this is a positive finding, otherwise use severity
+        const isPositive = isPositiveFinding(finding);
+        const config = isPositive ? severityConfig.positive : severityConfig[finding.severity];
         const Icon = config.icon;
 
         return (

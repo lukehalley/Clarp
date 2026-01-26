@@ -25,9 +25,12 @@ import type {
  * This is the primary transformer for the simplified Grok-only approach
  */
 export function grokAnalysisToReport(analysis: GrokAnalysisResult): XIntelReport {
-  // Build profile from Grok analysis
+  // Build profile from Grok analysis - ensure handle has no @ prefix
+  const rawHandle = analysis.handle || analysis.profile.handle || '';
+  const cleanHandle = rawHandle.replace(/^@/, '');
+
   const profile: XIntelProfile = {
-    handle: analysis.handle || analysis.profile.handle,
+    handle: cleanHandle,
     displayName: analysis.profile.displayName,
     bio: analysis.profile.bio,
     verified: analysis.profile.verified,
@@ -42,7 +45,7 @@ export function grokAnalysisToReport(analysis: GrokAnalysisResult): XIntelReport
   // Build reputation score from analysis
   const score = buildScoreFromAnalysis(analysis);
 
-  // Transform key findings
+  // Transform key findings - include theStory as a finding if available
   const keyFindings: KeyFinding[] = analysis.keyFindings.map((finding, i) => ({
     id: `kf_${i}`,
     title: extractFindingTitle(finding),
@@ -50,6 +53,17 @@ export function grokAnalysisToReport(analysis: GrokAnalysisResult): XIntelReport
     severity: determineSeverity(finding, analysis.riskLevel),
     evidenceIds: [],
   }));
+
+  // Add theStory as the first key finding if available
+  if (analysis.theStory) {
+    keyFindings.unshift({
+      id: 'kf_story',
+      title: 'Profile Summary',
+      description: analysis.theStory,
+      severity: 'info',
+      evidenceIds: [],
+    });
+  }
 
   // Build linked entities from analysis
   const linkedEntities: LinkedEntity[] = [];
@@ -93,16 +107,32 @@ export function grokAnalysisToReport(analysis: GrokAnalysisResult): XIntelReport
     });
   }
 
-  // Build evidence from citations
-  const evidence: XIntelEvidence[] = analysis.citations.map((citation, i) => ({
-    id: `ev_citation_${i}`,
-    tweetId: extractTweetIdFromUrl(citation.url) || `citation_${i}`,
-    timestamp: new Date(),
-    excerpt: citation.title || citation.url,
-    label: 'neutral' as const,
-    url: citation.url,
-    confidence: 0.8,
-  }));
+  // Build evidence from Grok's evidence array (preferred) or fall back to citations
+  let evidence: XIntelEvidence[];
+
+  if (analysis.evidence && analysis.evidence.length > 0) {
+    // Use the new evidence format with actual tweet excerpts
+    evidence = analysis.evidence.map((ev, i) => ({
+      id: `ev_${i}`,
+      tweetId: extractTweetIdFromUrl(ev.tweetUrl) || `ev_${i}`,
+      timestamp: new Date(),
+      excerpt: ev.tweetExcerpt,
+      label: mapGrokLabelToEvidence(ev.label),
+      url: ev.tweetUrl,
+      confidence: 0.85,
+    }));
+  } else {
+    // Fall back to citations (less informative)
+    evidence = analysis.citations.map((citation, i) => ({
+      id: `ev_citation_${i}`,
+      tweetId: extractTweetIdFromUrl(citation.url) || `citation_${i}`,
+      timestamp: new Date(),
+      excerpt: citation.title || citation.url,
+      label: 'neutral' as const,
+      url: citation.url,
+      confidence: 0.8,
+    }));
+  }
 
   // Build default behavior and network metrics
   const behaviorMetrics = buildDefaultBehaviorMetrics(analysis);
@@ -113,23 +143,51 @@ export function grokAnalysisToReport(analysis: GrokAnalysisResult): XIntelReport
     profile,
     score,
     keyFindings,
-    shilledEntities: [],
-    backlashEvents: analysis.controversies.map((controversy, i) => ({
-      id: `be_${i}`,
-      category: 'criticism' as const,
-      severity: analysis.riskLevel === 'high' ? 'high' as const : 'medium' as const,
-      startDate: new Date(),
-      endDate: undefined,
-      sources: [],
-      evidenceIds: [],
-      summary: controversy,
+    shilledEntities: (analysis.promotionHistory || []).map((promo, i) => ({
+      id: `se_${i}`,
+      entityName: promo.project,
+      ticker: promo.ticker,
+      mentionCount: promo.evidenceUrls?.length || 1,
+      promoCount: promo.evidenceUrls?.length || 1,
+      firstSeen: new Date(),
+      lastSeen: new Date(),
+      promoIntensity: promo.outcome === 'rugged' ? 90 : promo.outcome === 'failed' ? 70 : 50,
+      evidenceIds: promo.evidenceUrls?.map((_, j) => `ev_promo_${i}_${j}`) || [],
     })),
+    backlashEvents: [
+      // From reputation.controversies (more detailed)
+      ...(analysis.reputation?.controversies || []).map((controversy, i) => ({
+        id: `be_rep_${i}`,
+        category: 'criticism' as const,
+        severity: analysis.riskLevel === 'high' ? 'high' as const : 'medium' as const,
+        startDate: controversy.date ? new Date(controversy.date) : new Date(),
+        endDate: undefined,
+        sources: analysis.reputation?.critics?.map(c => ({
+          handle: c.who,
+          displayName: undefined,
+          followers: undefined,
+        })) || [],
+        evidenceIds: [],
+        summary: `${controversy.summary}${controversy.resolution ? ` (${controversy.resolution})` : ''}`,
+      })),
+      // From simple controversies array (fallback)
+      ...analysis.controversies.map((controversy, i) => ({
+        id: `be_${i}`,
+        category: 'criticism' as const,
+        severity: analysis.riskLevel === 'high' ? 'high' as const : 'medium' as const,
+        startDate: new Date(),
+        endDate: undefined,
+        sources: [],
+        evidenceIds: [],
+        summary: controversy,
+      })),
+    ],
     behaviorMetrics,
     networkMetrics,
     linkedEntities,
     evidence,
     scanTime: new Date(),
-    postsAnalyzed: analysis.searchesPerformed || 0,
+    postsAnalyzed: analysis.postsAnalyzed || analysis.evidence?.length || analysis.citations.length || 10,
     cached: false,
     disclaimer: `AI-powered analysis using Grok with live X search. ${analysis.tokensUsed ? `Tokens used: ${analysis.tokensUsed}.` : ''} This is not financial advice.`,
   };
@@ -145,30 +203,39 @@ function buildScoreFromAnalysis(analysis: GrokAnalysisResult): ReputationScore {
 
   // ============================================================================
   // CALCULATE SCORE FROM EVIDENCE-BASED INDICATORS
-  // Base score: 50 (neutral starting point)
+  // Use verdict.trustLevel if available (1-10 scale -> 0-100)
+  // Otherwise calculate from indicators
   // ============================================================================
 
-  let score = 50;
+  let score: number;
 
-  // POSITIVE FACTORS (add points) - reward legitimate actors
-  if (pos.isDoxxed) score += 20;                    // Doxxed team is major trust signal
-  if (pos.hasActiveGithub) score += 15;             // Active development = real project
-  if (pos.hasRealProduct) score += 10;              // Shipped product = not vaporware
-  if (pos.accountAgeDays > 365) score += 10;        // 1+ year account = established
-  else if (pos.accountAgeDays > 180) score += 5;    // 6+ months = somewhat established
-  if (pos.hasConsistentHistory) score += 5;         // Consistent messaging
-  if (pos.hasOrganicEngagement) score += 5;         // Real engagement
-  if (pos.hasCredibleBackers) score += 10;          // Known backers
-  if (analysis.profile.verified) score += 5;        // Verified account
+  if (analysis.verdict?.trustLevel !== undefined) {
+    // Use Grok's trust assessment (1-10 scale -> 0-100)
+    score = analysis.verdict.trustLevel * 10;
+  } else {
+    // Fall back to calculated score
+    score = 50;
 
-  // NEGATIVE FACTORS (subtract points) - penalize red flags
-  if (neg.hasScamAllegations) score -= 30;          // Scam allegations = serious
-  if (neg.hasRugHistory) score -= 40;               // Rug history = disqualifying
-  if (neg.isAnonymousTeam && !pos.isDoxxed) score -= 10; // Anonymous = some concern
-  if (neg.hasHypeLanguage) score -= 5;              // Hype language = minor concern
-  if (neg.hasSuspiciousFollowers) score -= 10;      // Fake followers
-  if (neg.hasPreviousRebrand) score -= 5;           // Rebrand = some concern
-  if (neg.hasAggressivePromotion) score -= 10;      // Aggressive promo = concerning
+    // POSITIVE FACTORS (add points) - reward legitimate actors
+    if (pos.isDoxxed) score += 20;                    // Doxxed team is major trust signal
+    if (pos.hasActiveGithub) score += 15;             // Active development = real project
+    if (pos.hasRealProduct) score += 10;              // Shipped product = not vaporware
+    if (pos.accountAgeDays > 365) score += 10;        // 1+ year account = established
+    else if (pos.accountAgeDays > 180) score += 5;    // 6+ months = somewhat established
+    if (pos.hasConsistentHistory) score += 5;         // Consistent messaging
+    if (pos.hasOrganicEngagement) score += 5;         // Real engagement
+    if (pos.hasCredibleBackers) score += 10;          // Known backers
+    if (analysis.profile.verified) score += 5;        // Verified account
+
+    // NEGATIVE FACTORS (subtract points) - penalize red flags
+    if (neg.hasScamAllegations) score -= 30;          // Scam allegations = serious
+    if (neg.hasRugHistory) score -= 40;               // Rug history = disqualifying
+    if (neg.isAnonymousTeam && !pos.isDoxxed) score -= 10; // Anonymous = some concern
+    if (neg.hasHypeLanguage) score -= 5;              // Hype language = minor concern
+    if (neg.hasSuspiciousFollowers) score -= 10;      // Fake followers
+    if (neg.hasPreviousRebrand) score -= 5;           // Rebrand = some concern
+    if (neg.hasAggressivePromotion) score -= 10;      // Aggressive promo = concerning
+  }
 
   // Clamp score to 0-100
   score = Math.max(0, Math.min(100, score));
@@ -290,6 +357,25 @@ function determineSeverity(finding: string, riskLevel: string): 'info' | 'warnin
 function extractTweetIdFromUrl(url: string): string | undefined {
   const match = url.match(/status\/(\d+)/);
   return match ? match[1] : undefined;
+}
+
+function mapGrokLabelToEvidence(
+  label: string
+): XIntelEvidence['label'] {
+  // Map Grok's labels to our evidence label type
+  const labelMap: Record<string, XIntelEvidence['label']> = {
+    shill: 'shill',
+    backlash: 'backlash',
+    toxic: 'toxic',
+    hype: 'hype',
+    positive: 'neutral',
+    promotion: 'shill',
+    controversy: 'backlash',
+    claim: 'neutral',
+    scam_warning: 'backlash',
+    milestone: 'neutral',
+  };
+  return labelMap[label] || 'neutral';
 }
 
 function buildDefaultBehaviorMetrics(analysis: GrokAnalysisResult): BehaviorMetrics {

@@ -268,9 +268,11 @@ export class GrokClient {
       const profile = parsed.profile as Record<string, unknown> || {};
       const positive = parsed.positiveIndicators as Record<string, unknown> || {};
       const negative = parsed.negativeIndicators as Record<string, unknown> || {};
+      const evidenceItems = Array.isArray(parsed.evidence) ? parsed.evidence : [];
 
       return {
         handle: String(parsed.handle || ''),
+        postsAnalyzed: typeof parsed.postsAnalyzed === 'number' ? parsed.postsAnalyzed : undefined,
         profile: {
           handle: String(parsed.handle || profile.handle || ''),
           displayName: profile.displayName as string | undefined,
@@ -319,7 +321,28 @@ export class GrokClient {
         } : null,
         controversies: Array.isArray(parsed.controversies) ? parsed.controversies : [],
         keyFindings: Array.isArray(parsed.keyFindings) ? parsed.keyFindings : [],
+        evidence: evidenceItems.map((ev: Record<string, unknown>) => ({
+          date: ev.date as string | undefined,
+          tweetExcerpt: String(ev.tweetExcerpt || ev.content || ''),
+          tweetUrl: String(ev.tweetUrl || ev.url || ''),
+          label: this.normalizeEvidenceLabel(ev.label as string),
+          relevance: String(ev.relevance || ev.notes || ''),
+        })),
         overallAssessment: parsed.overallAssessment as string | undefined,
+        theStory: parsed.theStory as string | undefined,
+        timeline: Array.isArray(parsed.timeline) ? parsed.timeline : undefined,
+        promotionHistory: Array.isArray(parsed.promotionHistory) ? parsed.promotionHistory : undefined,
+        reputation: parsed.reputation ? {
+          supporters: Array.isArray((parsed.reputation as any).supporters) ? (parsed.reputation as any).supporters : [],
+          critics: Array.isArray((parsed.reputation as any).critics) ? (parsed.reputation as any).critics : [],
+          controversies: Array.isArray((parsed.reputation as any).controversies) ? (parsed.reputation as any).controversies : [],
+        } : undefined,
+        verdict: parsed.verdict ? {
+          trustLevel: typeof (parsed.verdict as any).trustLevel === 'number' ? (parsed.verdict as any).trustLevel : 5,
+          riskLevel: this.normalizeRiskLevel((parsed.verdict as any).riskLevel),
+          confidence: this.normalizeConfidence((parsed.verdict as any).confidence),
+          summary: String((parsed.verdict as any).summary || ''),
+        } : undefined,
         riskLevel: this.normalizeRiskLevel(parsed.riskLevel as string),
         confidence: this.normalizeConfidence(parsed.confidence as string),
         rawAnalysis: text,
@@ -346,6 +369,19 @@ export class GrokClient {
     if (normalized === 'low') return 'low';
     if (normalized === 'high') return 'high';
     return 'medium';
+  }
+
+  private normalizeEvidenceLabel(
+    label: string | undefined
+  ): 'shill' | 'backlash' | 'toxic' | 'hype' | 'neutral' | 'positive' | 'promotion' | 'controversy' | 'claim' | 'scam_warning' | 'milestone' {
+    const normalized = String(label || '').toLowerCase().replace('_', '-');
+    const validLabels = ['shill', 'backlash', 'toxic', 'hype', 'positive', 'promotion', 'controversy', 'claim', 'scam_warning', 'scam-warning', 'milestone'];
+    if (validLabels.includes(normalized)) {
+      // Normalize scam-warning to scam_warning
+      if (normalized === 'scam-warning') return 'scam_warning';
+      return normalized as any;
+    }
+    return 'neutral';
   }
 
   private parseFromText(

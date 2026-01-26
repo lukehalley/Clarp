@@ -1,0 +1,91 @@
+{
+  "handle": "@fitzybrypto",
+  "dataCollection": {
+    "postsAnalyzed": 60,
+    "timeframeStart": "2024-08-04",
+    "timeframeEnd": "2026-01-26",
+    "mentionsAnalyzed": 20
+  },
+  "behaviorProfile": {
+    "postingPatterns": {
+      "frequency": "3-5 per day during active periods",
+      "peakActivity": "evenings GMT / late nights",
+      "contentMix": { "original": 40, "replies": 50, "retweets": 5, "quotes": 5 }
+    },
+    "communicationStyle": {
+      "tone": "casual/aggressive/hype-driven",
+      "useOfUrgency": true,
+      "useOfFOMO": true,
+      "engagementWithCritics": "argues aggressively",
+      "examples": ["you fucking thick cunt only talking about 1 side while the other goes round with weapons mobbed up", "You are literally having a convo about it on x right now you dumb fuck", "No one gives a fuck about your scam 15k shitter with your botted followers you fucking Nigerian gimp"]
+    },
+    "consistencyAnalysis": {
+      "narrativeShifts": [{ "date": "2025-06", "from": "general crypto gems", "to": "privacy focus ($Zera)", "possible_reason": "emerging privacy narrative on Solana" }],
+      "deletedContentEvidence": "no signs found",
+      "contradictions": []
+    }
+  },
+  "promotionTrack": [
+    {
+      "project": "$griffain",
+      "role": "organic_supporter",
+      "promotionPeriod": "2024-12 - 2025-01",
+      "claimsMade": ["kucoin gem list vote winner", "Binance alpha/listing incoming", "ATH after listing"],
+      "outcome": "success",
+      "followUpBehavior": "continued hype post-listing"
+    },
+    {
+      "project": "$Zera",
+      "role": "organic_supporter",
+      "promotionPeriod": "2025-06 - ongoing",
+      "claimsMade": ["Zec/XMR of Solana", "offline privacy cash", "billions MC", "roadmap delivers"],
+      "outcome": "ongoing building",
+      "followUpBehavior": "consistent long-term holding claims, addresses FUD"
+    },
+    {
+      "project": "$BOOB",
+      "role": "supporter/rescuer",
+      "promotionPeriod": "2026-01 - ongoing",
+      "claimsMade": ["charity for breast cancer", "team abandoned, stepping in", "creator fees to Keep A Breast"],
+      "outcome": "unknown/low MC ongoing",
+      "followUpBehavior": "addressing issues, promoting events"
+    },
+    {
+      "project": "VFS",
+      "role": "critic",
+      "promotionPeriod": "2026-01",
+      "claimsMade": ["scam warning"],
+      "outcome": "rugged/scam confirmed",
+      "followUpBehavior": "pointed out attackers for FUD"
+    }
+  ],
+  "networkAnalysis": {
+    "frequentInteractions": ["@ZeraLabs", "@dev_skill_issue", "@keepabreast", "@boobillions", "@solana", "@toly", "@melymel"],
+    "knownAssociations": [{ "handle": "@ZeraLabs", "relationship": "strong supporter", "reputation": "legit privacy project" }, { "handle": "@keepabreast", "relationship": "charity partner", "reputation": "established breast cancer org" }],
+    "suspiciousPatterns": []
+  },
+  "trustSignals": {
+    "positive": [
+      { "signal": "warns scams", "evidence": "VFS scam call before rug", "weight": "strong" },
+      { "signal": "long-term holding", "evidence": "claims 8+ months $Zera no sells", "weight": "moderate" },
+      { "signal": "charity support", "evidence": "$BOOB fees to Keep A Breast", "weight": "strong" }
+    ],
+    "negative": [
+      { "signal": "aggressive tone", "evidence": "profanity in replies", "weight": "weak" },
+      { "signal": "heavy shilling", "evidence": "hype posts with urgency", "weight": "moderate" }
+    ]
+  },
+  "evidence": [
+    { "date": "2026-01-26", "tweet": "Fighting with dex... @keepabreast", "url": "post:2014404196112437393", "category": "promotion", "notes": "$BOOB support" },
+    { "date": "2026-01-19", "tweet": "$Zera keeps building... privacy on chain", "url": "post:2013322740418109536", "category": "promotion", "notes": "$Zera hype" },
+    { "date": "2025-01-03", "tweet": "#griffain... new ATH after binance perp", "url": "post:1875306479613571145", "category": "promotion", "notes": "$griffain success" },
+    { "date": "2024-08-04", "tweet": "you fucking thick cunt...", "url": "post:1820123921020240366", "category": "reply", "notes": "aggressive style" },
+    { "date": "2026-01-15", "tweet": "warned them VFS was a scam...", "url": "web:6", "category": "scam warning", "notes": "VFS" }
+  ],
+  "assessment": {
+    "overallRisk": "low",
+    "confidence": "medium",
+    "characterSummary": "Crude, humorous Solana degen with aggressive banter; genuine long-term supporter of privacy ($Zera) and charity ($BOOB); calls out scams.",
+    "watchFor": ["$Zera roadmap delivery and price action", "$BOOB charity fund usage transparency", "new promotions for rugs"]
+  }
+}

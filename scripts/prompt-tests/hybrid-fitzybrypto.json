@@ -1,0 +1,321 @@
+{
+  "handle": "@Fitzybrypto",
+  "research": {
+    "postsAnalyzed": 70,
+    "mentionsAnalyzed": 20,
+    "timeframeCovered": "2025-01-31 to 2026-01-26",
+    "searchesPerformed": [
+      "from:fitzybrypto since:2025-12-01",
+      "from:fitzybrypto since:2025-10-01 until:2025-12-01",
+      "from:fitzybrypto since:2025-08-01 until:2025-10-01",
+      "from:fitzybrypto since:2025-06-01 until:2025-08-01",
+      "from:fitzybrypto since:2025-04-01 until:2025-06-01",
+      "from:fitzybrypto since:2025-02-01 until:2025-04-01",
+      "from:fitzybrypto until:2025-02-01 since:2024-10-01",
+      "@fitzybrypto (scam OR rug OR fraud OR shill OR paid OR dump OR honeypot) -from:fitzybrypto",
+      "@fitzybrypto -from:fitzybrypto since:2025-01-01",
+      "@fitzybrypto promotions tokens projects crypto calls shills",
+      "fitzybrypto scam rug fraud allegations"
+    ]
+  },
+  "profile": {
+    "displayName": "Fitzy",
+    "bio": "PhD in retard communication helping the lower IQ understand how things work. Posts are not financial advice.",
+    "verified": true,
+    "followers": 8435,
+    "accountCreated": "2024-02-01",
+    "accountAgeDays": 725
+  },
+  "theStory": "@Fitzybrypto is a Solana-focused degen trader and content creator known for his blunt, no-nonsense style and heavy promotion of privacy-focused projects like $ZERA from ZeraLabs. Emerging prominently in early 2025, he gained traction by calling out market manipulations and advising degens on trenches survival, as seen in his Jan 31, 2025 post criticizing tech founders for misunderstanding degen dynamics (https://x.com/Fitzybrypto/status/1885471731827015785). By mid-2025, he shifted to aggressive shilling of $ZERA, positioning it as Solana's top privacy play ahead of narratives like $ZEC, with posts like Sep 30, 2025 highlighting its visionary edge (https://x.com/Fitzybrypto/status/1973153772873588769). Controversies are minimal, though some accuse him of shilling rugs; no evidence found of personal rugs. Recently, on Jan 26, 2026, he CTO'd $BOOB after its team rugged, aligning it with breast cancer charity Keep A Breast for positive sentiment (https://x.com/Fitzybrypto/status/2015578806975668289). His reputation is solid among Solana degens for authenticity, evolving from critic to community leader.",
+  "timeline": [
+    {
+      "period": "Jan 2025",
+      "activity": "Critiquing degen market dynamics, advising founders on Solana launches",
+      "promotedProjects": [
+        "none major"
+      ],
+      "notableEvents": [
+        "Post on trenches-born advisors needed"
+      ],
+      "sentiment": "Respected for market insight"
+    },
+    {
+      "period": "Mar-May 2025",
+      "activity": "Memecoin commentary, calling out rugs",
+      "promotedProjects": [
+        "$hoodrat"
+      ],
+      "notableEvents": [
+        "Shilling $hoodrat resurgence"
+      ],
+      "sentiment": "Neutral, degen-focused"
+    },
+    {
+      "period": "Jul-Sep 2025",
+      "activity": "Heavy $ZERA promotion as privacy leader",
+      "promotedProjects": [
+        "$ZERA"
+      ],
+      "notableEvents": [
+        "Multiple $ZERA threads, dev interactions"
+      ],
+      "sentiment": "Growing hype, supporters rally"
+    },
+    {
+      "period": "Nov-Dec 2025",
+      "activity": "$RIFTS advocacy, market calls",
+      "promotedProjects": [
+        "$RIFTS",
+        "$pippin"
+      ],
+      "notableEvents": [
+        "$RIFTS TVL/revenue thesis"
+      ],
+      "sentiment": "Bullish on infra"
+    },
+    {
+      "period": "Jan 2026",
+      "activity": "CTO $BOOB charity coin post-rug",
+      "promotedProjects": [
+        "$BOOB",
+        "$ZERA"
+      ],
+      "notableEvents": [
+        "$BOOB takeover, boob memes"
+      ],
+      "sentiment": "Positive charity pivot, some skepticism"
+    }
+  ],
+  "promotionHistory": [
+    {
+      "project": "ZeraLabs",
+      "ticker": "$ZERA",
+      "role": "organic shiller",
+      "period": "2025-09 - ongoing",
+      "claims": [
+        "Top privacy on Solana, multi-cycle survivor, p2p cash"
+      ],
+      "outcome": "Ongoing, building",
+      "evidence": [
+        "https://x.com/Fitzybrypto/status/1973153772873588769",
+        "https://x.com/Fitzybrypto/status/1973170969998139494"
+      ]
+    },
+    {
+      "project": "BOOB",
+      "ticker": "$BOOB",
+      "role": "CTO post-rug",
+      "period": "2026-01",
+      "claims": [
+        "Charity for Keep A Breast, protect boob"
+      ],
+      "outcome": "Recovering, charity aligned",
+      "evidence": [
+        "https://x.com/Fitzybrypto/status/2015578806975668289",
+        "https://x.com/Fitzybrypto/status/2015755631609721292"
+      ]
+    },
+    {
+      "project": "RIFTS",
+      "ticker": "$RIFTS",
+      "role": "organic",
+      "period": "2025-11",
+      "claims": [
+        "500m+ potential with TVL/revenue"
+      ],
+      "outcome": "Dipped but advocated holding",
+      "evidence": [
+        "https://x.com/Fitzybrypto/status/1994944603917529529"
+      ]
+    },
+    {
+      "project": "hoodrat",
+      "ticker": "$hoodrat",
+      "role": "shill",
+      "period": "2025-05",
+      "claims": [
+        "Ready to run again"
+      ],
+      "outcome": "unknown",
+      "evidence": [
+        "https://x.com/Fitzybrypto/status/1928859086755340747"
+      ]
+    }
+  ],
+  "communicationStyle": {
+    "tone": "casual/aggressive/hype",
+    "useOfUrgency": true,
+    "useOfFOMO": true,
+    "profanity": true,
+    "examples": [
+      "You are literally an elite retard (https://x.com/Fitzybrypto/status/1994921052556988532)",
+      "Degens run the market... public suicide (https://x.com/Fitzybrypto/status/1885471731827015785)",
+      "Toly will jizz in his pants (https://x.com/Fitzybrypto/status/1973154642533224506)"
+    ]
+  },
+  "reputation": {
+    "supporters": [
+      {
+        "who": "@dev_skill_issue",
+        "what": "Pushing buttons fast on Zera",
+        "url": "https://x.com/Fitzybrypto/status/1973119329873850776"
+      },
+      {
+        "who": "@keepabreast",
+        "what": "Supporting $BOOB",
+        "url": "https://x.com/keepabreast/status/2015586666275131855"
+      }
+    ],
+    "critics": [
+      {
+        "who": "@Pokepal007",
+        "accusation": "Fresh wallets? Hold supply for charity?",
+        "url": "https://x.com/Pokepal007/status/2014804173372751891"
+      },
+      {
+        "who": "@ozzycooks",
+        "accusation": "Fartcoin and titcoin shill?",
+        "url": "https://x.com/ozzycooks/status/2014648599511273654"
+      }
+    ],
+    "controversies": [
+      {
+        "date": "2026-01-23",
+        "summary": "Accused of pumping $BOOB for dump on charity",
+        "resolution": "Defended as CTO revival, ongoing"
+      }
+    ]
+  },
+  "trustSignals": {
+    "positive": [
+      {
+        "signal": "Blue verified, steady growth to 8k followers",
+        "evidence": "User profile data",
+        "weight": "moderate"
+      },
+      {
+        "signal": "CTO abandoned charity coin $BOOB",
+        "evidence": "Posts aligning with Keep A Breast",
+        "weight": "strong"
+      },
+      {
+        "signal": "Calls out scams/manips like VFS",
+        "evidence": "Posts warning arb scams",
+        "weight": "strong"
+      }
+    ],
+    "negative": [
+      {
+        "signal": "Heavy shilling of low-cap tokens",
+        "evidence": "$ZERA, $BOOB promotions",
+        "weight": "moderate"
+      },
+      {
+        "signal": "Aggressive language alienates some",
+        "evidence": "Routine 'retard' usage",
+        "weight": "weak"
+      }
+    ]
+  },
+  "evidence": [
+    {
+      "date": "2026-01-26",
+      "content": "It was seeing Shaney still posting videos and not realising the team had abandoned it on her that made me do it ngl",
+      "url": "https://x.com/Fitzybrypto/status/2015578806975668289",
+      "type": "milestone",
+      "importance": "high",
+      "notes": "$BOOB CTO motivation"
+    },
+    {
+      "date": "2026-01-26",
+      "content": "I went to bed last night thinking of boob. I woke up this morning thinking of boob. We must protect boob at all costs.",
+      "url": "https://x.com/Fitzybrypto/status/2015755631609721292",
+      "type": "promotion",
+      "importance": "medium",
+      "notes": "$BOOB hype"
+    },
+    {
+      "date": "2025-11-30",
+      "content": "I’d honestly just let the short term traders bleed out of $RIFTS and scoop lows... Tvl and revenue takes off its a 500m+ project",
+      "url": "https://x.com/Fitzybrypto/status/1994944603917529529",
+      "type": "promotion",
+      "importance": "high",
+      "notes": "$RIFTS thesis"
+    },
+    {
+      "date": "2025-09-30",
+      "content": "Oh boy we are literally so far in front of everyone with the vision Everyone starting to talk about privacy, p2p etc. Probably going to end up being that one coin that makes it out the trenches this bull",
+      "url": "https://x.com/Fitzybrypto/status/1973153772873588769",
+      "type": "promotion",
+      "importance": "high",
+      "notes": "$ZERA long-term call"
+    },
+    {
+      "date": "2025-09-30",
+      "content": "Toly will jizz in his pants and vitalik might even get excited about it",
+      "url": "https://x.com/Fitzybrypto/status/1973154642533224506",
+      "type": "promotion",
+      "importance": "medium",
+      "notes": "$ZERA hype"
+    },
+    {
+      "date": "2025-07-28",
+      "content": "True",
+      "url": "https://x.com/Fitzybrypto/status/1949765035275731010",
+      "type": "claim",
+      "importance": "low",
+      "notes": "Memecoin commentary"
+    },
+    {
+      "date": "2025-05-31",
+      "content": "#hoodrat looks like its ready to run again and seeing more people taking notice of it on timeline",
+      "url": "https://x.com/Fitzybrypto/status/1928859086755340747",
+      "type": "promotion",
+      "importance": "medium",
+      "notes": "$hoodrat call"
+    },
+    {
+      "date": "2025-03-31",
+      "content": "same as your shit utilities you shill you fucking clown",
+      "url": "https://x.com/Fitzybrypto/status/1906788324083175889",
+      "type": "controversy",
+      "importance": "low",
+      "notes": "Aggressive reply"
+    },
+    {
+      "date": "2025-01-31",
+      "content": "Degens run the market, if anything is clear after the recent launches if @toly and @rajgokal want to bring in real founders... they need to bring in advisors... born in the ‘trenches’",
+      "url": "https://x.com/Fitzybrypto/status/1885471731827015785",
+      "type": "claim",
+      "importance": "high",
+      "notes": "Degen market advice"
+    },
+    {
+      "date": "2025-11-30",
+      "content": "Imagine doing this post and not including @ZeraLabs 🤣",
+      "url": "https://x.com/Fitzybrypto/status/1994921575746052303",
+      "type": "promotion",
+      "importance": "medium",
+      "notes": "$ZERA callout"
+    },
+    {
+      "date": "2026-01-26",
+      "content": "You drag people into crypto who don’t want to be involved in crypto then wonder why they take the money and run",
+      "url": "https://x.com/Fitzybrypto/status/2015615594955968934",
+      "type": "scam_warning",
+      "importance": "medium",
+      "notes": "Rug critique"
+    }
+  ],
+  "verdict": {
+    "trustLevel": 7,
+    "riskLevel": "low",
+    "confidence": "high",
+    "summary": "Fitzy is a genuine Solana degen with strong community ties, no scam history, and positive actions like CTOing a charity rug recovery. Heavy shilling is organic, focused on conviction plays like $ZERA. Minimal red flags despite aggressive style.",
+    "watchFor": [
+      "$BOOB dump risks post-CTO",
+      "$ZERA delivery on privacy promises",
+      "New promotions for rugs"
+    ]
+  }
+}

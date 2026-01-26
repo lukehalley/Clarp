@@ -308,10 +308,65 @@ export interface NegativeIndicators {
 }
 
 /**
+ * Evidence item from Grok analysis with actual tweet content
+ */
+export interface GrokEvidenceItem {
+  date?: string;
+  tweetExcerpt: string;
+  tweetUrl: string;
+  label: 'shill' | 'backlash' | 'toxic' | 'hype' | 'neutral' | 'positive' | 'promotion' | 'controversy' | 'claim' | 'scam_warning' | 'milestone';
+  relevance: string;
+}
+
+/**
+ * Timeline period from Grok analysis
+ */
+export interface GrokTimelinePeriod {
+  period: string;
+  activity: string;
+  promotedProjects: string[];
+  notableEvents: string[];
+  sentiment: string;
+}
+
+/**
+ * Promotion history item from Grok analysis
+ */
+export interface GrokPromotionHistoryItem {
+  project: string;
+  ticker?: string;
+  role: string;
+  period: string;
+  claims: string[];
+  outcome: string;
+  evidenceUrls: string[];
+}
+
+/**
+ * Reputation data from Grok analysis
+ */
+export interface GrokReputation {
+  supporters: Array<{ who: string; what: string; url: string }>;
+  critics: Array<{ who: string; accusation: string; url: string }>;
+  controversies: Array<{ date: string; summary: string; resolution: string }>;
+}
+
+/**
+ * Verdict from Grok analysis
+ */
+export interface GrokVerdict {
+  trustLevel: number;
+  riskLevel: 'low' | 'medium' | 'high';
+  confidence: 'low' | 'medium' | 'high';
+  summary: string;
+}
+
+/**
  * Analysis result from Grok with live X data
  */
 export interface GrokAnalysisResult {
   handle: string;
+  postsAnalyzed?: number;
   profile: {
     handle: string;
     displayName?: string;
@@ -335,7 +390,14 @@ export interface GrokAnalysisResult {
   // Findings
   controversies: string[];
   keyFindings: string[];
+  evidence?: GrokEvidenceItem[];
   overallAssessment?: string;
+  // Rich analysis data (from hybrid prompt)
+  theStory?: string;
+  timeline?: GrokTimelinePeriod[];
+  promotionHistory?: GrokPromotionHistoryItem[];
+  reputation?: GrokReputation;
+  verdict?: GrokVerdict;
   // Risk assessment
   riskLevel: 'low' | 'medium' | 'high';
   confidence: 'low' | 'medium' | 'high';
