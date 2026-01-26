@@ -1,5 +1,6 @@
 // X Intel Scan Service
 // Handles scan job management and report generation
+// Uses Grok with live X search (no separate X API needed)
 
 import {
   ScanJob,
@@ -8,10 +9,16 @@ import {
   SCAN_STATUS_PROGRESS,
 } from '@/types/xintel';
 import { getMockReport, getAvailableHandles } from './mock-data';
+import { getGrokClient, isGrokAvailable, GrokApiError } from '@/lib/grok/client';
+import { grokAnalysisToReport } from './transformers';
 
 // ============================================================================
-// SCAN JOB MANAGEMENT
+// CONFIGURATION
 // ============================================================================
+
+// Check if real API mode is enabled (only needs Grok with x_search capability)
+const USE_REAL_API = process.env.ENABLE_REAL_X_API === 'true'
+  && isGrokAvailable();
 
 // In-memory job storage (would be Redis/DB in production)
 const scanJobs: Map<string, ScanJob> = new Map();
@@ -26,6 +33,10 @@ const CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 const scanCooldowns: Map<string, Date> = new Map();
 const COOLDOWN_MS = 60 * 1000; // 1 minute between scans of same handle
 
+// ============================================================================
+// PUBLIC API
+// ============================================================================
+
 export interface SubmitScanOptions {
   handle: string;
   depth?: number;
@@ -37,13 +48,14 @@ export interface SubmitScanResult {
   status: ScanStatus;
   cached: boolean;
   error?: string;
+  useRealApi?: boolean;
 }
 
 /**
  * Submit a new scan job
  */
 export function submitScan(options: SubmitScanOptions): SubmitScanResult {
-  const { handle, depth = 800, force = false } = options;
+  const { handle, depth = 200, force = false } = options;
   const normalizedHandle = handle.toLowerCase().replace('@', '');
 
   // Check rate limiting
@@ -70,6 +82,7 @@ export function submitScan(options: SubmitScanOptions): SubmitScanResult {
           jobId: `cached_${normalizedHandle}`,
           status: 'cached',
           cached: true,
+          useRealApi: cached.report.disclaimer.includes('AI-powered'),
         };
       }
     }
@@ -89,13 +102,14 @@ export function submitScan(options: SubmitScanOptions): SubmitScanResult {
   scanJobs.set(jobId, job);
   scanCooldowns.set(normalizedHandle, new Date());
 
-  // Start processing asynchronously (simulated)
+  // Start processing asynchronously
   processScanJob(jobId);
 
   return {
     jobId,
     status: 'queued',
     cached: false,
+    useRealApi: USE_REAL_API,
   };
 }
 
@@ -133,18 +147,84 @@ export function hasAvailableData(handle: string): boolean {
   return getAvailableHandles().includes(normalizedHandle);
 }
 
+/**
+ * Check if real API mode is enabled
+ */
+export function isRealApiEnabled(): boolean {
+  return USE_REAL_API;
+}
+
 // ============================================================================
-// SCAN PROCESSING (SIMULATED)
+// SCAN PROCESSING
 // ============================================================================
 
 /**
  * Process a scan job through the pipeline
- * In production this would call real X API and ML services
+ * Uses real X API + Grok if configured, otherwise falls back to mock data
  */
 async function processScanJob(jobId: string): Promise<void> {
   const job = scanJobs.get(jobId);
   if (!job) return;
 
+  try {
+    if (USE_REAL_API) {
+      await processRealScan(job);
+    } else {
+      await processMockScan(job);
+    }
+  } catch (error) {
+    console.error(`Scan job ${jobId} failed:`, error);
+    job.status = 'failed';
+    job.error = error instanceof Error ? error.message : 'Unknown error';
+    scanJobs.set(jobId, job);
+
+    // Fall back to mock data on error
+    try {
+      const report = getMockReport(job.handle);
+      report.scanTime = new Date();
+      report.cached = false;
+      report.disclaimer = 'Scan failed, showing cached/generated data. ' + report.disclaimer;
+      reportCache.set(job.handle, { report, cachedAt: new Date() });
+    } catch {
+      // Ignore fallback errors
+    }
+  }
+}
+
+/**
+ * Process scan using Grok with live X search
+ * Grok handles all data fetching via x_search and web_search tools
+ */
+async function processRealScan(job: ScanJob): Promise<void> {
+  const grokClient = getGrokClient();
+
+  // Stage 1: Starting analysis
+  updateJobStatus(job, 'fetching', 10);
+
+  // Stage 2: Grok analyzes the profile using x_search
+  updateJobStatus(job, 'analyzing', 30);
+  const analysis = await grokClient.analyzeProfile(job.handle);
+
+  // Stage 3: Build report from Grok analysis
+  updateJobStatus(job, 'scoring', 80);
+  const report = grokAnalysisToReport(analysis);
+
+  // Stage 4: Complete
+  updateJobStatus(job, 'complete', 100);
+  job.completedAt = new Date();
+  scanJobs.set(job.id, job);
+
+  // Cache the report
+  reportCache.set(job.handle, {
+    report,
+    cachedAt: new Date(),
+  });
+}
+
+/**
+ * Process scan using mock data (fallback mode)
+ */
+async function processMockScan(job: ScanJob): Promise<void> {
   const stages: { status: ScanStatus; delay: number }[] = [
     { status: 'fetching', delay: 800 },
     { status: 'extracting', delay: 600 },
@@ -154,10 +234,7 @@ async function processScanJob(jobId: string): Promise<void> {
   ];
 
   for (const stage of stages) {
-    // Update job status
-    job.status = stage.status;
-    job.progress = SCAN_STATUS_PROGRESS[stage.status];
-    scanJobs.set(jobId, job);
+    updateJobStatus(job, stage.status);
 
     if (stage.delay > 0) {
       await new Promise(resolve => setTimeout(resolve, stage.delay));
@@ -170,6 +247,7 @@ async function processScanJob(jobId: string): Promise<void> {
   // Update report with actual scan time
   report.scanTime = new Date();
   report.cached = false;
+  report.disclaimer = 'DEMO MODE: ' + report.disclaimer;
 
   // Cache the report
   reportCache.set(job.handle, {
@@ -178,7 +256,16 @@ async function processScanJob(jobId: string): Promise<void> {
   });
 
   job.completedAt = new Date();
-  scanJobs.set(jobId, job);
+  scanJobs.set(job.id, job);
+}
+
+/**
+ * Update job status and progress
+ */
+function updateJobStatus(job: ScanJob, status: ScanStatus, progress?: number): void {
+  job.status = status;
+  job.progress = progress ?? SCAN_STATUS_PROGRESS[status];
+  scanJobs.set(job.id, job);
 }
 
 // ============================================================================
@@ -263,4 +350,17 @@ export function getActiveJobs(): ScanJob[] {
   return Array.from(scanJobs.values())
     .filter(job => job.status !== 'complete' && job.status !== 'failed')
     .sort((a, b) => b.startedAt.getTime() - a.startedAt.getTime());
+}
+
+/**
+ * Get API configuration status (for debugging/admin)
+ */
+export function getApiStatus(): {
+  grokConfigured: boolean;
+  realApiEnabled: boolean;
+} {
+  return {
+    grokConfigured: isGrokAvailable(),
+    realApiEnabled: USE_REAL_API,
+  };
 }
