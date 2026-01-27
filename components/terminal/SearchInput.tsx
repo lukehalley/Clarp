@@ -237,20 +237,20 @@ export default function SearchInput({ compact, initialValue = '', onSearch }: Se
       {isFocused && (recentSearches.length > 0 || query) && (
         <div
           ref={dropdownRef}
-          className="absolute top-full left-0 right-0 mt-1 bg-slate-dark border border-ivory-light/20 z-50 max-h-64 overflow-y-auto"
+          className="absolute top-full left-0 right-0 mt-1 bg-slate-dark border border-ivory-light/20 z-50 max-h-[50vh] sm:max-h-64 overflow-y-auto shadow-xl"
         >
           {/* Recent searches */}
           {recentSearches.length > 0 && !query && (
             <div className="p-2">
-              <div className="text-xs font-mono text-ivory-light/40 px-2 py-1">Recent</div>
+              <div className="text-[11px] sm:text-xs font-mono text-ivory-light/40 px-2 py-1">Recent</div>
               {recentSearches.map((search, i) => (
                 <button
                   key={i}
                   onClick={() => handleRecentClick(search)}
-                  className="w-full text-left px-3 py-2 font-mono text-sm text-ivory-light/70 hover:bg-ivory-light/5 hover:text-ivory-light flex items-center gap-2"
+                  className="w-full text-left px-2 sm:px-3 py-2 font-mono text-xs sm:text-sm text-ivory-light/70 hover:bg-ivory-light/5 hover:text-ivory-light flex items-center gap-2 overflow-hidden"
                 >
-                  <Search size={14} className="text-ivory-light/30" />
-                  {search}
+                  <Search size={12} className="text-ivory-light/30 shrink-0 sm:w-3.5 sm:h-3.5" />
+                  <span className="truncate">{search}</span>
                 </button>
               ))}
             </div>
@@ -261,22 +261,22 @@ export default function SearchInput({ compact, initialValue = '', onSearch }: Se
             <div className="p-2">
               <button
                 onClick={() => handleSearch(query)}
-                className="w-full text-left px-3 py-2 font-mono text-sm text-ivory-light hover:bg-danger-orange/10 flex items-center gap-2"
+                className="w-full text-left px-2 sm:px-3 py-2 font-mono text-xs sm:text-sm text-ivory-light hover:bg-danger-orange/10 flex items-center gap-2"
               >
-                <Search size={14} className="text-danger-orange" />
-                Search for &quot;{query}&quot;
+                <Search size={12} className="text-danger-orange shrink-0 sm:w-3.5 sm:h-3.5" />
+                <span className="truncate">Search for &quot;{query.slice(0, 30)}{query.length > 30 ? '...' : ''}&quot;</span>
               </button>
             </div>
           )}
 
           {/* Input format hints */}
           <div className="p-2 border-t border-ivory-light/10">
-            <div className="text-xs font-mono text-ivory-light/40 px-2 py-1">Accepted formats</div>
-            <div className="grid grid-cols-2 gap-1 text-xs font-mono text-ivory-light/50 px-2">
-              <span className="flex items-center gap-1">{INPUT_ICONS.token_address} Token address</span>
+            <div className="text-[11px] sm:text-xs font-mono text-ivory-light/40 px-2 py-1">Accepted formats</div>
+            <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[10px] sm:text-xs font-mono text-ivory-light/50 px-2">
+              <span className="flex items-center gap-1">{INPUT_ICONS.token_address} <span className="truncate">Token</span></span>
               <span className="flex items-center gap-1">{INPUT_ICONS.x_handle} @handle</span>
-              <span className="flex items-center gap-1">{INPUT_ICONS.website} Website URL</span>
-              <span className="flex items-center gap-1">{INPUT_ICONS.github} GitHub repo</span>
+              <span className="flex items-center gap-1">{INPUT_ICONS.website} <span className="truncate">Website</span></span>
+              <span className="flex items-center gap-1">{INPUT_ICONS.github} GitHub</span>
             </div>
           </div>
         </div>

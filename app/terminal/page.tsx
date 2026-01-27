@@ -60,67 +60,73 @@ function FilterBar({
   onReset: () => void;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-3 py-4 border-b border-ivory-light/10">
-      {/* Category filters */}
-      <div className="flex items-center gap-1">
-        {CATEGORY_FILTERS.map((filter) => (
-          <button
-            key={filter.id}
-            onClick={() => setCategory(filter.id)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 font-mono text-xs transition-colors border ${
-              category === filter.id
-                ? 'bg-danger-orange text-black font-bold border-danger-orange'
-                : 'bg-transparent border-ivory-light/20 text-ivory-light/60 hover:text-ivory-light hover:border-ivory-light/40'
-            }`}
-          >
-            {filter.icon}
-            {filter.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Spacer */}
-      <div className="flex-1" />
-
-      {/* Sort */}
-      <div className="flex items-center gap-2">
-        <ArrowUpDown size={14} className="text-ivory-light/40" />
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value as SortOption)}
-          className="px-2 py-1.5 bg-transparent border border-ivory-light/20 text-ivory-light/60 font-mono text-xs focus:border-danger-orange/50 focus:outline-none cursor-pointer"
-        >
-          {SORT_OPTIONS.map((option) => (
-            <option key={option.id} value={option.id} className="bg-slate-dark">
-              {option.label}
-            </option>
+    <div className="space-y-3 py-4 border-b border-ivory-light/10">
+      {/* Row 1: Category filters - scrollable on mobile */}
+      <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0 scrollbar-hide">
+        <div className="flex items-center gap-1 min-w-max sm:min-w-0">
+          {CATEGORY_FILTERS.map((filter) => (
+            <button
+              key={filter.id}
+              onClick={() => setCategory(filter.id)}
+              className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 font-mono text-[11px] sm:text-xs transition-colors border whitespace-nowrap ${
+                category === filter.id
+                  ? 'bg-danger-orange text-black font-bold border-danger-orange'
+                  : 'bg-transparent border-ivory-light/20 text-ivory-light/60 hover:text-ivory-light hover:border-ivory-light/40'
+              }`}
+            >
+              {filter.icon}
+              {filter.label}
+            </button>
           ))}
-        </select>
+        </div>
       </div>
 
-      {/* Verified toggle */}
-      <button
-        onClick={() => setVerifiedOnly(!verifiedOnly)}
-        className={`flex items-center gap-2 px-3 py-1.5 font-mono text-xs transition-colors border ${
-          verifiedOnly
-            ? 'bg-larp-green/20 border-larp-green/50 text-larp-green'
-            : 'bg-transparent border-ivory-light/20 text-ivory-light/40 hover:text-ivory-light/60'
-        }`}
-      >
-        <CheckCircle size={12} />
-        Verified
-      </button>
+      {/* Row 2: Sort + Verified + Reset */}
+      <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+        {/* Sort */}
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <ArrowUpDown size={12} className="text-ivory-light/40 sm:w-3.5 sm:h-3.5" />
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as SortOption)}
+            className="px-1.5 sm:px-2 py-1.5 bg-transparent border border-ivory-light/20 text-ivory-light/60 font-mono text-[11px] sm:text-xs focus:border-danger-orange/50 focus:outline-none cursor-pointer max-w-[140px] sm:max-w-none"
+          >
+            {SORT_OPTIONS.map((option) => (
+              <option key={option.id} value={option.id} className="bg-slate-dark">
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
 
-      {/* Reset */}
-      {hasActiveFilters && (
+        {/* Verified toggle */}
         <button
-          onClick={onReset}
-          className="flex items-center gap-1.5 px-3 py-1.5 font-mono text-xs text-ivory-light/40 hover:text-ivory-light/60 transition-colors"
+          onClick={() => setVerifiedOnly(!verifiedOnly)}
+          className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 font-mono text-[11px] sm:text-xs transition-colors border ${
+            verifiedOnly
+              ? 'bg-larp-green/20 border-larp-green/50 text-larp-green'
+              : 'bg-transparent border-ivory-light/20 text-ivory-light/40 hover:text-ivory-light/60'
+          }`}
         >
-          <RotateCcw size={12} />
-          Reset
+          <CheckCircle size={11} className="sm:w-3 sm:h-3" />
+          <span className="hidden xs:inline">Verified</span>
+          <span className="xs:hidden">✓</span>
         </button>
-      )}
+
+        {/* Spacer */}
+        <div className="flex-1" />
+
+        {/* Reset */}
+        {hasActiveFilters && (
+          <button
+            onClick={onReset}
+            className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 font-mono text-[11px] sm:text-xs text-ivory-light/40 hover:text-ivory-light/60 transition-colors"
+          >
+            <RotateCcw size={11} className="sm:w-3 sm:h-3" />
+            <span className="hidden xs:inline">Reset</span>
+          </button>
+        )}
+      </div>
     </div>
   );
 }
