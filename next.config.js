@@ -14,6 +14,11 @@ const nextConfig = {
         hostname: 'avatars.githubusercontent.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'cdn.dexscreener.com',
+        pathname: '/**',
+      },
     ],
   },
 }

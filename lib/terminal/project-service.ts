@@ -25,6 +25,8 @@ export function rowToProject(row: ProjectRow): Project {
     websiteUrl: row.website_url || undefined,
     tokenAddress: row.token_address || undefined,
     ticker: row.ticker || undefined,
+    discordUrl: row.discord_url || undefined,
+    telegramUrl: row.telegram_url || undefined,
     trustScore: {
       score: row.trust_score,
       tier: row.trust_tier as TrustTier,
@@ -36,6 +38,21 @@ export function rowToProject(row: ProjectRow): Project {
     githubIntel: row.github_intel as unknown as Project['githubIntel'] || undefined,
     websiteIntel: row.website_intel as unknown as Project['websiteIntel'] || undefined,
     socialMetrics: row.social_metrics as unknown as Project['socialMetrics'] || undefined,
+    // OSINT-enhanced fields
+    securityIntel: row.security_intel as unknown as Project['securityIntel'] || undefined,
+    tokenomics: row.tokenomics as unknown as Project['tokenomics'] || undefined,
+    liquidity: row.liquidity as unknown as Project['liquidity'] || undefined,
+    techStack: row.tech_stack as unknown as Project['techStack'] || undefined,
+    legalEntity: row.legal_entity as unknown as Project['legalEntity'] || undefined,
+    affiliations: row.affiliations as unknown as Project['affiliations'] || undefined,
+    roadmap: row.roadmap as unknown as Project['roadmap'] || undefined,
+    audit: row.audit as unknown as Project['audit'] || undefined,
+    shippingHistory: row.shipping_history as unknown as Project['shippingHistory'] || undefined,
+    positiveIndicators: row.positive_indicators as unknown as Project['positiveIndicators'] || undefined,
+    negativeIndicators: row.negative_indicators as unknown as Project['negativeIndicators'] || undefined,
+    keyFindings: row.key_findings || undefined,
+    theStory: row.the_story || undefined,
+    controversies: row.controversies || undefined,
     lastScanAt: new Date(row.last_scan_at),
     createdAt: new Date(row.created_at),
   };
@@ -56,6 +73,8 @@ export function projectToInsert(project: Partial<Project> & { name: string }): P
     website_url: project.websiteUrl || null,
     token_address: project.tokenAddress || null,
     ticker: project.ticker || null,
+    discord_url: project.discordUrl || null,
+    telegram_url: project.telegramUrl || null,
     trust_score: project.trustScore?.score || 50,
     trust_confidence: project.trustScore?.confidence || 'low',
     team: (project.team || []) as unknown as ProjectInsert['team'],
@@ -63,6 +82,21 @@ export function projectToInsert(project: Partial<Project> & { name: string }): P
     github_intel: (project.githubIntel || null) as unknown as ProjectInsert['github_intel'],
     website_intel: (project.websiteIntel || null) as unknown as ProjectInsert['website_intel'],
     social_metrics: (project.socialMetrics || null) as unknown as ProjectInsert['social_metrics'],
+    // OSINT-enhanced fields
+    security_intel: (project.securityIntel || null) as unknown as ProjectInsert['security_intel'],
+    tokenomics: (project.tokenomics || null) as unknown as ProjectInsert['tokenomics'],
+    liquidity: (project.liquidity || null) as unknown as ProjectInsert['liquidity'],
+    tech_stack: (project.techStack || null) as unknown as ProjectInsert['tech_stack'],
+    legal_entity: (project.legalEntity || null) as unknown as ProjectInsert['legal_entity'],
+    affiliations: (project.affiliations || null) as unknown as ProjectInsert['affiliations'],
+    roadmap: (project.roadmap || null) as unknown as ProjectInsert['roadmap'],
+    audit: (project.audit || null) as unknown as ProjectInsert['audit'],
+    shipping_history: (project.shippingHistory || null) as unknown as ProjectInsert['shipping_history'],
+    positive_indicators: (project.positiveIndicators || null) as unknown as ProjectInsert['positive_indicators'],
+    negative_indicators: (project.negativeIndicators || null) as unknown as ProjectInsert['negative_indicators'],
+    key_findings: project.keyFindings || null,
+    the_story: project.theStory || null,
+    controversies: project.controversies || null,
   };
 }
 
@@ -82,6 +116,8 @@ export function projectToUpdate(updates: Partial<Project>): ProjectUpdate {
   if (updates.websiteUrl !== undefined) result.website_url = updates.websiteUrl || null;
   if (updates.tokenAddress !== undefined) result.token_address = updates.tokenAddress || null;
   if (updates.ticker !== undefined) result.ticker = updates.ticker || null;
+  if (updates.discordUrl !== undefined) result.discord_url = updates.discordUrl || null;
+  if (updates.telegramUrl !== undefined) result.telegram_url = updates.telegramUrl || null;
   if (updates.trustScore !== undefined) {
     result.trust_score = updates.trustScore.score;
     result.trust_confidence = updates.trustScore.confidence;
@@ -91,6 +127,21 @@ export function projectToUpdate(updates: Partial<Project>): ProjectUpdate {
   if (updates.githubIntel !== undefined) result.github_intel = (updates.githubIntel || null) as unknown as ProjectUpdate['github_intel'];
   if (updates.websiteIntel !== undefined) result.website_intel = (updates.websiteIntel || null) as unknown as ProjectUpdate['website_intel'];
   if (updates.socialMetrics !== undefined) result.social_metrics = (updates.socialMetrics || null) as unknown as ProjectUpdate['social_metrics'];
+  // OSINT-enhanced fields
+  if (updates.securityIntel !== undefined) result.security_intel = (updates.securityIntel || null) as unknown as ProjectUpdate['security_intel'];
+  if (updates.tokenomics !== undefined) result.tokenomics = (updates.tokenomics || null) as unknown as ProjectUpdate['tokenomics'];
+  if (updates.liquidity !== undefined) result.liquidity = (updates.liquidity || null) as unknown as ProjectUpdate['liquidity'];
+  if (updates.techStack !== undefined) result.tech_stack = (updates.techStack || null) as unknown as ProjectUpdate['tech_stack'];
+  if (updates.legalEntity !== undefined) result.legal_entity = (updates.legalEntity || null) as unknown as ProjectUpdate['legal_entity'];
+  if (updates.affiliations !== undefined) result.affiliations = (updates.affiliations || null) as unknown as ProjectUpdate['affiliations'];
+  if (updates.roadmap !== undefined) result.roadmap = (updates.roadmap || null) as unknown as ProjectUpdate['roadmap'];
+  if (updates.audit !== undefined) result.audit = (updates.audit || null) as unknown as ProjectUpdate['audit'];
+  if (updates.shippingHistory !== undefined) result.shipping_history = (updates.shippingHistory || null) as unknown as ProjectUpdate['shipping_history'];
+  if (updates.positiveIndicators !== undefined) result.positive_indicators = (updates.positiveIndicators || null) as unknown as ProjectUpdate['positive_indicators'];
+  if (updates.negativeIndicators !== undefined) result.negative_indicators = (updates.negativeIndicators || null) as unknown as ProjectUpdate['negative_indicators'];
+  if (updates.keyFindings !== undefined) result.key_findings = updates.keyFindings || null;
+  if (updates.theStory !== undefined) result.the_story = updates.theStory || null;
+  if (updates.controversies !== undefined) result.controversies = updates.controversies || null;
   if (updates.lastScanAt !== undefined) result.last_scan_at = updates.lastScanAt.toISOString();
 
   return result;

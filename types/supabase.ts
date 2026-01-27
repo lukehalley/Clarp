@@ -14,79 +14,166 @@ export type Database = {
     Tables: {
       projects: {
         Row: {
+          affiliations: Json | null
           ai_summary: string | null
+          audit: Json | null
           avatar_url: string | null
+          controversies: string[] | null
           created_at: string
           description: string | null
-          github_url: string | null
+          discord_url: string | null
           github_intel: Json | null
+          github_url: string | null
           id: string
+          key_findings: string[] | null
           last_scan_at: string
+          legal_entity: Json | null
+          liquidity: Json | null
           market_data: Json | null
           name: string
+          negative_indicators: Json | null
+          positive_indicators: Json | null
+          roadmap: Json | null
+          security_intel: Json | null
           shipping_history: Json | null
           social_metrics: Json | null
           tags: string[] | null
           team: Json | null
+          tech_stack: Json | null
+          telegram_url: string | null
+          the_story: string | null
           ticker: string | null
           token_address: string | null
+          tokenomics: Json | null
           trust_confidence: string
           trust_score: number
           trust_tier: string
           updated_at: string
-          website_url: string | null
           website_intel: Json | null
+          website_url: string | null
           x_handle: string | null
         }
         Insert: {
+          affiliations?: Json | null
           ai_summary?: string | null
+          audit?: Json | null
           avatar_url?: string | null
+          controversies?: string[] | null
           created_at?: string
           description?: string | null
-          github_url?: string | null
+          discord_url?: string | null
           github_intel?: Json | null
+          github_url?: string | null
           id?: string
+          key_findings?: string[] | null
           last_scan_at?: string
+          legal_entity?: Json | null
+          liquidity?: Json | null
           market_data?: Json | null
           name: string
+          negative_indicators?: Json | null
+          positive_indicators?: Json | null
+          roadmap?: Json | null
+          security_intel?: Json | null
           shipping_history?: Json | null
           social_metrics?: Json | null
           tags?: string[] | null
           team?: Json | null
+          tech_stack?: Json | null
+          telegram_url?: string | null
+          the_story?: string | null
           ticker?: string | null
           token_address?: string | null
+          tokenomics?: Json | null
           trust_confidence?: string
           trust_score?: number
           trust_tier?: string
           updated_at?: string
-          website_url?: string | null
           website_intel?: Json | null
+          website_url?: string | null
           x_handle?: string | null
         }
         Update: {
+          affiliations?: Json | null
           ai_summary?: string | null
+          audit?: Json | null
           avatar_url?: string | null
+          controversies?: string[] | null
           created_at?: string
           description?: string | null
-          github_url?: string | null
+          discord_url?: string | null
           github_intel?: Json | null
+          github_url?: string | null
           id?: string
+          key_findings?: string[] | null
           last_scan_at?: string
+          legal_entity?: Json | null
+          liquidity?: Json | null
           market_data?: Json | null
           name?: string
+          negative_indicators?: Json | null
+          positive_indicators?: Json | null
+          roadmap?: Json | null
+          security_intel?: Json | null
           shipping_history?: Json | null
           social_metrics?: Json | null
           tags?: string[] | null
           team?: Json | null
+          tech_stack?: Json | null
+          telegram_url?: string | null
+          the_story?: string | null
           ticker?: string | null
           token_address?: string | null
+          tokenomics?: Json | null
           trust_confidence?: string
           trust_score?: number
           trust_tier?: string
           updated_at?: string
-          website_url?: string | null
           website_intel?: Json | null
+          website_url?: string | null
           x_handle?: string | null
+        }
+        Relationships: []
+      }
+      scan_jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          depth: number | null
+          error: string | null
+          handle: string
+          id: string
+          progress: number | null
+          started_at: string
+          status: string
+          status_message: string | null
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          depth?: number | null
+          error?: string | null
+          handle: string
+          id: string
+          progress?: number | null
+          started_at?: string
+          status?: string
+          status_message?: string | null
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          depth?: number | null
+          error?: string | null
+          handle?: string
+          id?: string
+          progress?: number | null
+          started_at?: string
+          status?: string
+          status_message?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -150,48 +237,6 @@ export type Database = {
           handle?: string
           report?: Json
           scanned_at?: string
-        }
-        Relationships: []
-      }
-      scan_jobs: {
-        Row: {
-          id: string
-          handle: string
-          depth: number
-          status: string
-          progress: number
-          status_message: string | null
-          started_at: string
-          completed_at: string | null
-          error: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id: string
-          handle: string
-          depth?: number
-          status?: string
-          progress?: number
-          status_message?: string | null
-          started_at?: string
-          completed_at?: string | null
-          error?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          handle?: string
-          depth?: number
-          status?: string
-          progress?: number
-          status_message?: string | null
-          started_at?: string
-          completed_at?: string | null
-          error?: string | null
-          created_at?: string
-          updated_at?: string
         }
         Relationships: []
       }

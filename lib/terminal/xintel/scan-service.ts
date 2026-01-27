@@ -1207,7 +1207,8 @@ async function fetchXAvatarUrl(handle: string): Promise<string | undefined> {
 }
 
 /**
- * Create or update a project entity from Grok analysis
+ * Create or update a project entity from Grok analysis + OSINT data
+ * Now uses the rich OSINT entity collected by entity-resolver for comprehensive data
  */
 async function upsertProjectFromAnalysis(
   handle: string,
@@ -1216,70 +1217,266 @@ async function upsertProjectFromAnalysis(
 ): Promise<void> {
   const normalizedHandle = handle.toLowerCase().replace('@', '');
 
-  // Determine project name from analysis
-  const name = analysis.profile?.displayName || `@${normalizedHandle}`;
+  // ========================================================================
+  // RETRIEVE OSINT ENTITY (collected by entity-resolver - FREE data!)
+  // ========================================================================
+  const osintEntity = osintEntityCache.get(normalizedHandle);
+  if (osintEntity) {
+    console.log(`[XIntel] Found OSINT entity for @${normalizedHandle} with:`, {
+      hasSecurityIntel: !!osintEntity.securityIntel?.isAccessible,
+      hasDomainIntel: !!osintEntity.domainIntel?.isAccessible,
+      hasMarketIntel: !!osintEntity.marketIntel?.priceUsd,
+      hasGithubIntel: !!osintEntity.githubIntel,
+      hasWebsiteIntel: !!osintEntity.websiteIntel?.isLive,
+      hasHistoryIntel: !!osintEntity.historyIntel?.hasArchives,
+      hasLaunchpadData: !!osintEntity.launchpadData,
+      riskFlagsCount: osintEntity.riskFlags?.length || 0,
+      legitimacySignalsCount: osintEntity.legitimacySignals?.length || 0,
+    });
+  } else {
+    console.log(`[XIntel] No OSINT entity found for @${normalizedHandle}, using Grok data only`);
+  }
 
-  // Extract team members from analysis (filter out empty handles) and fetch avatars
-  const rawTeam = (analysis.positiveIndicators?.teamMembers || [])
+  // Determine project name - prefer OSINT (more likely to be token name)
+  const name = osintEntity?.name || analysis.profile?.displayName || `@${normalizedHandle}`;
+
+  // Extract team members from both Grok analysis AND OSINT (merge them)
+  const grokTeam = (analysis.positiveIndicators?.teamMembers || [])
     .filter(member => member.xHandle || member.name);
+  const osintTeam = osintEntity?.discoveredTeam || [];
 
-  // Fetch avatars for team members in parallel
-  const team = await Promise.all(
-    rawTeam.map(async (member) => {
+  // Merge teams, deduplicate by handle/name
+  const seenMembers = new Set<string>();
+  const mergedTeam: Array<{ handle: string; displayName?: string; role?: string; avatarUrl?: string; isDoxxed?: boolean; linkedIn?: string }> = [];
+
+  // Add Grok team first (usually has roles from AI)
+  for (const member of grokTeam) {
+    const key = (member.xHandle || member.name || '').toLowerCase();
+    if (key && !seenMembers.has(key)) {
+      seenMembers.add(key);
       const memberHandle = member.xHandle?.replace('@', '').toLowerCase();
       const avatarUrl = memberHandle ? await fetchXAvatarUrl(memberHandle) : undefined;
-      return {
+      mergedTeam.push({
         handle: member.xHandle || '',
         displayName: member.name,
         role: normalizeRole(member.role),
         avatarUrl,
-      };
-    })
-  );
-
-  // Extract ticker from their own token promotion
-  const ownPromotion = analysis.promotionHistory?.find(p =>
-    p.project?.toLowerCase().includes(name.toLowerCase()) ||
-    p.ticker?.toLowerCase().includes(normalizedHandle)
-  );
-  const ticker = ownPromotion?.ticker?.replace('$', '') ||
-    analysis.contract?.ticker?.replace('$', '') ||
-    undefined;
-
-  // ========================================================================
-  // OSINT ENRICHMENT (using free APIs, not AI)
-  // ========================================================================
-
-  // Fetch GitHub intelligence if URL available
-  let githubIntel: GitHubRepoIntel | null = null;
-  if (analysis.github) {
-    console.log(`[XIntel] Fetching GitHub intel for ${analysis.github}`);
-    githubIntel = await fetchGitHubRepoIntel(analysis.github);
-    if (githubIntel) {
-      console.log(`[XIntel] GitHub: ${githubIntel.stars} stars, ${githubIntel.contributorsCount} contributors, health=${githubIntel.healthScore}`);
+        isDoxxed: !!member.linkedIn,
+        linkedIn: member.linkedIn || undefined,
+      });
     }
   }
 
-  // Check website status if URL available
-  let websiteStatus: { isLive: boolean; loadTimeMs?: number } | null = null;
-  if (analysis.website) {
-    console.log(`[XIntel] Checking website status for ${analysis.website}`);
-    websiteStatus = await checkWebsiteLive(analysis.website);
-    console.log(`[XIntel] Website ${analysis.website}: isLive=${websiteStatus.isLive}`);
+  // Add OSINT team (from GitHub contributors)
+  for (const member of osintTeam) {
+    const key = (member.twitter || member.github || member.name || '').toLowerCase();
+    if (key && !seenMembers.has(key)) {
+      seenMembers.add(key);
+      mergedTeam.push({
+        handle: member.twitter || member.github || '',
+        displayName: member.name,
+        role: normalizeRole(member.role),
+        isDoxxed: member.isDoxxed,
+      });
+    }
   }
 
-  // Build project data
+  // Extract ticker from OSINT or Grok
+  const ticker = osintEntity?.symbol ||
+    analysis.contract?.ticker?.replace('$', '') ||
+    analysis.promotionHistory?.find(p =>
+      p.project?.toLowerCase().includes(name.toLowerCase())
+    )?.ticker?.replace('$', '') ||
+    undefined;
+
+  // Extract token address from OSINT
+  const tokenAddress = osintEntity?.tokenAddresses?.[0]?.address ||
+    analysis.contract?.address ||
+    undefined;
+
+  // ========================================================================
+  // BUILD COMPREHENSIVE OSINT-ENRICHED PROJECT DATA
+  // ========================================================================
+
+  // Security Intel from RugCheck (OSINT)
+  const securityIntel = osintEntity?.securityIntel?.isAccessible ? {
+    mintAuthorityEnabled: osintEntity.securityIntel.mintAuthority === 'active',
+    freezeAuthorityEnabled: osintEntity.securityIntel.freezeAuthority === 'active',
+    lpLocked: osintEntity.securityIntel.lpLocked === true,
+    lpLockedPercent: osintEntity.securityIntel.markets?.[0]?.lpLockedPercent,
+    risks: osintEntity.securityIntel.risks?.map(r => r.description || r.name) || [],
+    holdersCount: osintEntity.securityIntel.totalHolders,
+    top10HoldersPercent: osintEntity.securityIntel.topHoldersConcentration,
+    // Domain intel (from RDAP)
+    domainAgeDays: osintEntity.domainIntel?.ageInDays,
+    domainRegistrar: osintEntity.domainIntel?.registrar,
+  } : undefined;
+
+  // Market Data from OSINT (Jupiter, Birdeye, CoinGecko, DexScreener)
+  const marketData = osintEntity?.marketIntel || osintEntity?.tokenData ? {
+    price: osintEntity.marketIntel?.priceUsd || osintEntity.tokenData?.priceUsd || 0,
+    priceChange24h: osintEntity.marketIntel?.priceChange24h || osintEntity.tokenData?.priceChange24h || 0,
+    marketCap: osintEntity.marketIntel?.marketCap || osintEntity.tokenData?.marketCap,
+    volume24h: osintEntity.marketIntel?.volume24h || osintEntity.tokenData?.volume24h,
+    liquidity: osintEntity.marketIntel?.liquidity || osintEntity.tokenData?.liquidity,
+  } : undefined;
+
+  // GitHub Intel from OSINT (already comprehensive from entity-resolver)
+  const githubIntelData = osintEntity?.githubIntel ? {
+    stars: osintEntity.githubIntel.repo?.stars || 0,
+    forks: osintEntity.githubIntel.repo?.forks || 0,
+    watchers: osintEntity.githubIntel.repo?.watchers || 0,
+    openIssues: osintEntity.githubIntel.repo?.openIssues || 0,
+    lastCommitDate: osintEntity.githubIntel.repo?.lastCommitDate || undefined,
+    lastCommitMessage: osintEntity.githubIntel.repo?.lastCommitMessage || undefined,
+    commitsLast30d: osintEntity.githubIntel.repo?.commitsLast30d || 0,
+    commitsLast90d: osintEntity.githubIntel.repo?.commitsLast90d || 0,
+    contributorsCount: osintEntity.githubIntel.contributors?.length || 0,
+    topContributors: osintEntity.githubIntel.contributors?.slice(0, 5).map(c => ({
+      login: c.login,
+      avatarUrl: c.avatarUrl,
+      contributions: c.contributions,
+    })),
+    primaryLanguage: osintEntity.githubIntel.repo?.primaryLanguage || undefined,
+    license: osintEntity.githubIntel.repo?.license || undefined,
+    isArchived: osintEntity.githubIntel.repo?.isArchived || false,
+    healthScore: osintEntity.githubIntel.repo?.healthScore || 0,
+    healthFactors: osintEntity.githubIntel.repo?.healthFactors || [],
+  } : undefined;
+
+  // Website Intel from OSINT (scraped data + wayback history)
+  // Check all social links for docs/roadmap/team pages
+  const allSocialLinks = osintEntity?.websiteIntel?.allSocialLinks || [];
+  const hasDocsLink = !!(osintEntity?.websiteIntel?.docs || osintEntity?.docs ||
+    allSocialLinks.some(l => l.url.toLowerCase().includes('docs') || l.url.toLowerCase().includes('gitbook')));
+  const hasRoadmapLink = allSocialLinks.some(l => l.url.toLowerCase().includes('roadmap'));
+  const hasTeamLink = allSocialLinks.some(l =>
+    l.url.toLowerCase().includes('team') || l.url.toLowerCase().includes('about'));
+  const hasAuditLink = allSocialLinks.some(l =>
+    l.url.toLowerCase().includes('audit') || l.url.toLowerCase().includes('certik') ||
+    l.url.toLowerCase().includes('hacken') || l.url.toLowerCase().includes('security'));
+
+  const websiteIntelData = osintEntity?.websiteIntel || osintEntity?.historyIntel ? {
+    isLive: osintEntity.websiteIntel?.isLive ?? true,
+    lastChecked: new Date(),
+    // From website scrape - detect pages from title/description and links
+    hasDocumentation: hasDocsLink,
+    hasRoadmap: hasRoadmapLink || (osintEntity?.websiteIntel?.title?.toLowerCase().includes('roadmap') || false),
+    hasTokenomics: osintEntity?.websiteIntel?.title?.toLowerCase().includes('tokenomics') ||
+      osintEntity?.websiteIntel?.description?.toLowerCase().includes('tokenomics') || false,
+    hasTeamPage: hasTeamLink,
+    hasAuditInfo: hasAuditLink,
+    // Red flags and trust indicators from OSINT
+    redFlags: [
+      ...(osintEntity.riskFlags || []),
+      ...(osintEntity.websiteIntel?.isLive === false ? ['Website not accessible'] : []),
+      ...(osintEntity.domainIntel?.ageRisk === 'new' ?
+        [`Domain registered only ${osintEntity.domainIntel.ageInDays} days ago`] : []),
+    ],
+    trustIndicators: [
+      ...(osintEntity.legitimacySignals || []),
+      ...(osintEntity.websiteIntel?.isLive ? ['Website is live'] : []),
+      ...(osintEntity.historyIntel?.hasArchives ?
+        [`Website history since ${osintEntity.historyIntel.firstArchiveDate?.toISOString().split('T')[0]}`] : []),
+      ...(osintEntity.domainIntel?.ageRisk === 'established' ?
+        [`Domain established (${osintEntity.domainIntel.ageInMonths} months old)`] : []),
+    ],
+    websiteQuality: osintEntity.websiteIntel?.isLive ?
+      (osintEntity.legitimacySignals && osintEntity.legitimacySignals.length > 3 ?
+        'professional' as const : 'basic' as const) : 'suspicious' as const,
+    qualityScore: calculateWebsiteQualityScore(osintEntity),
+  } : undefined;
+
+  // Positive Indicators (from OSINT + Grok)
+  const positiveIndicators = {
+    isDoxxed: analysis.positiveIndicators?.isDoxxed || mergedTeam.some(m => m.isDoxxed),
+    doxxedDetails: analysis.positiveIndicators?.doxxedDetails || undefined,
+    hasActiveGithub: analysis.positiveIndicators?.hasActiveGithub || (githubIntelData?.commitsLast30d || 0) > 0,
+    githubActivity: githubIntelData ? `${githubIntelData.commitsLast30d} commits in last 30d` : undefined,
+    hasRealProduct: analysis.positiveIndicators?.hasRealProduct || false,
+    productDetails: analysis.positiveIndicators?.productDetails || undefined,
+    accountAgeDays: osintEntity?.domainIntel?.ageInDays || 0,
+    hasConsistentHistory: osintEntity?.historyIntel?.hasArchives || false,
+    hasOrganicEngagement: !analysis.negativeIndicators?.hasSuspiciousFollowers,
+    hasCredibleBackers: analysis.positiveIndicators?.hasCredibleBackers || false,
+    backersDetails: analysis.positiveIndicators?.backersDetails || undefined,
+  };
+
+  // Negative Indicators (from OSINT + Grok) - all boolean fields must be boolean, not undefined
+  const negativeIndicators = {
+    hasScamAllegations: !!(analysis.negativeIndicators?.hasScamAllegations),
+    scamDetails: analysis.negativeIndicators?.scamDetails || undefined,
+    hasRugHistory: !!(analysis.negativeIndicators?.hasRugHistory || osintEntity?.securityIntel?.isRugged),
+    rugDetails: osintEntity?.securityIntel?.isRugged ? 'Flagged as rug pull by RugCheck' : undefined,
+    isAnonymousTeam: !!(analysis.negativeIndicators?.isAnonymousTeam || mergedTeam.length === 0),
+    hasHypeLanguage: !!(analysis.negativeIndicators?.hasHypeLanguage),
+    hypeExamples: analysis.negativeIndicators?.hypeExamples || [],
+    hasSuspiciousFollowers: !!(analysis.negativeIndicators?.hasSuspiciousFollowers),
+    suspiciousDetails: analysis.negativeIndicators?.suspiciousDetails || undefined,
+    hasPreviousRebrand: !!(analysis.negativeIndicators?.hasPreviousRebrand),
+    rebrandDetails: analysis.negativeIndicators?.rebrandDetails || undefined,
+    hasAggressivePromotion: !!(analysis.negativeIndicators?.hasAggressivePromotion),
+    promotionDetails: analysis.negativeIndicators?.promotionDetails || undefined,
+    noPublicAudit: !hasAuditLink,
+    lowLiquidity: (marketData?.liquidity || 0) < 10000,
+    unverifiedLegalEntity: true, // Default, could be updated from Grok
+  };
+
+  // Tokenomics from OSINT
+  const tokenomics = osintEntity?.securityIntel ? {
+    totalSupply: osintEntity.securityIntel.totalSupply || undefined,
+    circulatingSupply: undefined, // Would need additional API
+    burnMechanism: undefined,
+    burnRate: undefined,
+    isDeflationary: false,
+    vestingSchedule: undefined,
+  } : undefined;
+
+  // Liquidity from OSINT
+  const liquidity = osintEntity?.securityIntel?.markets?.[0] ? {
+    primaryDex: osintEntity.securityIntel.markets[0].marketType || undefined,
+    poolType: undefined,
+    liquidityUsd: osintEntity.securityIntel.totalLiquidityUsd,
+    liquidityLocked: osintEntity.securityIntel.lpLocked === true,
+    lockDuration: undefined,
+  } : undefined;
+
+  // Tech Stack from OSINT
+  const techStack = osintEntity?.techStack ? {
+    blockchain: osintEntity.tokenAddresses?.[0]?.chain || 'solana',
+    zkTech: undefined,
+    offlineCapability: false,
+    hardwareProducts: [],
+  } : undefined;
+
+  // Key findings from OSINT + Grok
+  const keyFindings: string[] = [];
+  if (osintEntity?.securityIntel?.isRugged) keyFindings.push('⚠️ FLAGGED AS RUG PULL');
+  if (osintEntity?.securityIntel?.mintAuthority === 'active') keyFindings.push('Mint authority active - unlimited supply risk');
+  if (osintEntity?.securityIntel?.freezeAuthority === 'active') keyFindings.push('Freeze authority active - tokens can be frozen');
+  if (osintEntity?.securityIntel?.lpLocked === false && (osintEntity?.securityIntel?.totalLiquidityUsd || 0) > 1000)
+    keyFindings.push('Liquidity not locked');
+  if (osintEntity?.domainIntel?.ageRisk === 'new')
+    keyFindings.push(`New domain: registered ${osintEntity.domainIntel.ageInDays} days ago`);
+  if (githubIntelData && githubIntelData.stars > 100)
+    keyFindings.push(`Strong GitHub presence: ${githubIntelData.stars} stars`);
+  if (osintEntity?.launchpadData)
+    keyFindings.push(`Launched on ${osintEntity.launchpad}: ${osintEntity.launchpadData.isGraduated ? 'Graduated from bonding curve' : 'Still on bonding curve'}`);
+
+  // Build project data with comprehensive OSINT
   const projectData = {
     name,
-    description: analysis.theStory || analysis.overallAssessment || undefined,
-    avatarUrl: analysis.profile?.avatarUrl || await fetchXAvatarUrl(normalizedHandle),
-    tags: extractTags(analysis, githubIntel),
+    description: analysis.theStory || osintEntity?.description || analysis.overallAssessment || undefined,
+    avatarUrl: osintEntity?.imageUrl || analysis.profile?.avatarUrl || await fetchXAvatarUrl(normalizedHandle),
+    tags: extractTags(analysis, githubIntelData, osintEntity),
     aiSummary: analysis.verdict?.summary || analysis.overallAssessment || undefined,
     xHandle: normalizedHandle,
-    githubUrl: analysis.github || undefined,
-    websiteUrl: analysis.website || undefined,
-    tokenAddress: analysis.contract?.address || undefined,
+    githubUrl: osintEntity?.github || analysis.github || undefined,
+    websiteUrl: osintEntity?.website || analysis.website || undefined,
+    tokenAddress,
     ticker,
+    discordUrl: osintEntity?.discord || undefined,
+    telegramUrl: osintEntity?.telegram || undefined,
     trustScore: {
       score: report.score.overall,
       tier: report.score.riskLevel === 'low' ? 'trusted' as const :
@@ -1287,69 +1484,86 @@ async function upsertProjectFromAnalysis(
       confidence: report.score.confidence,
       lastUpdated: new Date(),
     },
-    team,
+    team: mergedTeam,
     socialMetrics: {
       followers: analysis.profile?.followers,
       engagement: undefined,
       postsPerWeek: undefined,
     },
-    // GitHub intelligence (from API - free!)
-    githubIntel: githubIntel ? {
-      stars: githubIntel.stars,
-      forks: githubIntel.forks,
-      watchers: githubIntel.watchers,
-      openIssues: githubIntel.openIssues,
-      lastCommitDate: githubIntel.lastCommitDate || undefined,
-      lastCommitMessage: githubIntel.lastCommitMessage || undefined,
-      commitsLast30d: githubIntel.commitsLast30d,
-      commitsLast90d: githubIntel.commitsLast90d,
-      contributorsCount: githubIntel.contributorsCount,
-      topContributors: githubIntel.topContributors,
-      primaryLanguage: githubIntel.primaryLanguage || undefined,
-      license: githubIntel.license || undefined,
-      isArchived: githubIntel.isArchived,
-      healthScore: githubIntel.healthScore,
-      healthFactors: githubIntel.healthFactors,
-    } : undefined,
-    // Website intelligence (simple status check - free!)
-    websiteIntel: websiteStatus ? {
-      isLive: websiteStatus.isLive,
-      lastChecked: new Date(),
-      hasDocumentation: false, // Would need AI to detect
-      hasRoadmap: false,
-      hasTokenomics: false,
-      hasTeamPage: false,
-      hasAuditInfo: false,
-      redFlags: websiteStatus.isLive ? [] : ['Website not accessible'],
-      trustIndicators: websiteStatus.isLive ? ['Website is live'] : [],
-      websiteQuality: websiteStatus.isLive ? 'unknown' as const : 'suspicious' as const,
-      qualityScore: websiteStatus.isLive ? 50 : 20,
-    } : undefined,
+    // OSINT-enriched fields (OSINT is primary - free & reliable, Grok is fallback)
+    marketData,
+    githubIntel: githubIntelData,
+    websiteIntel: websiteIntelData,
+    securityIntel,
+    // OSINT primary, Grok fallback
+    tokenomics: tokenomics || analysis.tokenomics,
+    liquidity: liquidity || analysis.liquidity,
+    techStack: techStack || analysis.techStack,
+    positiveIndicators,
+    negativeIndicators,
+    keyFindings: keyFindings.length > 0 ? keyFindings : undefined,
+    theStory: analysis.theStory || undefined,
+    // Grok-provided deep analysis fields
+    legalEntity: analysis.legalEntity || undefined,
+    affiliations: analysis.affiliations?.length ? analysis.affiliations : undefined,
+    roadmap: analysis.roadmap?.length ? analysis.roadmap : undefined,
+    audit: analysis.audit || undefined,
+    shippingHistory: analysis.shippingHistory?.length ? analysis.shippingHistory : undefined,
+    controversies: analysis.controversies?.length ? analysis.controversies : undefined,
     lastScanAt: new Date(),
   };
 
   await upsertProjectByHandle(normalizedHandle, projectData);
-  console.log(`[XIntel] Upserted project entity for @${normalizedHandle}`);
+  console.log(`[XIntel] Upserted project entity for @${normalizedHandle} with OSINT enrichment`);
+}
+
+/**
+ * Calculate website quality score based on OSINT signals
+ */
+function calculateWebsiteQualityScore(osintEntity: ResolvedEntity | undefined): number {
+  if (!osintEntity) return 50;
+
+  let score = 50;
+
+  // Positive signals
+  if (osintEntity.websiteIntel?.isLive) score += 10;
+  if (osintEntity.githubIntel) score += 10;
+  if (osintEntity.historyIntel?.hasArchives) score += 5;
+  if (osintEntity.domainIntel?.ageRisk === 'established') score += 10;
+  if (osintEntity.legitimacySignals && osintEntity.legitimacySignals.length > 0)
+    score += Math.min(osintEntity.legitimacySignals.length * 3, 15);
+
+  // Negative signals
+  if (osintEntity.riskFlags && osintEntity.riskFlags.length > 0)
+    score -= Math.min(osintEntity.riskFlags.length * 5, 25);
+  if (osintEntity.domainIntel?.ageRisk === 'new') score -= 15;
+  if (osintEntity.securityIntel?.isRugged) score -= 30;
+
+  return Math.max(0, Math.min(100, score));
 }
 
 /**
  * Extract relevant tags from analysis
  */
-function extractTags(analysis: GrokAnalysisResult, githubIntel?: GitHubRepoIntel | null): string[] {
+function extractTags(
+  analysis: GrokAnalysisResult,
+  githubIntel?: { stars: number; commitsLast30d: number; isArchived: boolean; license?: string; contributorsCount: number } | null,
+  osintEntity?: ResolvedEntity
+): string[] {
   const tags: string[] = [];
 
-  // Entity type
+  // Entity type from Grok
   if (analysis.positiveIndicators?.hasRealProduct) tags.push('product');
   if (analysis.positiveIndicators?.hasActiveGithub) tags.push('builder');
   if (analysis.positiveIndicators?.isDoxxed) tags.push('doxxed');
   if (analysis.positiveIndicators?.hasCredibleBackers) tags.push('backed');
 
-  // Risk indicators
+  // Risk indicators from Grok
   if (analysis.negativeIndicators?.hasScamAllegations) tags.push('allegations');
   if (analysis.negativeIndicators?.hasRugHistory) tags.push('rug-history');
   if (analysis.negativeIndicators?.isAnonymousTeam) tags.push('anon');
 
-  // GitHub-based tags (from free API)
+  // GitHub-based tags
   if (githubIntel) {
     if (githubIntel.stars >= 100) tags.push('popular');
     if (githubIntel.commitsLast30d >= 10) tags.push('active');
@@ -1358,7 +1572,42 @@ function extractTags(analysis: GrokAnalysisResult, githubIntel?: GitHubRepoIntel
     if (githubIntel.contributorsCount >= 5) tags.push('team');
   }
 
-  return tags;
+  // OSINT-based tags
+  if (osintEntity) {
+    // Launchpad
+    if (osintEntity.launchpad === 'pump_fun') tags.push('pump-fun');
+    if (osintEntity.launchpad === 'bags_fm') tags.push('bags-fm');
+    if (osintEntity.launchpadData?.isGraduated) tags.push('graduated');
+
+    // Security status from RugCheck
+    if (osintEntity.securityIntel?.isAccessible) {
+      if (osintEntity.securityIntel.mintAuthority === 'renounced' &&
+          osintEntity.securityIntel.freezeAuthority === 'renounced') {
+        tags.push('authorities-renounced');
+      }
+      if (osintEntity.securityIntel.lpLocked) tags.push('lp-locked');
+      if (osintEntity.securityIntel.isRugged) tags.push('rug-flagged');
+      if ((osintEntity.securityIntel.totalHolders || 0) > 1000) tags.push('1k-holders');
+      if ((osintEntity.securityIntel.totalHolders || 0) > 10000) tags.push('10k-holders');
+    }
+
+    // Domain age
+    if (osintEntity.domainIntel?.ageRisk === 'new') tags.push('new-domain');
+    if (osintEntity.domainIntel?.ageRisk === 'established') tags.push('established-domain');
+
+    // Market presence
+    if (osintEntity.marketIntel?.isListed) tags.push('coingecko');
+    if ((osintEntity.marketIntel?.liquidity || 0) > 100000) tags.push('high-liquidity');
+
+    // Social presence
+    if (osintEntity.telegramIntel?.memberCount && osintEntity.telegramIntel.memberCount > 1000) tags.push('active-telegram');
+    if (osintEntity.discordIntel?.isVerified) tags.push('verified-discord');
+
+    // Wayback history
+    if (osintEntity.historyIntel?.hasArchives) tags.push('archived-history');
+  }
+
+  return [...new Set(tags)]; // Deduplicate
 }
 
 // ============================================================================

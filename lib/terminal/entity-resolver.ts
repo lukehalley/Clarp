@@ -21,6 +21,8 @@ import { lookupTokenByAddress, searchToken, TokenData } from './xintel/tokenLook
 import {
   // Website & Social Scrapers
   scrapeWebsite,
+  scrapeDocsForGitHub,
+  findLiveDocsUrl,
   scrapeTelegramGroup,
   scrapeDiscordServer,
   // GitHub Intelligence
@@ -407,6 +409,31 @@ async function resolveFromTokenAddress(address: string): Promise<ResolutionResul
     if (historyIntel.hasArchives) {
       legitimacySignals.push(`Website history: ${historyIntel.totalSnapshots} archives since ${historyIntel.firstArchiveDate?.toISOString().split('T')[0]}`);
       confidence += 5;
+    }
+
+    // Aggressive GitHub discovery from docs sites
+    if (!github && docs) {
+      console.log(`[EntityResolver] No GitHub found, crawling docs site: ${docs}`);
+      const docsGithub = await scrapeDocsForGitHub(docs);
+      if (docsGithub) {
+        github = docsGithub;
+        notes.push(`GitHub found from docs site`);
+      }
+    }
+
+    // If still no GitHub and no docs, try to probe for docs URLs
+    if (!github && !docs && website) {
+      console.log(`[EntityResolver] No GitHub or docs found, probing for docs URLs...`);
+      const liveDocsUrl = await findLiveDocsUrl(website);
+      if (liveDocsUrl) {
+        docs = liveDocsUrl;
+        console.log(`[EntityResolver] Found live docs URL: ${liveDocsUrl}`);
+        const docsGithub = await scrapeDocsForGitHub(liveDocsUrl);
+        if (docsGithub) {
+          github = docsGithub;
+          notes.push(`GitHub found from discovered docs site`);
+        }
+      }
     }
   }
 

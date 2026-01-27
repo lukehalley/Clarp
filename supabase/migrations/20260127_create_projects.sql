@@ -126,6 +126,10 @@ CREATE POLICY "Allow service update on projects" ON projects
   USING (true)
   WITH CHECK (true);
 
+CREATE POLICY "Allow service delete on projects" ON projects
+  FOR DELETE
+  USING (true);
+
 -- ============================================================================
 -- COMMENTS
 -- ============================================================================

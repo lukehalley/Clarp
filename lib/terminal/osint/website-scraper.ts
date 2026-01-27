@@ -105,6 +105,7 @@ const EMAIL_PATTERN = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
 const DEFAULT_MAX_PAGES = 15;         // Max pages to crawl
 const DEFAULT_TIMEOUT_MS = 10000;     // Timeout per page
 const TOTAL_TIMEOUT_MS = 45000;       // Total crawl timeout
+const DOCS_CRAWL_MAX_PAGES = 5;       // Max pages to crawl on docs sites
 
 // Pages that are likely to have social links
 const PRIORITY_PATHS = [
@@ -121,6 +122,23 @@ const PRIORITY_PATHS = [
   '/announcements',
   '/faq',
   '/roadmap',
+];
+
+// Docs site pages that commonly have GitHub links
+const DOCS_PRIORITY_PATHS = [
+  '/',
+  '/introduction',
+  '/getting-started',
+  '/quickstart',
+  '/quick-start',
+  '/overview',
+  '/developers',
+  '/developer',
+  '/contribute',
+  '/contributing',
+  '/github',
+  '/resources',
+  '/community',
 ];
 
 // ============================================================================
@@ -717,4 +735,158 @@ function dedupeByUrl(links: Array<{ platform: string; url: string }>): Array<{ p
     seen.add(normalized);
     return true;
   });
+}
+
+// ============================================================================
+// AGGRESSIVE DOCS SITE CRAWLING
+// ============================================================================
+
+/**
+ * Crawl a documentation site specifically to find GitHub links
+ * Called when we find a docs URL during main crawl
+ */
+export async function scrapeDocsForGitHub(docsUrl: string): Promise<string | null> {
+  console.log(`[WebsiteScraper] Crawling docs site for GitHub: ${docsUrl}`);
+
+  try {
+    const normalizedUrl = docsUrl.startsWith('http') ? docsUrl : `https://${docsUrl}`;
+    const baseUrl = new URL(normalizedUrl);
+    const baseHost = baseUrl.host;
+
+    const visited = new Set<string>();
+    const toVisit: string[] = [];
+    const allGithubUrls: string[] = [];
+
+    // Queue priority docs paths
+    const priorityUrls = DOCS_PRIORITY_PATHS.map(path => {
+      try {
+        return new URL(path, normalizedUrl).href;
+      } catch {
+        return null;
+      }
+    }).filter((u): u is string => u !== null);
+
+    toVisit.push(normalizedUrl);
+    for (const pUrl of priorityUrls) {
+      if (!toVisit.includes(pUrl)) {
+        toVisit.push(pUrl);
+      }
+    }
+
+    const startTime = Date.now();
+
+    while (toVisit.length > 0 && visited.size < DOCS_CRAWL_MAX_PAGES) {
+      // Timeout check
+      if (Date.now() - startTime > 15000) {
+        console.log(`[WebsiteScraper] Docs crawl timeout after ${visited.size} pages`);
+        break;
+      }
+
+      const pageUrl = toVisit.shift()!;
+      const normalizedPageUrl = normalizeUrlForVisited(pageUrl);
+      if (visited.has(normalizedPageUrl)) continue;
+      visited.add(normalizedPageUrl);
+
+      try {
+        const pageResult = await fetchAndExtract(pageUrl, baseHost);
+
+        if (pageResult.isLive) {
+          allGithubUrls.push(...pageResult.githubUrls);
+
+          // Also check for GitHub in the page's internal links
+          // Docs sites often have sidebar links to GitHub
+          for (const link of pageResult.internalLinks) {
+            const normalizedLink = normalizeUrlForVisited(link);
+            if (!visited.has(normalizedLink) && !toVisit.includes(link)) {
+              toVisit.push(link);
+            }
+          }
+        }
+      } catch (error) {
+        console.log(`[WebsiteScraper] Docs page error ${pageUrl}:`, error instanceof Error ? error.message : error);
+      }
+    }
+
+    const validGithub = filterGitHubUrls([...new Set(allGithubUrls)]);
+    if (validGithub.length > 0) {
+      const githubUrl = `https://github.com/${validGithub[0]}`;
+      console.log(`[WebsiteScraper] Found GitHub from docs: ${githubUrl}`);
+      return githubUrl;
+    }
+
+    console.log(`[WebsiteScraper] No GitHub found in docs site (${visited.size} pages crawled)`);
+    return null;
+  } catch (error) {
+    console.error(`[WebsiteScraper] Error crawling docs:`, error);
+    return null;
+  }
+}
+
+/**
+ * Extract potential docs URLs from a website URL
+ * Checks common documentation subdomain patterns
+ */
+export function getDocsUrlCandidates(websiteUrl: string): string[] {
+  const candidates: string[] = [];
+
+  try {
+    const url = new URL(websiteUrl.startsWith('http') ? websiteUrl : `https://${websiteUrl}`);
+    const domain = url.hostname.replace(/^www\./, '');
+    const parts = domain.split('.');
+
+    // Base domain (e.g., payai.network -> payai)
+    const baseName = parts.length >= 2 ? parts[parts.length - 2] : parts[0];
+    const tld = parts.slice(-2).join('.'); // e.g., network, com, io
+
+    // Common docs URL patterns
+    candidates.push(`https://docs.${domain}`);
+    candidates.push(`https://${baseName}.gitbook.io`);
+    candidates.push(`https://${domain}/docs`);
+    candidates.push(`https://${domain}/documentation`);
+    candidates.push(`https://docs.${baseName}.io`);
+    candidates.push(`https://${baseName}-docs.gitbook.io`);
+
+    // GitBook variations
+    if (!domain.includes('gitbook')) {
+      candidates.push(`https://${baseName}.gitbook.io/docs`);
+      candidates.push(`https://${baseName}.gitbook.io/${baseName}`);
+    }
+  } catch {
+    // Invalid URL
+  }
+
+  return candidates;
+}
+
+/**
+ * Probe docs URL candidates to find which ones are live
+ */
+export async function findLiveDocsUrl(websiteUrl: string): Promise<string | null> {
+  const candidates = getDocsUrlCandidates(websiteUrl);
+
+  for (const candidate of candidates) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 5000);
+
+      const response = await fetch(candidate, {
+        method: 'HEAD',
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; CLARP/1.0; +https://clarp.fun)',
+        },
+      });
+
+      clearTimeout(timeout);
+
+      if (response.ok) {
+        console.log(`[WebsiteScraper] Found live docs URL: ${candidate}`);
+        return candidate;
+      }
+    } catch {
+      // Not live, continue to next candidate
+    }
+  }
+
+  return null;
 }

@@ -31,6 +31,9 @@ export {
 // Website Scraper (NO AI - pure regex)
 export {
   scrapeWebsite,
+  scrapeDocsForGitHub,
+  findLiveDocsUrl,
+  getDocsUrlCandidates,
   type ScrapedWebsite,
   type ScrapeOptions,
 } from './website-scraper';
