@@ -254,7 +254,7 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
         </div>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-hidden">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden">
           {children}
         </main>
 

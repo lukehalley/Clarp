@@ -57,9 +57,9 @@ export default function IntelCard({ project, scoreDelta24h }: IntelCardProps) {
       href={`/terminal/project/${project.xHandle || project.id}`}
       className="group block"
     >
-      <div className="flex border-2 border-ivory-light/20 bg-ivory-light/5 hover:border-danger-orange/30 transition-colors overflow-hidden h-[100px]">
-        {/* Left: Avatar (100x100) */}
-        <div className="shrink-0 bg-[#0a0a09] border-r border-ivory-light/10 w-[100px] h-[100px] overflow-hidden relative">
+      <div className="flex border-2 border-ivory-light/20 bg-ivory-light/5 hover:border-danger-orange/30 transition-colors overflow-hidden min-h-[90px] sm:h-[100px]">
+        {/* Left: Avatar - Responsive sizing */}
+        <div className="shrink-0 bg-[#0a0a09] border-r border-ivory-light/10 w-[80px] h-[90px] sm:w-[100px] sm:h-[100px] overflow-hidden relative">
           {project.avatarUrl ? (
             <Image
               src={project.avatarUrl}
@@ -82,42 +82,42 @@ export default function IntelCard({ project, scoreDelta24h }: IntelCardProps) {
           )}
         </div>
 
-        {/* Content - compact layout */}
-        <div className="flex-1 min-w-0 p-3 flex flex-col justify-between">
+        {/* Content - responsive compact layout */}
+        <div className="flex-1 min-w-0 p-2 sm:p-3 flex flex-col justify-between">
           {/* Top row: Name + Ticker + Score */}
-          <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start justify-between gap-2 sm:gap-3">
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="font-mono font-bold text-ivory-light text-base truncate">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                <h3 className="font-mono font-bold text-ivory-light text-sm sm:text-base truncate max-w-[120px] xs:max-w-none">
                   {project.name}
                 </h3>
                 {project.ticker && (
-                  <span className="font-mono text-sm text-danger-orange shrink-0">
+                  <span className="font-mono text-xs sm:text-sm text-danger-orange shrink-0">
                     ${project.ticker}
                   </span>
                 )}
               </div>
               {/* Badges row */}
-              <div className="flex items-center gap-2 mt-1">
-                {chain && <ChainIcon chain={chain} size={16} />}
+              <div className="flex items-center gap-1.5 sm:gap-2 mt-1 flex-wrap">
+                {chain && <ChainIcon chain={chain} size={14} className="sm:w-4 sm:h-4" />}
                 {project.trustScore?.tier === 'verified' && (
-                  <span className="text-[10px] font-mono px-1.5 py-0.5 bg-larp-green/20 text-larp-green border border-larp-green/30">
+                  <span className="text-[9px] sm:text-[10px] font-mono px-1 sm:px-1.5 py-0.5 bg-larp-green/20 text-larp-green border border-larp-green/30">
                     Verified
                   </span>
                 )}
                 {isTrusted ? (
-                  <Shield size={12} className="text-larp-green" />
+                  <Shield size={11} className="text-larp-green sm:w-3 sm:h-3" />
                 ) : displayScore < 40 ? (
-                  <AlertTriangle size={12} style={{ color: scoreColor }} />
+                  <AlertTriangle size={11} style={{ color: scoreColor }} className="sm:w-3 sm:h-3" />
                 ) : null}
-                <span className="text-[10px] font-mono text-ivory-light/50">
+                <span className="text-[9px] sm:text-[10px] font-mono text-ivory-light/50 hidden xs:inline">
                   {riskLabel}
                 </span>
               </div>
             </div>
             {/* Score */}
             <div
-              className="font-mono font-bold text-3xl shrink-0"
+              className="font-mono font-bold text-2xl sm:text-3xl shrink-0"
               style={{ color: scoreColor }}
             >
               {displayScore}
@@ -125,9 +125,9 @@ export default function IntelCard({ project, scoreDelta24h }: IntelCardProps) {
           </div>
 
           {/* Bottom row: Trust bar + Tags */}
-          <div className="flex items-end justify-between gap-3">
+          <div className="flex items-end justify-between gap-2 sm:gap-3">
             {/* Trust bar */}
-            <div className="flex-1 max-w-[200px]">
+            <div className="flex-1 max-w-[120px] sm:max-w-[200px]">
               <div className="h-1 bg-slate-dark/50 overflow-hidden">
                 <div
                   className="h-full transition-all duration-300"
@@ -138,13 +138,13 @@ export default function IntelCard({ project, scoreDelta24h }: IntelCardProps) {
                 />
               </div>
             </div>
-            {/* Tags */}
+            {/* Tags - hide on very small screens */}
             {tags.length > 0 && (
-              <div className="flex gap-1">
-                {tags.map((tag, i) => (
+              <div className="hidden xs:flex gap-1">
+                {tags.slice(0, 2).map((tag, i) => (
                   <span
                     key={i}
-                    className="text-[9px] font-mono px-1.5 py-0.5 bg-slate-dark/50 text-ivory-light/40 border border-ivory-light/10"
+                    className="text-[8px] sm:text-[9px] font-mono px-1 sm:px-1.5 py-0.5 bg-slate-dark/50 text-ivory-light/40 border border-ivory-light/10"
                   >
                     {tag}
                   </span>

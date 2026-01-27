@@ -6,6 +6,14 @@ module.exports = {
     './app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
+    screens: {
+      'xs': '375px',  // Small phones
+      'sm': '640px',  // Default Tailwind
+      'md': '768px',  // Default Tailwind
+      'lg': '1024px', // Default Tailwind
+      'xl': '1280px', // Default Tailwind
+      '2xl': '1536px', // Default Tailwind
+    },
     extend: {
       colors: {
         // Primary palette - harsh

@@ -183,25 +183,27 @@ function TabNav({
   onTabChange: (tab: TabId) => void;
 }) {
   return (
-    <div className="flex items-center gap-1 p-1 bg-ivory-light/[0.02] border border-ivory-light/10">
-      {TABS.map((tab) => {
-        const Icon = tab.icon;
-        const isActive = activeTab === tab.id;
-        return (
-          <button
-            key={tab.id}
-            onClick={() => onTabChange(tab.id)}
-            className={`flex items-center gap-2 px-4 py-2 text-xs font-mono transition-all ${
-              isActive
-                ? 'bg-danger-orange text-black'
-                : 'text-ivory-light/50 hover:text-ivory-light hover:bg-ivory-light/5'
-            }`}
-          >
-            <Icon size={14} />
-            <span className="hidden sm:inline">{tab.label}</span>
-          </button>
-        );
-      })}
+    <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0 scrollbar-hide">
+      <div className="flex items-center gap-1 p-1 bg-ivory-light/[0.02] border border-ivory-light/10 min-w-max sm:min-w-0">
+        {TABS.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => onTabChange(tab.id)}
+              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 text-xs font-mono transition-all whitespace-nowrap ${
+                isActive
+                  ? 'bg-danger-orange text-black'
+                  : 'text-ivory-light/50 hover:text-ivory-light hover:bg-ivory-light/5'
+              }`}
+            >
+              <Icon size={14} />
+              <span className="text-[11px] sm:text-xs">{tab.label}</span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -360,7 +362,7 @@ function SecurityIntelSection({ security }: { security?: SecurityIntel | null })
       />
       <CardBody className="space-y-4">
         {/* Security Status Grid */}
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
           <div className={`flex items-center gap-2 p-3 border ${!security.mintAuthorityEnabled ? 'border-larp-green/20 bg-larp-green/5' : 'border-larp-red/20 bg-larp-red/5'}`}>
             {!security.mintAuthorityEnabled ? (
               <Lock size={14} className="text-larp-green shrink-0" />
@@ -1194,7 +1196,7 @@ function WebsiteIntelSection({ intel, websiteUrl }: { intel?: Project['websiteIn
         </div>
 
         {/* Checklist */}
-        <div className="grid grid-cols-2 gap-1 mb-4">
+        <div className="grid grid-cols-1 xs:grid-cols-2 gap-1 mb-4">
           {checkItems.map((item) => (
             <div key={item.key} className="flex items-center gap-2 py-1.5">
               {item.value ? (
@@ -1508,54 +1510,80 @@ export default function ProjectPage() {
   return (
     <div className="h-full flex flex-col overflow-hidden bg-slate-dark">
       {/* Header */}
-      <div className="shrink-0 flex items-center justify-between px-6 py-4 border-b border-ivory-light/5">
+      <div className="shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-ivory-light/5 gap-2">
         <button
           onClick={() => router.push('/terminal')}
-          className="flex items-center gap-2 text-sm text-ivory-light/50 hover:text-ivory-light transition-colors"
+          className="flex items-center gap-1.5 sm:gap-2 text-sm text-ivory-light/50 hover:text-ivory-light transition-colors shrink-0"
         >
           <ArrowLeft size={16} />
-          <span className="font-mono text-xs">Back</span>
+          <span className="font-mono text-xs hidden sm:inline">Back</span>
         </button>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={handleShare}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-ivory-light/50 border border-ivory-light/10 hover:border-ivory-light/20 hover:text-ivory-light transition-colors"
+            className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-xs text-ivory-light/50 border border-ivory-light/10 hover:border-ivory-light/20 hover:text-ivory-light transition-colors"
           >
             <Share2 size={12} />
-            Share
+            <span className="hidden sm:inline">Share</span>
           </button>
           <button
             onClick={handleRescan}
             disabled={isRefreshing || !project.xHandle}
-            className="flex items-center gap-1.5 px-4 py-1.5 text-xs bg-danger-orange text-black font-mono font-medium disabled:opacity-50 hover:bg-danger-orange/90 transition-colors"
+            className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 text-xs bg-danger-orange text-black font-mono font-medium disabled:opacity-50 hover:bg-danger-orange/90 transition-colors"
           >
             <RefreshCw size={12} className={isRefreshing ? 'animate-spin' : ''} />
-            Rescan
+            <span className="hidden xs:inline">Rescan</span>
           </button>
         </div>
       </div>
 
       {/* Main content */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-6xl mx-auto px-6 py-6">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
           {/* Project Header - Always visible */}
-          <div className="flex gap-6 mb-6">
-            {/* Avatar */}
-            <div className="shrink-0">
-              <div className="w-16 h-16 rounded-lg overflow-hidden border border-ivory-light/10">
-                {project.avatarUrl ? (
-                  <Image src={project.avatarUrl} alt={project.name} width={64} height={64} />
-                ) : project.tokenAddress ? (
-                  <ContractAvatar address={project.tokenAddress} size={64} bgColor="transparent" />
-                ) : (
-                  <ContractAvatar address={project.id || project.name} size={64} bgColor="transparent" />
-                )}
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-6">
+            {/* Avatar + Trust Score Row on Mobile */}
+            <div className="flex items-start gap-4 sm:block">
+              <div className="shrink-0">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden border border-ivory-light/10">
+                  {project.avatarUrl ? (
+                    <Image src={project.avatarUrl} alt={project.name} width={64} height={64} className="w-full h-full object-cover" />
+                  ) : project.tokenAddress ? (
+                    <ContractAvatar address={project.tokenAddress} size={64} bgColor="transparent" />
+                  ) : (
+                    <ContractAvatar address={project.id || project.name} size={64} bgColor="transparent" />
+                  )}
+                </div>
+              </div>
+              {/* Trust Score - visible on mobile only next to avatar */}
+              <div className="sm:hidden flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <h1 className="text-lg text-ivory-light font-bold truncate">{project.name}</h1>
+                  {project.ticker && (
+                    <span className="font-mono text-sm text-danger-orange shrink-0">${project.ticker}</span>
+                  )}
+                </div>
+                <div
+                  className="inline-flex items-center gap-1.5 px-2 py-0.5 border"
+                  style={{
+                    borderColor: getTrustColor(score) + '40',
+                    backgroundColor: getTrustColor(score) + '10',
+                  }}
+                >
+                  <span className="font-mono text-sm font-bold" style={{ color: getTrustColor(score) }}>
+                    {score}
+                  </span>
+                  <span className="text-[10px] font-mono uppercase" style={{ color: getTrustColor(score) }}>
+                    {getTrustLabel(score)}
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* Info */}
+            {/* Info - Desktop layout */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-3 mb-1">
+              {/* Desktop: Name + Ticker + Score on same line */}
+              <div className="hidden sm:flex items-center gap-3 mb-1">
                 <h1 className="text-xl text-ivory-light font-bold truncate">{project.name}</h1>
                 {project.ticker && (
                   <span className="font-mono text-base text-danger-orange shrink-0">${project.ticker}</span>
@@ -1578,7 +1606,7 @@ export default function ProjectPage() {
               </div>
 
               {/* Links */}
-              <div className="flex items-center gap-4 flex-wrap">
+              <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
                 {project.xHandle && (
                   <a
                     href={`https://x.com/${project.xHandle}`}
@@ -1587,7 +1615,7 @@ export default function ProjectPage() {
                     className="flex items-center gap-1 text-xs text-ivory-light/50 hover:text-ivory-light transition-colors"
                   >
                     <Twitter size={12} />
-                    @{project.xHandle}
+                    <span className="hidden xs:inline">@</span>{project.xHandle}
                   </a>
                 )}
                 {project.websiteUrl && (
@@ -1598,7 +1626,7 @@ export default function ProjectPage() {
                     className="flex items-center gap-1 text-xs text-ivory-light/50 hover:text-ivory-light transition-colors"
                   >
                     <Globe size={12} />
-                    Website
+                    <span className="hidden xs:inline">Website</span>
                   </a>
                 )}
                 {project.githubUrl && (
@@ -1609,7 +1637,7 @@ export default function ProjectPage() {
                     className="flex items-center gap-1 text-xs text-ivory-light/50 hover:text-ivory-light transition-colors"
                   >
                     <GithubIcon size={12} />
-                    GitHub
+                    <span className="hidden xs:inline">GitHub</span>
                   </a>
                 )}
                 {project.discordUrl && (
@@ -1620,7 +1648,7 @@ export default function ProjectPage() {
                     className="flex items-center gap-1 text-xs text-ivory-light/50 hover:text-ivory-light transition-colors"
                   >
                     <MessageCircle size={12} />
-                    Discord
+                    <span className="hidden xs:inline">Discord</span>
                   </a>
                 )}
                 {project.telegramUrl && (
@@ -1631,12 +1659,13 @@ export default function ProjectPage() {
                     className="flex items-center gap-1 text-xs text-ivory-light/50 hover:text-ivory-light transition-colors"
                   >
                     <Send size={12} />
-                    Telegram
+                    <span className="hidden xs:inline">Telegram</span>
                   </a>
                 )}
-                <span className="text-[10px] text-ivory-light/30 flex items-center gap-1 ml-auto">
+                <span className="text-[10px] text-ivory-light/30 flex items-center gap-1 sm:ml-auto">
                   <Clock size={10} />
-                  {formatDate(project.lastScanAt)}
+                  <span className="hidden xs:inline">{formatDate(project.lastScanAt)}</span>
+                  <span className="xs:hidden">{new Date(project.lastScanAt).toLocaleDateString()}</span>
                 </span>
               </div>
             </div>
