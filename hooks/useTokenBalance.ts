@@ -9,6 +9,22 @@ import { PublicKey } from '@solana/web3.js';
 import { getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
 import { CLARP_MINT, CLARP_DECIMALS } from '@/lib/config/tokenomics';
 
+/**
+ * Format large numbers in compact form (e.g., 19.61B, 1.5M, 750K)
+ */
+function formatCompactNumber(num: number): string {
+  if (num >= 1_000_000_000) {
+    return (num / 1_000_000_000).toFixed(2).replace(/\.?0+$/, '') + 'B';
+  }
+  if (num >= 1_000_000) {
+    return (num / 1_000_000).toFixed(2).replace(/\.?0+$/, '') + 'M';
+  }
+  if (num >= 1_000) {
+    return (num / 1_000).toFixed(2).replace(/\.?0+$/, '') + 'K';
+  }
+  return num.toLocaleString(undefined, { maximumFractionDigits: 2 });
+}
+
 export interface TokenBalanceState {
   balance: number | null;
   balanceRaw: bigint | null;
@@ -79,7 +95,7 @@ export function useTokenBalance(): TokenBalanceState {
   return {
     balance,
     balanceRaw,
-    balanceFormatted: balance !== null ? balance.toLocaleString() : '—',
+    balanceFormatted: balance !== null ? formatCompactNumber(balance) : '—',
     isLoading,
     error,
     refetch: fetchBalance,

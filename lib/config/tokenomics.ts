@@ -5,7 +5,7 @@ import { PublicKey } from '@solana/web3.js';
 
 // CLARP Token
 export const CLARP_MINT = new PublicKey('GtwMkjRY8Vi5oGaLaEsd1xnsr3AkZ6ZYBqsG5ipTBAGS');
-export const CLARP_DECIMALS = 6;
+export const CLARP_DECIMALS = 9;
 
 // Tier thresholds (in whole tokens, not raw amounts)
 export const TIER_THRESHOLDS = {
@@ -80,30 +80,35 @@ export const MIN_DISTRIBUTION_SOL = 0.1;
 // Bags.fm URL for buying CLARP
 export const BAGS_FM_URL = 'https://bags.fm/token/GtwMkjRY8Vi5oGaLaEsd1xnsr3AkZ6ZYBqsG5ipTBAGS';
 
-// Tier display config
-export const TIER_CONFIG: Record<Tier, { label: string; color: string; bg: string; icon: string }> = {
+// Tier display config - icon names reference Lucide icons
+// Uses brutalist design system colors for high visibility
+export const TIER_CONFIG: Record<Tier, { label: string; color: string; bg: string; border: string; icon: string }> = {
   free: {
     label: 'Free',
-    color: 'text-gray-400',
-    bg: 'bg-gray-500/20 border-gray-500/30',
-    icon: '👤',
+    color: 'text-ivory-light/70',
+    bg: 'bg-slate-medium/30',
+    border: 'border-ivory-light/30',
+    icon: 'user',
   },
   holder: {
     label: 'Holder',
-    color: 'text-blue-400',
-    bg: 'bg-blue-500/20 border-blue-500/30',
-    icon: '⭐',
+    color: 'text-cyan-400',
+    bg: 'bg-cyan-500/20',
+    border: 'border-cyan-400',
+    icon: 'star',
   },
   power: {
     label: 'Power',
-    color: 'text-purple-400',
-    bg: 'bg-purple-500/20 border-purple-500/30',
-    icon: '💎',
+    color: 'text-fuchsia-400',
+    bg: 'bg-fuchsia-500/20',
+    border: 'border-fuchsia-400',
+    icon: 'gem',
   },
   whale: {
     label: 'Whale',
-    color: 'text-amber-400',
-    bg: 'bg-amber-500/20 border-amber-500/30',
-    icon: '🐋',
+    color: 'text-danger-orange',
+    bg: 'bg-danger-orange/20',
+    border: 'border-danger-orange',
+    icon: 'crown',
   },
 };
