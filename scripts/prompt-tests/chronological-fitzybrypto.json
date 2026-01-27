@@ -1,0 +1,148 @@
+{
+  "handle": "@fitzybrypto",
+  "accountOverview": {
+    "displayName": "Fitzy",
+    "bio": "PhD in retard communication helping the lower IQ understand how things work. Posts are not financial advice.",
+    "verified": true,
+    "followers": 8435,
+    "following": 0,
+    "accountCreated": "2024-09-01",
+    "accountAgeDays": 512,
+    "estimatedPostsAnalyzed": 100
+  },
+  "timeline": [
+    {
+      "period": "Sep 2024",
+      "summary": "Early activity with casual replies and memes, low volume posting focused on general crypto discussions.",
+      "notableEvents": ["Casual interactions with degen community"],
+      "promotedProjects": [],
+      "sentimentFromOthers": "neutral"
+    },
+    {
+      "period": "Dec 2024",
+      "summary": "Continued light posting with humorous replies, engaging in community banter.",
+      "notableEvents": ["Replies to influencers like EricCryptoman"],
+      "promotedProjects": [],
+      "sentimentFromOthers": "neutral"
+    },
+    {
+      "period": "Mar 2025",
+      "summary": "Active in meme vs utility debates, criticizing utility tokens and defending memes.",
+      "notableEvents": ["Clashes with IncomeSharks and others on meme coin viability"],
+      "promotedProjects": [],
+      "sentimentFromOthers": "mixed"
+    },
+    {
+      "period": "Jun 2025",
+      "summary": "Promoting privacy-focused projects, replying to Solana figures like @toly.",
+      "notableEvents": ["Shill for $mnplyM0N3Y as private payment system on Solana"],
+      "promotedProjects": ["$mnplyM0N3Y"],
+      "sentimentFromOthers": "positive"
+    },
+    {
+      "period": "Sep 2025",
+      "summary": "Heavy promotion of $zera as privacy/acc coin, visionary posts, interactions with @dev_skill_issue.",
+      "notableEvents": ["Multiple posts hyping $zera roadmap and potential"],
+      "promotedProjects": ["$zera"],
+      "sentimentFromOthers": "positive"
+    },
+    {
+      "period": "Jan 2026",
+      "summary": "CTO takeover of $boob after rug, supporting charity @keepabreast, meme-heavy posting.",
+      "notableEvents": ["Revived $boob, community support, boob memes"],
+      "promotedProjects": ["$boob", "$zera"],
+      "sentimentFromOthers": "positive"
+    }
+  ],
+  "promotionHistory": [
+    {
+      "projectName": "$zera",
+      "ticker": "$ZERA",
+      "firstMention": "2025-09-30",
+      "lastMention": "2026-01-26",
+      "outcome": "unknown",
+      "evidenceUrls": ["https://x.com/Fitzybrypto/status/1973154642533224506", "https://x.com/Fitzybrypto/status/1973153772873588769"]
+    },
+    {
+      "projectName": "$boob",
+      "ticker": "$BOOB",
+      "firstMention": "2026-01-22",
+      "lastMention": "2026-01-26",
+      "outcome": "revived after rug",
+      "evidenceUrls": ["https://x.com/Fitzybrypto/status/2014377042528153876", "https://x.com/Fitzybrypto/status/2015755631609721292"]
+    },
+    {
+      "projectName": "$mnplyM0N3Y",
+      "ticker": "$M0N3Y",
+      "firstMention": "2025-06-04",
+      "lastMention": "2025-06-04",
+      "outcome": "unknown",
+      "evidenceUrls": ["https://x.com/Fitzybrypto/status/1930359992902623604"]
+    },
+    {
+      "projectName": "$CSWAP",
+      "ticker": "$CSWAP",
+      "firstMention": "2024-09-29",
+      "lastMention": "2024-09-29",
+      "outcome": "unknown",
+      "evidenceUrls": ["https://x.com/Fitzybrypto/status/1840493015598567426"]
+    }
+  ],
+  "reputationAnalysis": {
+    "positiveSignals": ["CTO'd $boob for charity after rug, gaining community support", "Consistent NFA disclaimer", "Engages positively with projects like $zera team", "Known for degen calls in Solana ecosystem"],
+    "negativeSignals": ["Aggressive language calling followers 'retarded pigs'", "Shills multiple memecoins/tokens without deep analysis"],
+    "controversies": [
+      {
+        "date": "2026-01-19",
+        "summary": "Warned against buying on CTO rumors, called buyers 'retarded pigs'",
+        "sources": ["https://x.com/Fitzybrypto/status/2013277303992721729"]
+      }
+    ],
+    "communityPerception": "Viewed as a straightforward degen trader and shiller in Solana CT, respected for bold calls and charity actions like $boob CTO, but criticized for crude communication style."
+  },
+  "evidence": [
+    {
+      "date": "2026-01-26",
+      "tweetExcerpt": "I went to bed last night thinking of boob. I woke up this morning thinking of boob. We must protect boob at all costs.",
+      "tweetUrl": "https://x.com/Fitzybrypto/status/2015755631609721292",
+      "category": "promotion",
+      "significance": "Heavy promotion of $boob post-CTO"
+    },
+    {
+      "date": "2025-09-30",
+      "tweetExcerpt": "Oh boy we are literally so far in front of everyone with the vision Everyone starting to talk about privacy, p2p etc.",
+      "tweetUrl": "https://x.com/Fitzybrypto/status/1973153772873588769",
+      "category": "promotion",
+      "significance": "Key $zera shill highlighting privacy narrative"
+    },
+    {
+      "date": "2026-01-22",
+      "tweetExcerpt": "Ok fuck it ctoing $boob will write more in a bit",
+      "tweetUrl": "https://x.com/Fitzybrypto/status/2014377042528153876",
+      "category": "milestone",
+      "significance": "Announces CTO of rugged $boob for charity"
+    },
+    {
+      "date": "2025-06-04",
+      "tweetExcerpt": "What if the first private offline and online payment system was built on the solana blockchain? @mnplyM0N3Y",
+      "tweetUrl": "https://x.com/Fitzybrypto/status/1930359992902623604",
+      "category": "promotion",
+      "significance": "Early privacy project shill tagging Solana co-founder"
+    },
+    {
+      "date": "2026-01-19",
+      "tweetExcerpt": "You are all retarded pigs",
+      "tweetUrl": "https://x.com/Fitzybrypto/status/2013277303992721729",
+      "category": "controversy",
+      "significance": "Backlash from anti-hype stance on CTO rumors"
+    }
+  ],
+  "assessment": {
+    "trustworthiness": 8,
+    "consistency": 7,
+    "transparency": 9,
+    "overallRisk": "low",
+    "confidence": "medium",
+    "summary": "@Fitzybrypto is a vocal Solana degen trader with a track record of shilling privacy/meme projects like $zera and CTOing charity $boob post-rug. No direct scam accusations; crude style but consistent NFA and community engagement suggest low risk for followers who DYOR."
+  }
+}

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { submitScan, getScanJob } from '@/lib/terminal/xintel/scan-service';
-import { isValidHandle, formatHandle } from '@/types/xintel';
+import { submitUniversalScan, getScanJob, getActiveScanByHandle } from '@/lib/terminal/xintel/scan-service';
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,23 +8,25 @@ export async function POST(request: NextRequest) {
 
     if (!handle || typeof handle !== 'string') {
       return NextResponse.json(
-        { error: 'Handle is required' },
+        { error: 'Search query is required' },
         { status: 400 }
       );
     }
 
-    const formattedHandle = formatHandle(handle);
+    // Clean the input
+    const input = handle.trim();
 
-    if (!isValidHandle(formattedHandle)) {
+    if (input.length < 2) {
       return NextResponse.json(
-        { error: 'Invalid handle format. X handles must be 4-15 characters (letters, numbers, underscore).' },
+        { error: 'Search query too short' },
         { status: 400 }
       );
     }
 
-    const result = submitScan({
-      handle: formattedHandle,
-      depth: depth || 800,
+    // Use universal scan - it accepts any input type (token address, X handle, website, GitHub)
+    const result = await submitUniversalScan({
+      input,
+      depth: depth || 200,
       force: force || false,
     });
 
@@ -38,10 +39,26 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       jobId: result.jobId,
+      inputType: result.inputType,
+      canonicalId: result.canonicalId,
       status: result.status,
       cached: result.cached,
+      // Include OSINT data if available (for immediate display)
+      osintData: result.osintData ? {
+        name: result.osintData.name,
+        symbol: result.osintData.symbol,
+        website: result.osintData.website,
+        xHandle: result.osintData.xHandle,
+        github: result.osintData.github,
+        telegram: result.osintData.telegram,
+        discord: result.osintData.discord,
+        confidence: result.osintData.confidence,
+        securityIntel: result.osintData.securityIntel,
+        marketIntel: result.osintData.marketIntel,
+      } : undefined,
     });
-  } catch {
+  } catch (err) {
+    console.error('[API] Scan error:', err);
     return NextResponse.json(
       { error: 'Failed to process scan request' },
       { status: 500 }
@@ -51,15 +68,41 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   const jobId = request.nextUrl.searchParams.get('jobId');
+  const handle = request.nextUrl.searchParams.get('handle');
 
+  // If handle is provided, look up active scan by handle (for resume on page refresh)
+  if (handle) {
+    const job = await getActiveScanByHandle(handle);
+
+    if (!job) {
+      return NextResponse.json(
+        { error: 'No active scan found for this handle', hasActiveScan: false },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      jobId: job.id,
+      handle: job.handle,
+      status: job.status,
+      progress: job.progress,
+      statusMessage: job.statusMessage,
+      startedAt: job.startedAt,
+      completedAt: job.completedAt,
+      error: job.error,
+      hasActiveScan: true,
+    });
+  }
+
+  // Otherwise, look up by jobId
   if (!jobId) {
     return NextResponse.json(
-      { error: 'Job ID is required' },
+      { error: 'Job ID or handle is required' },
       { status: 400 }
     );
   }
 
-  const job = getScanJob(jobId);
+  const job = await getScanJob(jobId);
 
   if (!job) {
     return NextResponse.json(
@@ -73,6 +116,7 @@ export async function GET(request: NextRequest) {
     handle: job.handle,
     status: job.status,
     progress: job.progress,
+    statusMessage: job.statusMessage,
     startedAt: job.startedAt,
     completedAt: job.completedAt,
     error: job.error,

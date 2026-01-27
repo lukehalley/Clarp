@@ -1,16 +1,13 @@
 // CLARP Terminal - TypeScript Types
 
 // ============================================================================
-// CHAINS
+// CHAIN (Solana only)
 // ============================================================================
 
-export type Chain = 'solana' | 'ethereum' | 'base' | 'arbitrum';
+export type Chain = 'solana';
 
 export const CHAIN_INFO: Record<Chain, { name: string; shortName: string; color: string }> = {
   solana: { name: 'Solana', shortName: 'SOL', color: '#9945FF' },
-  ethereum: { name: 'Ethereum', shortName: 'ETH', color: '#627EEA' },
-  base: { name: 'Base', shortName: 'BASE', color: '#0052FF' },
-  arbitrum: { name: 'Arbitrum', shortName: 'ARB', color: '#28A0F0' },
 };
 
 // ============================================================================

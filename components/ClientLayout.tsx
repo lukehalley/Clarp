@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback, createContext, useContext, useRef } f
 import { usePathname, useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import ClarpAI from '@/components/ClarpAI';
+import { AuthProvider } from '@/contexts/AuthContext';
+import WalletProvider from '@/contexts/WalletProvider';
 
 // Context for page transition
 interface TransitionContextType {
@@ -89,18 +91,22 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
   const useDarkOverlay = isFadingOut ? targetIsDark : currentIsDark;
 
   return (
-    <TransitionContext.Provider value={{ navigateWithFade }}>
-      {!isTerminal && <Navbar />}
-      {children}
-      {!isTerminal && <ClarpAI />}
+    <WalletProvider>
+      <AuthProvider>
+        <TransitionContext.Provider value={{ navigateWithFade }}>
+          {!isTerminal && <Navbar />}
+          {children}
+          {!isTerminal && <ClarpAI />}
 
-      {/* Page transition overlay */}
-      <div
-        className={`fixed inset-0 z-[300] pointer-events-none transition-opacity duration-500 ease-out ${
-          useDarkOverlay ? 'bg-black' : 'bg-ivory-light'
-        }`}
-        style={{ opacity: overlayOpacity }}
-      />
-    </TransitionContext.Provider>
+          {/* Page transition overlay */}
+          <div
+            className={`fixed inset-0 z-[300] pointer-events-none transition-opacity duration-500 ease-out ${
+              useDarkOverlay ? 'bg-black' : 'bg-ivory-light'
+            }`}
+            style={{ opacity: overlayOpacity }}
+          />
+        </TransitionContext.Provider>
+      </AuthProvider>
+    </WalletProvider>
   );
 }

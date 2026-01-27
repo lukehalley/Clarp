@@ -13,6 +13,7 @@ export type ScanStatus =
   | 'extracting'
   | 'analyzing'
   | 'scoring'
+  | 'enriching'
   | 'complete'
   | 'failed'
   | 'cached';
@@ -23,6 +24,7 @@ export interface ScanJob {
   depth: number;
   status: ScanStatus;
   progress: number; // 0-100
+  statusMessage?: string; // Detailed step description
   startedAt: Date;
   completedAt?: Date;
   error?: string;
@@ -34,6 +36,7 @@ export const SCAN_STATUS_LABELS: Record<ScanStatus, string> = {
   extracting: 'Extracting Entities',
   analyzing: 'Analyzing Behavior',
   scoring: 'Building Report',
+  enriching: 'Enriching Token Data',
   complete: 'Complete',
   failed: 'Failed',
   cached: 'Cached',
@@ -41,10 +44,11 @@ export const SCAN_STATUS_LABELS: Record<ScanStatus, string> = {
 
 export const SCAN_STATUS_PROGRESS: Record<ScanStatus, number> = {
   queued: 0,
-  fetching: 20,
-  extracting: 45,
-  analyzing: 70,
-  scoring: 90,
+  fetching: 15,
+  extracting: 30,
+  analyzing: 55,
+  scoring: 75,
+  enriching: 90,
   complete: 100,
   failed: 0,
   cached: 100,
@@ -104,6 +108,30 @@ export const EVIDENCE_LABEL_COLORS: Record<XIntelEvidenceLabel, string> = {
 // SHILLED ENTITIES
 // ============================================================================
 
+export interface TokenMarketData {
+  tokenAddress: string;
+  poolAddress?: string;
+  priceUsd: number;
+  // Price changes for multiple timeframes
+  priceChange5m?: number;
+  priceChange1h?: number;
+  priceChange6h?: number;
+  priceChange24h?: number;
+  volume24h?: number;
+  liquidity?: number;
+  marketCap?: number;
+  dexType?: 'raydium' | 'meteora' | 'orca' | 'pump_fun' | 'unknown';
+  // Transaction data
+  buys24h?: number;
+  sells24h?: number;
+  // Token info
+  imageUrl?: string;
+  pairCreatedAt?: number;
+  // URLs
+  dexScreenerUrl?: string;
+  birdeyeUrl?: string;
+}
+
 export interface ShilledEntity {
   id: string;
   entityName: string;
@@ -114,6 +142,8 @@ export interface ShilledEntity {
   lastSeen: Date;
   promoIntensity: number; // 0-100 (promotional vs neutral ratio)
   evidenceIds: string[];
+  // Token market data (if resolved)
+  tokenData?: TokenMarketData;
 }
 
 // ============================================================================

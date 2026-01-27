@@ -24,9 +24,9 @@ export async function GET(
     );
   }
 
-  // Get report (always returns data - generates random if no preset)
-  const report = getCachedReport(formattedHandle);
-  const cacheAge = getCacheAge(formattedHandle);
+  // Get report from cache (token data is enriched during the scan phase)
+  const report = await getCachedReport(formattedHandle);
+  const cacheAge = await getCacheAge(formattedHandle);
 
   return NextResponse.json({
     report,

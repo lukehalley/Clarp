@@ -1,0 +1,124 @@
+{
+  "handle": "@fitzybrypto",
+  "researchSummary": {
+    "postsReviewed": 35,
+    "mentionsFound": 20,
+    "timeframeCovered": "June 2025 - January 2026"
+  },
+  "theStory": "Fitzybrypto, real name likely Fitzy, runs a verified X account with 8,435 followers, branding himself with a humorous bio: 'PhD in retard communication helping the lower IQ understand how things work. Posts are not financial advice.' Active in the Solana meme coin ecosystem, his content blends degen humor, simple crypto explanations, and token promotions. Early activity in June-July 2025 shows casual engagement, like replying in threads with quips (e.g., June 4, 2025: 'What do women love?' in a meme context, https://x.com/Fitzybrypto/status/1930364250070909024) and openly 'pumping bags' on July 25, 2025 ('Im busy pumping my bags', https://x.com/Fitzybrypto/status/1948866955965804781), indicating a trader mindset without specific projects highlighted.\n\nBy late 2025 and into January 2026, Fitzy evolved into a community leader, particularly with $BOOB, a boob-themed meme coin. On January 19, 2026, he addressed rumors of a Community Takeover (CTO), calling buyers 'retarded pigs' for front-running but proceeded to CTO after the original team allegedly exploited Keep A Breast charity ('Ok fuck it ctoing $boob', https://x.com/Fitzybrypto/status/2014377042528153876). He ramped up boob memes, like January 26's 'We must protect boob at all costs' (https://x.com/Fitzybrypto/status/2015755631609721292), driving engagement. The charity endorsed him positively on January 23 ('@Fitzybrypto is the guy', https://x.com/keepabreast/status/2014648937190228342), boosting legitimacy.\n\nHis reputation is mixed: praised as transparent and capable by supporters for leading multi-million mcap CTOs previously, but criticized for potential pump/dumps. On January 23, amid charity bullishness ('Breast cancer charity bullish...', https://x.com/Fitzybrypto/status/2014789214060138924), @Pokepal007 accused him of fresh wallets and pump/dump risks. No major rugs or exits noted; he critiques others like James Wynn on January 11 (https://x.com/Fitzybrypto/status/2010170602074849785). Overall, he's a niche degen voice, evolving from casual shiller to CTO leader.",
+  "keyMoments": [
+    {
+      "date": "2025-07-25",
+      "event": "Publicly admits to pumping bags",
+      "significance": "Reveals early degen trading style",
+      "tweetUrl": "https://x.com/Fitzybrypto/status/1948866955965804781"
+    },
+    {
+      "date": "2026-01-19",
+      "event": "CTO takeover of $BOOB announced",
+      "significance": "Shifts to leadership role in meme coin",
+      "tweetUrl": "https://x.com/Fitzybrypto/status/2013277303992721729"
+    },
+    {
+      "date": "2026-01-23",
+      "event": "Keep A Breast charity endorsement amid accusations",
+      "significance": "Gains legitimacy but faces pump/dump claims",
+      "tweetUrl": "https://x.com/Fitzybrypto/status/2014789214060138924"
+    },
+    {
+      "date": "2026-01-26",
+      "event": "Heavy boob meme posting surge",
+      "significance": "Solidifies $BOOB community focus",
+      "tweetUrl": "https://x.com/Fitzybrypto/status/2015755631609721292"
+    }
+  ],
+  "promotionHistory": [
+    {
+      "project": "$BOOB (Solana meme coin)",
+      "period": "January 2026 - ongoing",
+      "outcome": "CTO led, charity adoption, sustained meme-driven pumps",
+      "details": "Took over from malicious original team; praised by Keep A Breast; multiple boob memes and calls to hold (e.g., https://x.com/Fitzybrypto/status/2015135813160288583)"
+    },
+    {
+      "project": "Unnamed bags",
+      "period": "July 2025",
+      "outcome": "Casual pumps, low visibility",
+      "details": "Thread replies like 'Imagine the easiest play' (https://x.com/Fitzybrypto/status/1948866606320250942); prior multi-mcap CTOs mentioned by others"
+    }
+  ],
+  "publicPerception": {
+    "supporters": "Degen community aping due to CTO track record ('GOAT @Fitzybrypto', https://x.com/stekisteks/status/2014570244732551472); Keep A Breast charity for delivery and coordination ('@Fitzybrypto is the guy', https://x.com/keepabreast/status/2014648937190228342).",
+    "critics": "Accusers like @Pokepal007 claiming fresh wallets and pump/dump on $BOOB ('Are they all your fresh wallets?', https://x.com/Pokepal007/status/2014804173372751891); minor FUD from ignored shills.",
+    "controversies": [
+      {
+        "date": "2026-01-23",
+        "summary": "Accused by @Pokepal007 of pump/dump scheme using fresh wallets on $BOOB, questioning hold intentions amid charity tie-in.",
+        "resolution": "Unresolved; Fitzy continued posting bullish content without direct response."
+      }
+    ]
+  },
+  "evidenceArchive": [
+    {
+      "date": "2025-07-25",
+      "content": "Im busy pumping my bags ill dig up the original bible if I have to",
+      "url": "https://x.com/Fitzybrypto/status/1948866955965804781",
+      "type": "own_post",
+      "importance": "high"
+    },
+    {
+      "date": "2026-01-19",
+      "content": "Ok fuck it ctoing $boob will write more in a bit",
+      "url": "https://x.com/Fitzybrypto/status/2014377042528153876",
+      "type": "own_post",
+      "importance": "high"
+    },
+    {
+      "date": "2026-01-23",
+      "content": "Breast cancer charity bullish on art bullposting a boob meme coin...",
+      "url": "https://x.com/Fitzybrypto/status/2014789214060138924",
+      "type": "own_post",
+      "importance": "high"
+    },
+    {
+      "date": "2026-01-23",
+      "content": "Are they all your fresh wallets @Fitzybrypto Are you going to hold your supply?",
+      "url": "https://x.com/Pokepal007/status/2014804173372751891",
+      "type": "mention",
+      "importance": "high"
+    },
+    {
+      "date": "2026-01-26",
+      "content": "I went to bed last night thinking of boob... We must protect boob at all costs.",
+      "url": "https://x.com/Fitzybrypto/status/2015755631609721292",
+      "type": "own_post",
+      "importance": "medium"
+    },
+    {
+      "date": "2026-01-19",
+      "content": "If you're buying something based on rumours I was going to CTO it... You are all retarded pigs",
+      "url": "https://x.com/Fitzybrypto/status/2013277303992721729",
+      "type": "own_post",
+      "importance": "medium"
+    },
+    {
+      "date": "2025-06-04",
+      "content": "What do women love?",
+      "url": "https://x.com/Fitzybrypto/status/1930364250070909024",
+      "type": "own_post",
+      "importance": "low"
+    },
+    {
+      "date": "2026-01-11",
+      "content": "James wynn trying to pump another farm... calling the owner broke",
+      "url": "https://x.com/Fitzybrypto/status/2010170602074849785",
+      "type": "own_post",
+      "importance": "medium"
+    }
+  ],
+  "bottomLine": {
+    "trustLevel": "neutral",
+    "riskLevel": "medium",
+    "confidence": "medium",
+    "oneSentence": "@fitzybrypto is a humorous Solana meme coin shiller and CTO leader, best known for taking over $BOOB with charity backing but shadowed by minor pump/dump suspicions."
+  }
+}

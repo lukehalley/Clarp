@@ -1,0 +1,141 @@
+{
+  "handle": "@fitzybrypto",
+  "searchesPerformed": [
+    {
+      "query": "from:@fitzybrypto",
+      "resultsSummary": "10 latest posts (Jan 26, 2026) heavily focused on $boob memecoin memes, promoting it for breast cancer charity after taking over socials from abandoning team. Comments on crypto rugs (e.g., criticizing BagsApp project), boob-related humor, and support for $Zera. Earlier top posts promote $Zera privacy coin, criticize rugs like $snowball and $Frog.",
+      "relevantTweets": 10
+    },
+    {
+      "query": "\"@fitzybrypto scam\"",
+      "resultsSummary": "No direct scam allegations against @fitzybrypto. Minor indirect mentions tying to shilled coins like $Zera (called scam by detractors) or past shills (fartcoin/titcoin). Overall low volume, mostly unrelated or defensive.",
+      "relevantTweets": 2
+    },
+    {
+      "query": "\"@fitzybrypto rug\"",
+      "resultsSummary": "Very few results. Isolated accusations linking to promoted projects (e.g., $Zera 'rug soon' by haters, $boob post-rug takeover). No evidence of @fitzybrypto rugging or scamming personally; he calls out rugs.",
+      "relevantTweets": 3
+    },
+    {
+      "query": "\"@fitzybrypto\"",
+      "resultsSummary": "General mentions mostly positive/neutral: appreciation for $boob charity takeover (CTO after rug), replies to boob memes. Some criticism of shills but low sentiment negativity. High engagement on his posts.",
+      "relevantTweets": 10
+    },
+    {
+      "query": "tokens/projects promoted by @fitzybrypto (semantic and keyword)",
+      "resultsSummary": "$Zera (privacy coin, heavily shilled Jan 2026, bullish on privacy narrative), $boob (charity memecoin, recent takeover and heavy promotion), mentions of $RIFTS (made a rift), past criticism/shills like $snowball (called rug), $Frog (larp). Focus on Solana memecoins/privacy.",
+      "relevantTweets": 8
+    },
+    {
+      "query": "real identity of @fitzybrypto (semantic)",
+      "resultsSummary": "No credible doxxing or real identity found. Unrelated old posts or no matches. Appears fully anon.",
+      "relevantTweets": 0
+    }
+  ],
+  "profile": {
+    "displayName": "Fitzy",
+    "bio": "PhD in retard communication helping the lower IQ understand how things work. Posts are not financial advice.",
+    "verified": true,
+    "followers": 8435,
+    "accountAge": "approx 10-12 months",
+    "postingFrequency": "5-10 posts per day recently"
+  },
+  "identity": {
+    "isDoxxed": false,
+    "realName": null,
+    "linkedAccounts": [],
+    "location": null,
+    "profession": null
+  },
+  "activityAnalysis": {
+    "mainTopics": ["Solana memecoins", "Privacy coins ($Zera)", "Crypto rugs/calls", "Charity ($boob)"],
+    "promotedTokens": [
+      {
+        "name": "Zera",
+        "ticker": "$Zera",
+        "mentions": 20,
+        "firstSeen": "Jan 2026",
+        "outcome": "Ongoing, bullish narrative"
+      },
+      {
+        "name": "boob",
+        "ticker": "$boob",
+        "mentions": 15,
+        "firstSeen": "Jan 22 2026",
+        "outcome": "CTO takeover post-rug, charity focus"
+      }
+    ],
+    "engagementStyle": "Humorous, direct, meme-heavy; calls out scams/rugs transparently; rallies community for positive causes like charity.",
+    "redFlags": ["Heavy memecoin shilling (high risk assets)", "Association with post-rug takeovers"],
+    "greenFlags": ["Calls out scams/larps (e.g., $snowball, $Frog)", "Transparent $boob takeover for charity", "Consistent privacy narrative"]
+  },
+  "externalPerception": {
+    "positiveTestimonials": [
+      {
+        "from": "@ex_jenn",
+        "excerpt": "CTO by @Fitzybrypto after a horrible rug. Best of luck to you, I bought a bit",
+        "url": "https://x.com/ex_jenn/status/2014526022239015211"
+      },
+      {
+        "from": "@orchard123",
+        "excerpt": "Thank you for stepping in to assist @keepabreast and $boob. Such a great cause",
+        "url": "https://x.com/orchard123/status/2015577433273946528"
+      }
+    ],
+    "negativeTestimonials": [
+      {
+        "from": "@ozzycooks",
+        "excerpt": "Fartcoin shill and titcoin shill?",
+        "url": "https://x.com/ozzycooks/status/2014648599511273654"
+      },
+      {
+        "from": "@bet420hz",
+        "excerpt": "Charity coins are a fucking joke... Clown CTO",
+        "url": "https://x.com/bet420hz/status/2014414081428484464"
+      }
+    ],
+    "controversies": [
+      {
+        "date": "Jan 22 2026",
+        "summary": "$boob rug by original team, @Fitzybrypto takes over socials for charity",
+        "severity": "low"
+      }
+    ]
+  },
+  "evidence": [
+    {
+      "excerpt": "I have taken over the socials, the fees will still go to the keep a breast charity... Boobillions or bust",
+      "url": "https://x.com/Fitzybrypto/status/2014456852851900554",
+      "date": "2026-01-22",
+      "label": "positive",
+      "context": "$boob takeover explanation"
+    },
+    {
+      "excerpt": "This fucking retard $snowball dev is dumping on a wallet he put under a give away",
+      "url": "https://x.com/Fitzybrypto/status/2004289329653551403",
+      "date": "2025-12-25",
+      "label": "negative",
+      "context": "Calling out rug"
+    },
+    {
+      "excerpt": "Privacy will lead this year... The on chain token thats been building privacy the longest... $Zera",
+      "url": "https://x.com/Fitzybrypto/status/2011473725388976395",
+      "date": "2026-01-14",
+      "label": "shill",
+      "context": "$Zera promotion"
+    },
+    {
+      "excerpt": "You drag people into crypto who don’t want to be involved... then wonder why they take the money and run",
+      "url": "https://x.com/Fitzybrypto/status/2015615594955968934",
+      "date": "2026-01-26",
+      "label": "neutral",
+      "context": "Criticizing project"
+    }
+  ],
+  "verdict": {
+    "riskLevel": "low",
+    "confidence": "medium",
+    "recommendation": "Legit anonymous crypto influencer focused on Solana memecoins and privacy; follow for calls but DYOR as memecoins are high-risk. Positive charity involvement offsets minor shill criticisms.",
+    "keyReasons": ["No personal scam/rug history; calls out bad actors", "Transparent actions like $boob charity takeover", "Consistent posting without major controversies"]
+  }
+}

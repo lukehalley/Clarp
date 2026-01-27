@@ -39,6 +39,12 @@ next-env.d.ts
 .DS_Store
 Thumbs.db
 
+# AI tool configurations (local/personal)
+.claude/
+.agents/
+.gemini/
+.opencode/
+
 # Internal/Private - Do not commit to public repo
 chats/
 marketing-assets/
@@ -48,3 +54,4 @@ MARKETING_PLAN.md
 PROJECT_CONCEPT.md
 ROADMAP_V1.pdf
 ROADMAP_PUBLIC.md
+supabase/.temp/
