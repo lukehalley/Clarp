@@ -285,8 +285,15 @@ function isValidXHandle(handle: string): boolean {
 
 /**
  * Extract X handle from Twitter URL
+ * Handles edge cases like x.com/i/communities/... which are NOT user profiles
  */
 function extractXHandleFromUrl(url: string): string | null {
+  // Skip internal X paths like /i/communities, /i/lists, /i/spaces, etc.
+  if (/(?:twitter\.com|x\.com)\/i\//i.test(url)) {
+    console.log(`[EntityResolver] Ignoring internal X path: ${url}`);
+    return null;
+  }
+
   const match = url.match(/(?:twitter\.com|x\.com)\/(@?[\w]+)/i);
   if (match) {
     const handle = match[1].replace('@', '').toLowerCase();
