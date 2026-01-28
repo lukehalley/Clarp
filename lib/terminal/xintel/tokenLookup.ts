@@ -19,12 +19,15 @@ export interface TokenData {
   liquidity: number;
   marketCap: number;
   poolAddress: string;
-  dexType: 'raydium' | 'meteora' | 'orca' | 'pump_fun' | 'pumpswap' | 'unknown';
+  // DEX/trading venue
+  dexType: 'raydium' | 'meteora' | 'orca' | 'pump_fun' | 'pumpswap' | 'moonshot' | 'jupiter' | 'unknown';
   // Raw DEX ID from DexScreener (for debugging/display)
   rawDexId?: string;
-  // Pump.fun specific: whether the token has graduated from bonding curve
-  // true = trading on PumpSwap (graduated), false = still on bonding curve
-  isPumpFunGraduated?: boolean;
+  // Detected launchpad (if any) - from address pattern or dexId
+  detectedLaunchpad?: 'pump_fun' | 'bags_fm' | 'moonshot' | 'raydium_launchlab' | 'meteora_dbc' | 'letsbonk' | 'boop_fun' | 'sugar' | 'unknown';
+  // For launchpad tokens: whether graduated from bonding curve
+  // true = graduated to DEX, false = still on bonding curve, undefined = not applicable
+  isGraduated?: boolean;
   // Transaction data
   buys24h?: number;
   sells24h?: number;
@@ -33,7 +36,7 @@ export interface TokenData {
   websiteUrl?: string;
   twitterUrl?: string;
   telegramUrl?: string;
-  // Age
+  // Age - timestamp when first trading pair was created
   pairCreatedAt?: number;
 }
 
@@ -48,24 +51,81 @@ const DEXSCREENER_API = 'https://api.dexscreener.com/latest/dex';
 /**
  * Normalize DEX identifiers to our standard types
  *
- * IMPORTANT: PumpSwap vs pump_fun distinction:
- * - 'pumpswap' = Token has GRADUATED from bonding curve, now trading on PumpSwap DEX
- * - 'pump_fun' = Token is still on bonding curve (not graduated yet)
+ * Solana DEX Landscape:
+ * - 'raydium' = Raydium AMM/CLMM/CPMM (most volume)
+ * - 'orca' = Orca Whirlpools
+ * - 'meteora' = Meteora DLMM/Dynamic Pools
+ * - 'jupiter' = Jupiter (aggregator, but also has native pools)
+ * - 'pumpswap' = Graduated pump.fun tokens (post-March 2025)
+ * - 'pump_fun' = Still on pump.fun bonding curve
+ * - 'moonshot' = Moonshot by DexScreener
  */
 function normalizeDexType(dexId: string): TokenData['dexType'] {
   const normalized = dexId.toLowerCase();
 
+  // Major DEXs
   if (normalized.includes('raydium')) return 'raydium';
   if (normalized.includes('meteora')) return 'meteora';
-  if (normalized.includes('orca')) return 'orca';
+  if (normalized.includes('orca') || normalized.includes('whirlpool')) return 'orca';
+  if (normalized.includes('jupiter')) return 'jupiter';
 
-  // PumpSwap = graduated pump.fun tokens (check this BEFORE general pump check)
+  // Launchpad DEXs
   if (normalized.includes('pumpswap')) return 'pumpswap';
-
-  // pump_fun = still on bonding curve
-  if (normalized.includes('pump')) return 'pump_fun';
+  if (normalized === 'pumpfun' || normalized === 'pump_fun') return 'pump_fun';
+  if (normalized.includes('moonshot') || normalized.includes('moonit')) return 'moonshot';
 
   return 'unknown';
+}
+
+/**
+ * Detect launchpad from DEX ID
+ * Many launchpads have their own DEX/AMM that shows up in DexScreener
+ */
+function detectLaunchpadFromDex(dexId: string, tokenAddress?: string): TokenData['detectedLaunchpad'] {
+  const normalized = dexId.toLowerCase();
+  const isPumpToken = tokenAddress?.toLowerCase().endsWith('pump');
+
+  // Pump.fun ecosystem
+  if (normalized === 'pumpfun' || normalized.includes('pumpswap') || isPumpToken) {
+    return 'pump_fun';
+  }
+
+  // Moonshot by DexScreener
+  if (normalized.includes('moonshot') || normalized.includes('moonit')) {
+    return 'moonshot';
+  }
+
+  // Meteora Dynamic Bonding Curve
+  if (normalized.includes('meteora') && (normalized.includes('dbc') || normalized.includes('bonding'))) {
+    return 'meteora_dbc';
+  }
+
+  // LetsBonk / Bonkfun
+  if (normalized.includes('bonk') || normalized.includes('letsbonk')) {
+    return 'letsbonk';
+  }
+
+  // Boop.fun
+  if (normalized.includes('boop')) {
+    return 'boop_fun';
+  }
+
+  // Sugar
+  if (normalized.includes('sugar')) {
+    return 'sugar';
+  }
+
+  // Raydium LaunchLab
+  if (normalized.includes('launchlab')) {
+    return 'raydium_launchlab';
+  }
+
+  // Bags.fm - check address pattern
+  if (tokenAddress?.endsWith('BAGS')) {
+    return 'bags_fm';
+  }
+
+  return undefined;
 }
 
 /**
@@ -82,27 +142,37 @@ function normalizeDexType(dexId: string): TokenData['dexType'] {
  * @param tokenAddress - Optional token address to check if it's a pump.fun token
  * @returns true if graduated, false if on bonding curve, undefined if not a pump.fun token
  */
-function isPumpFunGraduated(dexId: string, tokenAddress?: string): boolean | undefined {
+/**
+ * Check if a launchpad token has graduated based on DEX ID
+ * Works for any launchpad that uses bonding curves (pump.fun, moonshot, etc.)
+ *
+ * Graduation means the token has left the bonding curve and is now
+ * trading on a regular DEX (PumpSwap, Raydium, etc.)
+ */
+function checkGraduationStatus(dexId: string, tokenAddress?: string): boolean | undefined {
   const normalized = dexId.toLowerCase();
   const isPumpFunToken = tokenAddress?.toLowerCase().endsWith('pump');
 
-  // If trading on PumpSwap, it has graduated (PumpSwap = pump.fun's AMM post-graduation)
+  // PumpSwap = graduated pump.fun token
   if (normalized.includes('pumpswap')) return true;
 
-  // If still on pumpfun bonding curve, not graduated
+  // Still on pumpfun bonding curve = not graduated
   if (normalized === 'pumpfun') return false;
 
-  // If on Raydium and it's a pump.fun token (ends with "pump"), it graduated pre-PumpSwap
-  // Note: Before March 2025, graduated tokens went to Raydium instead of PumpSwap
-  if (normalized.includes('raydium') && isPumpFunToken) return true;
+  // Moonshot on bonding curve = not graduated, on Raydium = graduated
+  if (normalized.includes('moonshot') || normalized.includes('moonit')) return false;
 
-  // If on Meteora/Orca and it's a pump.fun token, check if it might have graduated
-  // (Some tokens can migrate to other DEXs after graduation)
-  if ((normalized.includes('meteora') || normalized.includes('orca')) && isPumpFunToken) {
-    return true; // If it's on a major DEX and it's a pump.fun token, it graduated
+  // If on Raydium/Meteora/Orca and it's a pump.fun token, it graduated pre-PumpSwap
+  // Note: Before March 2025, graduated tokens went to Raydium instead of PumpSwap
+  if (isPumpFunToken) {
+    if (normalized.includes('raydium') ||
+        normalized.includes('meteora') ||
+        normalized.includes('orca')) {
+      return true;
+    }
   }
 
-  // Not a pump.fun token or unknown DEX - can't determine graduation status
+  // Not a launchpad token or can't determine
   return undefined;
 }
 
@@ -159,7 +229,8 @@ export async function lookupTokenByAddress(tokenAddress: string): Promise<TokenS
         poolAddress: pair.pairAddress,
         dexType: normalizeDexType(pair.dexId),
         rawDexId: pair.dexId,
-        isPumpFunGraduated: isPumpFunGraduated(pair.dexId, tokenAddress),
+        detectedLaunchpad: detectLaunchpadFromDex(pair.dexId, tokenAddress),
+        isGraduated: checkGraduationStatus(pair.dexId, tokenAddress),
         buys24h: pair.txns?.h24?.buys,
         sells24h: pair.txns?.h24?.sells,
         imageUrl: pair.info?.imageUrl,
@@ -228,7 +299,8 @@ export async function searchToken(query: string): Promise<TokenSearchResult> {
         poolAddress: pair.pairAddress,
         dexType: normalizeDexType(pair.dexId),
         rawDexId: pair.dexId,
-        isPumpFunGraduated: isPumpFunGraduated(pair.dexId, tokenAddress),
+        detectedLaunchpad: detectLaunchpadFromDex(pair.dexId, tokenAddress),
+        isGraduated: checkGraduationStatus(pair.dexId, tokenAddress),
         buys24h: pair.txns?.h24?.buys,
         sells24h: pair.txns?.h24?.sells,
         imageUrl: pair.info?.imageUrl,

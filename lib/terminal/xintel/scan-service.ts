@@ -1588,45 +1588,135 @@ async function upsertProjectFromAnalysis(
     hardwareProducts: [],
   } : undefined;
 
-  // Key findings from OSINT + Grok
+  // Key findings from OSINT + Grok - comprehensive analysis for ANY Solana token
   const keyFindings: string[] = [];
-  if (osintEntity?.securityIntel?.isRugged) keyFindings.push('⚠️ FLAGGED AS RUG PULL');
-  if (osintEntity?.securityIntel?.mintAuthority === 'active') keyFindings.push('Mint authority active - unlimited supply risk');
-  if (osintEntity?.securityIntel?.freezeAuthority === 'active') keyFindings.push('Freeze authority active - tokens can be frozen');
-  if (osintEntity?.securityIntel?.lpLocked === false && (osintEntity?.securityIntel?.totalLiquidityUsd || 0) > 1000)
-    keyFindings.push('Liquidity not locked');
-  if (osintEntity?.domainIntel?.ageRisk === 'new')
-    keyFindings.push(`New domain: registered ${osintEntity.domainIntel.ageInDays} days ago`);
-  if (githubIntelData && githubIntelData.stars > 100)
-    keyFindings.push(`Strong GitHub presence: ${githubIntelData.stars} stars`);
+  // Use raw OSINT data for key findings (securityIntel var above is transformed for projectData)
+  const rawSecurityIntel = osintEntity?.securityIntel;
+  const rawTokenData = osintEntity?.tokenData;
+  const rawMarketIntel = osintEntity?.marketIntel;
 
-  // Launchpad graduation status - prefer DexScreener data (more reliable) over launchpad API
-  if (osintEntity?.launchpad === 'pump_fun' || osintEntity?.launchpad === 'bags_fm') {
-    // DexScreener tells us if the token is trading on PumpSwap (graduated) or bonding curve
-    const isGraduatedFromDex = osintEntity?.tokenData?.isPumpFunGraduated;
+  // === CRITICAL SECURITY FLAGS (show first) ===
+  if (rawSecurityIntel?.isRugged) keyFindings.push('⚠️ FLAGGED AS RUG PULL');
+  if (rawSecurityIntel?.mintAuthority === 'active') keyFindings.push('Mint authority active - unlimited supply risk');
+  if (rawSecurityIntel?.freezeAuthority === 'active') keyFindings.push('Freeze authority active - tokens can be frozen');
+
+  // === HOLDER CONCENTRATION (from RugCheck) ===
+  // High concentration is a major risk signal for ANY token
+  if (rawSecurityIntel?.topHoldersConcentration && rawSecurityIntel.topHoldersConcentration > 50) {
+    keyFindings.push(`Top 10 holders control ${rawSecurityIntel.topHoldersConcentration.toFixed(0)}% of supply`);
+  } else if (rawSecurityIntel?.topHolderPercent && rawSecurityIntel.topHolderPercent > 20) {
+    keyFindings.push(`Largest holder owns ${rawSecurityIntel.topHolderPercent.toFixed(1)}% of supply`);
+  }
+
+  // Insider detection
+  if (rawSecurityIntel?.insiderNetworks && rawSecurityIntel.insiderNetworks > 10) {
+    keyFindings.push(`${rawSecurityIntel.insiderNetworks} insider network accounts detected`);
+  }
+
+  // Creator holdings
+  if (rawSecurityIntel?.creatorBalancePercent && rawSecurityIntel.creatorBalancePercent > 10) {
+    keyFindings.push(`Creator still holds ${rawSecurityIntel.creatorBalancePercent.toFixed(1)}% of supply`);
+  }
+
+  // === LIQUIDITY STATUS ===
+  if (rawSecurityIntel?.lpLocked === false && (rawSecurityIntel?.totalLiquidityUsd || 0) > 1000) {
+    keyFindings.push('Liquidity not locked - can be pulled');
+  } else if (rawSecurityIntel?.lpLocked === true) {
+    keyFindings.push('LP locked ✓');
+  }
+
+  // === TRADING VENUE INFO (for ANY token) ===
+  const tokenDexType = rawTokenData?.dexType;
+  const tokenRawDexId = rawTokenData?.rawDexId;
+  const tokenLiquidity = rawTokenData?.liquidity || rawMarketIntel?.liquidity;
+
+  // Format DEX name nicely
+  const formatDexName = (dex: string | undefined, raw: string | undefined): string => {
+    if (!dex && !raw) return 'Unknown DEX';
+    if (dex === 'pumpswap') return 'PumpSwap';
+    if (dex === 'pump_fun') return 'Pump.fun (bonding curve)';
+    if (dex === 'raydium') return 'Raydium';
+    if (dex === 'meteora') return 'Meteora';
+    if (dex === 'orca') return 'Orca';
+    if (dex === 'moonshot') return 'Moonshot';
+    if (dex === 'jupiter') return 'Jupiter';
+    return raw || dex || 'DEX';
+  };
+
+  // === LAUNCHPAD + GRADUATION STATUS ===
+  // Detect launchpad from either address pattern or DexScreener dexId
+  const detectedLaunchpad = osintEntity?.launchpad || rawTokenData?.detectedLaunchpad;
+
+  if (detectedLaunchpad && detectedLaunchpad !== 'unknown') {
+    const isGraduatedFromDex = rawTokenData?.isGraduated;
     const isGraduatedFromLaunchpad = osintEntity?.launchpadData?.isGraduated;
-    const dexType = osintEntity?.tokenData?.dexType;
-    const rawDexId = osintEntity?.tokenData?.rawDexId;
+    const tokenIsGraduated = isGraduatedFromDex ?? isGraduatedFromLaunchpad;
 
-    // Use DexScreener as primary source (checks if trading on PumpSwap vs bonding curve)
-    // Fall back to launchpad API if DexScreener data unavailable
-    const isGraduated = isGraduatedFromDex ?? isGraduatedFromLaunchpad;
+    // Format launchpad name
+    const launchpadName = detectedLaunchpad === 'pump_fun' ? 'Pump.fun' :
+                          detectedLaunchpad === 'bags_fm' ? 'Bags.fm' :
+                          detectedLaunchpad === 'moonshot' ? 'Moonshot' :
+                          detectedLaunchpad === 'raydium_launchlab' ? 'Raydium LaunchLab' :
+                          detectedLaunchpad === 'meteora_dbc' ? 'Meteora DBC' :
+                          detectedLaunchpad === 'letsbonk' ? 'LetsBonk' :
+                          detectedLaunchpad;
 
-    if (isGraduated === true) {
-      // Show where the token graduated to (PumpSwap for new tokens, Raydium for pre-March 2025 tokens)
-      const graduatedTo = dexType === 'pumpswap' ? 'PumpSwap' :
-                          dexType === 'raydium' ? 'Raydium (pre-March 2025)' :
-                          dexType === 'meteora' ? 'Meteora' :
-                          rawDexId || 'DEX';
-      keyFindings.push(`Launched on ${osintEntity.launchpad}: Graduated to ${graduatedTo}`);
-    } else if (isGraduated === false) {
-      keyFindings.push(`Launched on ${osintEntity.launchpad}: Still on bonding curve`);
+    if (tokenIsGraduated === true) {
+      const graduatedTo = formatDexName(tokenDexType, tokenRawDexId);
+      keyFindings.push(`Launched on ${launchpadName}: Graduated to ${graduatedTo}`);
+    } else if (tokenIsGraduated === false) {
+      keyFindings.push(`Launched on ${launchpadName}: Still on bonding curve`);
     } else {
-      keyFindings.push(`Launched on ${osintEntity.launchpad}`);
+      keyFindings.push(`Launched on ${launchpadName}`);
     }
-  } else if (osintEntity?.launchpadData) {
-    // Non-pump.fun launchpads
-    keyFindings.push(`Launched on ${osintEntity.launchpad}`);
+  } else if (tokenDexType && tokenDexType !== 'unknown') {
+    // For non-launchpad tokens, show where they're trading
+    const dexName = formatDexName(tokenDexType, tokenRawDexId);
+    const liqStr = tokenLiquidity ? ` ($${(tokenLiquidity / 1000).toFixed(0)}K liquidity)` : '';
+    keyFindings.push(`Trading on ${dexName}${liqStr}`);
+  }
+
+  // === TOKEN AGE ===
+  if (rawTokenData?.pairCreatedAt) {
+    const ageMs = Date.now() - rawTokenData.pairCreatedAt;
+    const ageDays = Math.floor(ageMs / (1000 * 60 * 60 * 24));
+    if (ageDays < 7) {
+      keyFindings.push(`New token: created ${ageDays === 0 ? 'today' : ageDays === 1 ? 'yesterday' : `${ageDays} days ago`}`);
+    } else if (ageDays < 30) {
+      keyFindings.push(`Token age: ${Math.floor(ageDays / 7)} week${ageDays >= 14 ? 's' : ''} old`);
+    }
+  }
+
+  // === HOLDER COUNT ===
+  const holderCount = rawSecurityIntel?.totalHolders || rawMarketIntel?.totalHolders;
+  if (holderCount) {
+    if (holderCount < 100) {
+      keyFindings.push(`Low holder count: ${holderCount} wallets`);
+    } else if (holderCount > 10000) {
+      keyFindings.push(`Large holder base: ${(holderCount / 1000).toFixed(0)}K+ wallets`);
+    }
+  }
+
+  // === POSITIVE SIGNALS ===
+  if (osintEntity?.domainIntel?.ageRisk === 'established') {
+    keyFindings.push(`Established domain: ${osintEntity.domainIntel.ageInMonths}+ months old`);
+  } else if (osintEntity?.domainIntel?.ageRisk === 'new') {
+    keyFindings.push(`New domain: registered ${osintEntity.domainIntel.ageInDays} days ago`);
+  }
+
+  if (githubIntelData && githubIntelData.stars > 100) {
+    keyFindings.push(`Strong GitHub presence: ${githubIntelData.stars} stars`);
+  }
+
+  if (rawMarketIntel?.isListed) {
+    keyFindings.push('Listed on CoinGecko ✓');
+  }
+
+  // === RUGCHECK SCORE (as summary) ===
+  if (rawSecurityIntel?.riskLevel && rawSecurityIntel.riskLevel !== 'Unknown') {
+    const emoji = rawSecurityIntel.riskLevel === 'Good' ? '✓' :
+                  rawSecurityIntel.riskLevel === 'Warn' ? '⚠️' : '🚨';
+    keyFindings.push(`RugCheck: ${rawSecurityIntel.normalizedScore}/10 (${rawSecurityIntel.riskLevel}) ${emoji}`);
   }
 
   // Map Grok's entityType to our EntityType (normalize 'company' to 'organization')
@@ -1750,9 +1840,9 @@ function extractTags(
     if (osintEntity.launchpad === 'pump_fun') tags.push('pump-fun');
     if (osintEntity.launchpad === 'bags_fm') tags.push('bags-fm');
 
-    // Graduation status - prefer DexScreener (checks if on PumpSwap) over launchpad API
-    const isGraduated = osintEntity.tokenData?.isPumpFunGraduated ?? osintEntity.launchpadData?.isGraduated;
-    if (isGraduated) tags.push('graduated');
+    // Graduation status - prefer DexScreener data over launchpad API
+    const tokenGraduated = osintEntity.tokenData?.isGraduated ?? osintEntity.launchpadData?.isGraduated;
+    if (tokenGraduated) tags.push('graduated');
 
     // Security status from RugCheck
     if (osintEntity.securityIntel?.isAccessible) {
