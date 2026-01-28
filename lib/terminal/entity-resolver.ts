@@ -212,20 +212,26 @@ export function detectInputType(input: string): InputType {
  * Extract X handle from various URL formats
  */
 function extractXHandle(input: string): string | null {
+  let handle: string | null = null;
+
   if (input.startsWith('@')) {
-    return input.slice(1).toLowerCase();
+    handle = input.slice(1).toLowerCase();
+  } else {
+    const urlMatch = input.match(/(?:twitter\.com|x\.com)\/(@?[\w]+)/i);
+    if (urlMatch) {
+      handle = urlMatch[1].replace('@', '').toLowerCase();
+    } else if (/^[a-zA-Z0-9_]{1,15}$/.test(input)) {
+      handle = input.toLowerCase();
+    }
   }
 
-  const urlMatch = input.match(/(?:twitter\.com|x\.com)\/(@?[\w]+)/i);
-  if (urlMatch) {
-    return urlMatch[1].replace('@', '').toLowerCase();
+  // Validate the handle is not a reserved X path
+  if (handle && !isValidXHandle(handle)) {
+    console.log(`[EntityResolver] Ignoring reserved X path: ${handle}`);
+    return null;
   }
 
-  if (/^[a-zA-Z0-9_]{1,15}$/.test(input)) {
-    return input.toLowerCase();
-  }
-
-  return null;
+  return handle;
 }
 
 /**
@@ -255,12 +261,40 @@ function extractGitHub(input: string): { org: string; repo?: string } | null {
 }
 
 /**
+ * Reserved X paths that are not valid user handles
+ */
+const RESERVED_X_PATHS = new Set([
+  'i', 'home', 'explore', 'search', 'notifications', 'messages',
+  'settings', 'compose', 'intent', 'share', 'login', 'logout',
+  'signup', 'tos', 'privacy', 'about', 'help', 'download',
+  'hashtag', 'who_to_follow', 'lists', 'bookmarks', 'communities',
+  'verified', 'premium', 'analytics', 'ads', 'media', 'likes',
+  'followers', 'following', 'status', 'statuses', 'moments',
+]);
+
+/**
+ * Check if a handle is a valid X username (not a reserved path)
+ */
+function isValidXHandle(handle: string): boolean {
+  if (!handle || handle.length < 1 || handle.length > 15) return false;
+  if (RESERVED_X_PATHS.has(handle.toLowerCase())) return false;
+  // X handles can only contain alphanumeric and underscore
+  if (!/^[a-zA-Z0-9_]+$/.test(handle)) return false;
+  return true;
+}
+
+/**
  * Extract X handle from Twitter URL
  */
 function extractXHandleFromUrl(url: string): string | null {
   const match = url.match(/(?:twitter\.com|x\.com)\/(@?[\w]+)/i);
   if (match) {
-    return match[1].replace('@', '').toLowerCase();
+    const handle = match[1].replace('@', '').toLowerCase();
+    if (!isValidXHandle(handle)) {
+      console.log(`[EntityResolver] Ignoring reserved X path: ${handle}`);
+      return null;
+    }
+    return handle;
   }
   return null;
 }
