@@ -7,6 +7,9 @@
 
 export type TrustTier = 'verified' | 'trusted' | 'neutral' | 'caution' | 'avoid';
 
+// Entity type classification (determined by Grok during scan)
+export type EntityType = 'project' | 'person' | 'organization';
+
 export interface TrustScore {
   score: number; // 0-100 (100 = most trusted)
   tier: TrustTier;
@@ -124,6 +127,9 @@ export interface SecurityIntel {
 
 export interface Project {
   id: string;
+
+  // Entity classification (project, person, or organization)
+  entityType?: EntityType;
 
   // Display
   name: string;

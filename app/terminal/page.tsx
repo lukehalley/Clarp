@@ -10,14 +10,18 @@ import {
   Shield,
   ArrowUpDown,
   RotateCcw,
+  Boxes,
+  User,
+  Building2,
 } from 'lucide-react';
 import IntelCard from '@/components/terminal/IntelCard';
-import type { Project } from '@/types/project';
+import type { Project, EntityType } from '@/types/project';
 
 // ============================================================================
 // TYPES
 // ============================================================================
 
+type EntityFilter = 'project' | 'person' | 'organization';
 type CategoryFilter = 'all' | 'verified' | 'high-risk' | 'low-risk';
 type SortOption = 'score-high' | 'score-low' | 'recent' | 'name-asc';
 
@@ -28,6 +32,12 @@ const SORT_OPTIONS: { id: SortOption; label: string }[] = [
   { id: 'name-asc', label: 'Name: A to Z' },
 ];
 
+const ENTITY_FILTERS: { id: EntityFilter; label: string; shortLabel: string; icon: React.ReactNode; color: string }[] = [
+  { id: 'project', label: 'Projects', shortLabel: 'Projects', icon: <Boxes size={14} />, color: 'text-danger-orange' },
+  { id: 'person', label: 'People', shortLabel: 'People', icon: <User size={14} />, color: 'text-larp-purple' },
+  { id: 'organization', label: 'Orgs', shortLabel: 'Orgs', icon: <Building2 size={14} />, color: 'text-larp-yellow' },
+];
+
 const CATEGORY_FILTERS: { id: CategoryFilter; label: string; icon: React.ReactNode }[] = [
   { id: 'all', label: 'All', icon: <Filter size={14} /> },
   { id: 'verified', label: 'Verified', icon: <CheckCircle size={14} /> },
@@ -35,6 +45,76 @@ const CATEGORY_FILTERS: { id: CategoryFilter; label: string; icon: React.ReactNo
   { id: 'low-risk', label: 'Trusted', icon: <Shield size={14} /> },
 ];
 
+
+// ============================================================================
+// ENTITY TYPE TABS
+// ============================================================================
+
+function EntityTypeTabs({
+  entityFilter,
+  setEntityFilter,
+  counts,
+}: {
+  entityFilter: EntityFilter;
+  setEntityFilter: (e: EntityFilter) => void;
+  counts: { project: number; person: number; organization: number };
+}) {
+  return (
+    <div className="border-b-2 border-ivory-light/10">
+      <div className="flex">
+        {ENTITY_FILTERS.map((filter, index) => {
+          const isActive = entityFilter === filter.id;
+          const count = counts[filter.id];
+
+          return (
+            <button
+              key={filter.id}
+              onClick={() => setEntityFilter(filter.id)}
+              className={`
+                relative flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-3 sm:py-4
+                font-mono text-[11px] sm:text-xs transition-all duration-200
+                border-b-2 -mb-[2px]
+                ${isActive
+                  ? `${filter.color} border-current font-bold bg-current/5`
+                  : 'text-ivory-light/40 border-transparent hover:text-ivory-light/60 hover:bg-ivory-light/[0.02]'
+                }
+                ${index === 0 ? '' : 'border-l border-ivory-light/5'}
+              `}
+            >
+              <span className={`transition-transform duration-200 ${isActive ? 'scale-110' : ''}`}>
+                {filter.icon}
+              </span>
+              <span className="hidden xs:inline">{filter.label}</span>
+              <span className="xs:hidden">{filter.shortLabel}</span>
+              {count > 0 && (
+                <span className={`
+                  ml-1 px-1.5 py-0.5 text-[9px] sm:text-[10px] rounded-sm
+                  ${isActive
+                    ? 'bg-current/20 text-current'
+                    : 'bg-ivory-light/10 text-ivory-light/40'
+                  }
+                `}>
+                  {count}
+                </span>
+              )}
+              {/* Active indicator glow */}
+              {isActive && (
+                <div
+                  className="absolute bottom-0 left-0 right-0 h-[2px] blur-sm"
+                  style={{
+                    backgroundColor: filter.id === 'project' ? '#FF6B35'
+                      : filter.id === 'person' ? '#9B59B6'
+                      : '#FFD93D'
+                  }}
+                />
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 // ============================================================================
 // FILTER BAR
@@ -174,10 +254,18 @@ export default function TerminalPage() {
   const [currentPage, setCurrentPage] = useState(1);
 
   // Filters
+  const [entityFilter, setEntityFilter] = useState<EntityFilter>('project');
   const [category, setCategory] = useState<CategoryFilter>('all');
   const [sortBy, setSortBy] = useState<SortOption>('score-high');
   const [scoreRange, setScoreRange] = useState<[number, number]>([0, 100]);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
+
+  // Calculate entity counts
+  const entityCounts = {
+    project: projects.filter(p => p.entityType === 'project' || !p.entityType).length,
+    person: projects.filter(p => p.entityType === 'person').length,
+    organization: projects.filter(p => p.entityType === 'organization').length,
+  };
 
   // Fetch projects on mount
   useEffect(() => {
@@ -205,6 +293,7 @@ export default function TerminalPage() {
   };
 
   const resetFilters = () => {
+    setEntityFilter('project');
     setCategory('all');
     setSortBy('score-high');
     setScoreRange([0, 100]);
@@ -212,6 +301,7 @@ export default function TerminalPage() {
   };
 
   const hasActiveFilters =
+    entityFilter !== 'project' ||
     category !== 'all' ||
     sortBy !== 'score-high' ||
     scoreRange[0] !== 0 ||
@@ -222,6 +312,10 @@ export default function TerminalPage() {
   const filteredProjects = projects
     .filter((project) => {
       const score = project.trustScore?.score ?? 50;
+
+      // Entity type filter
+      const projectType = project.entityType || 'project'; // Default to project if not set
+      if (entityFilter !== projectType) return false;
 
       // Category filter
       if (category === 'verified' && project.trustScore?.tier !== 'verified') return false;
@@ -263,11 +357,25 @@ export default function TerminalPage() {
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [category, sortBy, verifiedOnly]);
+  }, [entityFilter, category, sortBy, verifiedOnly]);
+
+  // Get label for results count
+  const getResultsLabel = () => {
+    if (entityFilter === 'person') return filteredProjects.length === 1 ? 'person' : 'people';
+    if (entityFilter === 'organization') return filteredProjects.length === 1 ? 'org' : 'orgs';
+    return filteredProjects.length === 1 ? 'project' : 'projects';
+  };
 
   return (
     <div className="px-4 sm:px-6 py-6">
       <div className="max-w-7xl mx-auto">
+        {/* Entity Type Tabs */}
+        <EntityTypeTabs
+          entityFilter={entityFilter}
+          setEntityFilter={setEntityFilter}
+          counts={entityCounts}
+        />
+
         {/* Filter Bar */}
         <FilterBar
           category={category}
@@ -283,7 +391,7 @@ export default function TerminalPage() {
         {/* Results count */}
         <div className="flex items-center justify-between py-4">
           <span className="font-mono text-xs text-ivory-light/40">
-            {filteredProjects.length} project{filteredProjects.length !== 1 ? 's' : ''}
+            {filteredProjects.length} {getResultsLabel()}
           </span>
         </div>
 

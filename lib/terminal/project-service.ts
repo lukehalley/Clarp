@@ -3,7 +3,7 @@
 
 import { getSupabaseClient, isSupabaseAvailable } from '@/lib/supabase/client';
 import type { ProjectRow, ProjectInsert, ProjectUpdate } from '@/types/supabase';
-import type { Project, TrustTier, TeamMember } from '@/types/project';
+import type { Project, TrustTier, TeamMember, EntityType } from '@/types/project';
 
 // ============================================================================
 // TYPE CONVERTERS
@@ -15,6 +15,7 @@ import type { Project, TrustTier, TeamMember } from '@/types/project';
 export function rowToProject(row: ProjectRow): Project {
   return {
     id: row.id,
+    entityType: (row.entity_type as EntityType) || undefined,
     name: row.name,
     description: row.description || undefined,
     avatarUrl: row.avatar_url || undefined,
@@ -64,6 +65,7 @@ export function rowToProject(row: ProjectRow): Project {
 export function projectToInsert(project: Partial<Project> & { name: string }): ProjectInsert {
   return {
     name: project.name,
+    entity_type: project.entityType || null,
     description: project.description || null,
     avatar_url: project.avatarUrl || null,
     tags: project.tags || [],
@@ -107,6 +109,7 @@ export function projectToUpdate(updates: Partial<Project>): ProjectUpdate {
   const result: ProjectUpdate = {};
 
   if (updates.name !== undefined) result.name = updates.name;
+  if (updates.entityType !== undefined) result.entity_type = updates.entityType || null;
   if (updates.description !== undefined) result.description = updates.description || null;
   if (updates.avatarUrl !== undefined) result.avatar_url = updates.avatarUrl || null;
   if (updates.tags !== undefined) result.tags = updates.tags;

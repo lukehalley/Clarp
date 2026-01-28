@@ -897,9 +897,11 @@ async function processRealScan(job: ScanJob): Promise<void> {
   updateJobStatus(job, 'fetching', 10, 'Classifying account type...');
 
   let isProject = false;
+  let classifiedEntityType: 'project' | 'person' | 'company' | 'unknown' = 'unknown';
   try {
     const classification = await grokClient.classifyHandle(job.handle);
     console.log(`[XIntel] Classification result: crypto=${classification.isCryptoRelated}, type=${classification.entityType}`);
+    classifiedEntityType = classification.entityType;
 
     // Early exit if not crypto-related
     if (!classification.isCryptoRelated) {
@@ -1065,8 +1067,8 @@ async function processRealScan(job: ScanJob): Promise<void> {
         CACHE_TTL_MS
       ).catch(err => console.error('[XIntel] Failed to cache to Supabase:', err));
 
-      // Also create/update the project entity
-      upsertProjectFromAnalysis(job.handle, analysis, report)
+      // Also create/update the project entity (pass entityType from classification)
+      upsertProjectFromAnalysis(job.handle, analysis, report, classifiedEntityType)
         .catch(err => console.error('[XIntel] Failed to upsert project:', err));
     }
   } catch (error) {
@@ -1261,7 +1263,8 @@ async function fetchXAvatarUrl(handle: string): Promise<string | undefined> {
 async function upsertProjectFromAnalysis(
   handle: string,
   analysis: GrokAnalysisResult,
-  report: XIntelReport
+  report: XIntelReport,
+  entityType?: 'project' | 'person' | 'company' | 'unknown'
 ): Promise<void> {
   const normalizedHandle = handle.toLowerCase().replace('@', '');
 
@@ -1511,9 +1514,15 @@ async function upsertProjectFromAnalysis(
   if (osintEntity?.launchpadData)
     keyFindings.push(`Launched on ${osintEntity.launchpad}: ${osintEntity.launchpadData.isGraduated ? 'Graduated from bonding curve' : 'Still on bonding curve'}`);
 
+  // Map Grok's entityType to our EntityType (normalize 'company' to 'organization')
+  const normalizedEntityType = entityType === 'company' ? 'organization' as const :
+                               entityType === 'project' ? 'project' as const :
+                               entityType === 'person' ? 'person' as const : undefined;
+
   // Build project data with comprehensive OSINT
   const projectData = {
     name,
+    entityType: normalizedEntityType,
     description: analysis.theStory || osintEntity?.description || analysis.overallAssessment || undefined,
     avatarUrl: osintEntity?.imageUrl || analysis.profile?.avatarUrl || await fetchXAvatarUrl(normalizedHandle),
     tags: extractTags(analysis, githubIntelData, osintEntity),
@@ -1562,7 +1571,7 @@ async function upsertProjectFromAnalysis(
   };
 
   await upsertProjectByHandle(normalizedHandle, projectData);
-  console.log(`[XIntel] Upserted project entity for @${normalizedHandle} with OSINT enrichment`);
+  console.log(`[XIntel] Upserted project entity for @${normalizedHandle} (type: ${normalizedEntityType || 'unknown'}) with OSINT enrichment`);
 }
 
 /**

@@ -2,15 +2,58 @@
 
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Shield, AlertTriangle, TrendingUp } from 'lucide-react';
+import { Shield, AlertTriangle, TrendingUp, User, Boxes, Building2 } from 'lucide-react';
 import ContractAvatar from '@/components/ContractAvatar';
 import ChainIcon, { type Chain } from '@/components/terminal/ChainIcon';
-import type { Project } from '@/types/project';
+import type { Project, EntityType } from '@/types/project';
 
 interface IntelCardProps {
   project: Project;
   scoreDelta24h?: number;
 }
+
+// Entity type styling configuration
+const ENTITY_STYLES: Record<EntityType | 'default', {
+  icon: React.ReactNode;
+  label: string;
+  color: string;
+  bgColor: string;
+  borderColor: string;
+  accentGlow: string;
+}> = {
+  project: {
+    icon: <Boxes size={10} />,
+    label: 'Project',
+    color: 'text-danger-orange',
+    bgColor: 'bg-danger-orange/10',
+    borderColor: 'border-danger-orange/30',
+    accentGlow: 'shadow-[0_0_12px_rgba(255,107,53,0.15)]',
+  },
+  person: {
+    icon: <User size={10} />,
+    label: 'Person',
+    color: 'text-larp-purple',
+    bgColor: 'bg-larp-purple/10',
+    borderColor: 'border-larp-purple/30',
+    accentGlow: 'shadow-[0_0_12px_rgba(155,89,182,0.15)]',
+  },
+  organization: {
+    icon: <Building2 size={10} />,
+    label: 'Org',
+    color: 'text-larp-yellow',
+    bgColor: 'bg-larp-yellow/10',
+    borderColor: 'border-larp-yellow/30',
+    accentGlow: 'shadow-[0_0_12px_rgba(255,217,61,0.15)]',
+  },
+  default: {
+    icon: <Boxes size={10} />,
+    label: 'Project',
+    color: 'text-danger-orange',
+    bgColor: 'bg-danger-orange/10',
+    borderColor: 'border-danger-orange/30',
+    accentGlow: 'shadow-[0_0_12px_rgba(255,107,53,0.15)]',
+  },
+};
 
 // Get color based on trust score (inverted - higher = better = green)
 function getScoreColor(score: number): string {
@@ -47,6 +90,12 @@ export default function IntelCard({ project, scoreDelta24h }: IntelCardProps) {
   const riskLabel = getRiskLabel(displayScore);
   const chain = detectChain(project.tokenAddress);
 
+  // Get entity type styling
+  const entityType = project.entityType || 'default';
+  const entityStyle = ENTITY_STYLES[entityType] || ENTITY_STYLES.default;
+  const isPerson = entityType === 'person';
+  const isOrganization = entityType === 'organization';
+
   // Calculate contribution bar width
   const contributionPercent = Math.min(100, displayScore);
 
@@ -62,15 +111,26 @@ export default function IntelCard({ project, scoreDelta24h }: IntelCardProps) {
       onClick={handleClick}
       className="group block cursor-pointer"
     >
-      <div className="flex border-2 border-ivory-light/20 bg-ivory-light/5 hover:border-danger-orange/30 transition-colors overflow-hidden min-h-[90px] sm:h-[100px]">
-        {/* Left: Avatar - Responsive sizing */}
-        <div className="shrink-0 bg-[#0a0a09] border-r border-ivory-light/10 w-[80px] h-[90px] sm:w-[100px] sm:h-[100px] overflow-hidden relative pointer-events-none">
+      <div className={`
+        flex border-2 bg-ivory-light/5 transition-all duration-200 overflow-hidden min-h-[90px] sm:h-[100px]
+        ${isPerson
+          ? 'border-larp-purple/20 hover:border-larp-purple/40 hover:shadow-[0_0_20px_rgba(155,89,182,0.1)]'
+          : isOrganization
+          ? 'border-larp-yellow/20 hover:border-larp-yellow/40 hover:shadow-[0_0_20px_rgba(255,217,61,0.1)]'
+          : 'border-ivory-light/20 hover:border-danger-orange/30'
+        }
+      `}>
+        {/* Left: Avatar - Responsive sizing with entity type indicator */}
+        <div className={`
+          shrink-0 bg-[#0a0a09] border-r w-[80px] h-[90px] sm:w-[100px] sm:h-[100px] overflow-hidden relative pointer-events-none
+          ${isPerson ? 'border-larp-purple/20' : isOrganization ? 'border-larp-yellow/20' : 'border-ivory-light/10'}
+        `}>
           {project.avatarUrl ? (
             <Image
               src={project.avatarUrl}
               alt={project.name}
               fill
-              className="object-cover"
+              className={`object-cover ${isPerson ? 'rounded-full scale-90' : ''}`}
             />
           ) : project.tokenAddress ? (
             <ContractAvatar
@@ -85,6 +145,12 @@ export default function IntelCard({ project, scoreDelta24h }: IntelCardProps) {
               bgColor="#0a0a09"
             />
           )}
+          {/* Entity type corner badge */}
+          <div className={`
+            absolute top-1 left-1 p-1 ${entityStyle.bgColor} ${entityStyle.borderColor} border
+          `}>
+            <span className={entityStyle.color}>{entityStyle.icon}</span>
+          </div>
         </div>
 
         {/* Content - responsive compact layout */}
@@ -104,6 +170,17 @@ export default function IntelCard({ project, scoreDelta24h }: IntelCardProps) {
               </div>
               {/* Badges row */}
               <div className="flex items-center gap-1.5 sm:gap-2 mt-1 flex-wrap">
+                {/* Entity type badge for non-projects */}
+                {(isPerson || isOrganization) && (
+                  <span className={`
+                    text-[9px] sm:text-[10px] font-mono px-1 sm:px-1.5 py-0.5
+                    ${entityStyle.bgColor} ${entityStyle.color} ${entityStyle.borderColor} border
+                    flex items-center gap-1
+                  `}>
+                    {entityStyle.icon}
+                    <span className="hidden xs:inline">{entityStyle.label}</span>
+                  </span>
+                )}
                 {chain && <ChainIcon chain={chain} size={14} className="sm:w-4 sm:h-4" />}
                 {project.trustScore?.tier === 'verified' && (
                   <span className="text-[9px] sm:text-[10px] font-mono px-1 sm:px-1.5 py-0.5 bg-larp-green/20 text-larp-green border border-larp-green/30">
@@ -129,22 +206,26 @@ export default function IntelCard({ project, scoreDelta24h }: IntelCardProps) {
             </div>
           </div>
 
-          {/* Bottom row: Trust bar + Tags */}
+          {/* Bottom row: Trust bar + Tags/Handle */}
           <div className="flex items-end justify-between gap-2 sm:gap-3">
             {/* Trust bar */}
             <div className="flex-1 max-w-[120px] sm:max-w-[200px]">
-              <div className="h-1 bg-slate-dark/50 overflow-hidden">
+              <div className={`h-1 bg-slate-dark/50 overflow-hidden ${isPerson ? 'rounded-full' : ''}`}>
                 <div
-                  className="h-full transition-all duration-300"
+                  className={`h-full transition-all duration-300 ${isPerson ? 'rounded-full' : ''}`}
                   style={{
                     width: `${contributionPercent}%`,
-                    backgroundColor: scoreColor,
+                    backgroundColor: isPerson ? '#9B59B6' : isOrganization ? '#FFD93D' : scoreColor,
                   }}
                 />
               </div>
             </div>
-            {/* Tags - hide on very small screens */}
-            {tags.length > 0 && (
+            {/* X Handle for people, Tags for others */}
+            {isPerson && project.xHandle ? (
+              <span className="text-[9px] sm:text-[10px] font-mono text-larp-purple/70">
+                @{project.xHandle}
+              </span>
+            ) : tags.length > 0 ? (
               <div className="hidden xs:flex gap-1">
                 {tags.slice(0, 2).map((tag, i) => (
                   <span
@@ -155,7 +236,7 @@ export default function IntelCard({ project, scoreDelta24h }: IntelCardProps) {
                   </span>
                 ))}
               </div>
-            )}
+            ) : null}
           </div>
         </div>
       </div>
