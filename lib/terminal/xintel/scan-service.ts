@@ -22,7 +22,7 @@ import {
   getActiveScanJobByHandle,
 } from '@/lib/supabase/client';
 import { upsertProjectByHandle, upsertProjectByTokenAddress } from '@/lib/terminal/project-service';
-import type { GrokAnalysisResult } from '@/lib/grok/types';
+import type { GrokAnalysisResult, GrokCommunityAnalysisResult } from '@/lib/grok/types';
 import { fetchGitHubRepoIntel, checkWebsiteLive, type GitHubRepoIntel } from '@/lib/terminal/osint';
 import {
   resolveEntity,
@@ -183,27 +183,84 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
     console.log(`  - Price: $${entity.marketIntel.priceUsd}`);
   }
 
-  // If no X handle or skipXAnalysis, return OSINT-only result
+  // If no X handle or skipXAnalysis, check for X community URL or return OSINT-only result
   if (!entity.xHandle || skipXAnalysis) {
-    console.log(`[UniversalScan] No X handle or skip requested - returning OSINT-only result`);
+    console.log(`[UniversalScan] No X handle${entity.xCommunityUrl ? ', but found X community URL' : ''} - ${entity.xCommunityUrl ? 'running community analysis' : 'returning OSINT-only result'}`);
+
+    // Try X community analysis if we have a community URL
+    let communityAnalysis: GrokCommunityAnalysisResult | null = null;
+    if (entity.xCommunityUrl && !skipXAnalysis && isGrokAvailable()) {
+      try {
+        console.log(`[UniversalScan] Analyzing X community: ${entity.xCommunityUrl}`);
+        const grokClient = getGrokClient();
+        communityAnalysis = await grokClient.analyzeCommunity(entity.xCommunityUrl);
+        console.log(`[UniversalScan] Community analysis complete: ${communityAnalysis.communityName}, health: ${communityAnalysis.verdict.communityHealth}`);
+
+        // Extract X handle from community if found
+        if (communityAnalysis.projectInfo?.xHandle && !entity.xHandle) {
+          console.log(`[UniversalScan] Community analysis found X handle: @${communityAnalysis.projectInfo.xHandle}`);
+          // We could trigger a full X handle scan here if desired, but for now just log it
+        }
+      } catch (err) {
+        console.error(`[UniversalScan] Community analysis failed:`, err);
+      }
+    }
+
+    // Build key findings from OSINT + community analysis
+    const keyFindings: string[] = [
+      ...(entity.securityIntel?.isRugged ? ['⚠️ FLAGGED AS RUG PULL'] : []),
+      ...(entity.securityIntel?.mintAuthority === 'active' ? ['Mint authority active'] : []),
+      ...(entity.securityIntel?.freezeAuthority === 'active' ? ['Freeze authority active'] : []),
+    ];
+
+    // Add community analysis findings
+    if (communityAnalysis) {
+      keyFindings.push(`X Community: ${communityAnalysis.communityName || 'Analyzed'}`);
+      if (communityAnalysis.memberCount) {
+        keyFindings.push(`Community members: ${communityAnalysis.memberCount.toLocaleString()}`);
+      }
+      if (communityAnalysis.communitySignals?.sentiment) {
+        keyFindings.push(`Community sentiment: ${communityAnalysis.communitySignals.sentiment}`);
+      }
+      // Add key findings from community analysis
+      if (communityAnalysis.keyFindings?.length > 0) {
+        keyFindings.push(...communityAnalysis.keyFindings.slice(0, 3));
+      }
+      // Add red flags from community
+      if (communityAnalysis.communitySignals?.redFlags?.length) {
+        keyFindings.push(...communityAnalysis.communitySignals.redFlags.slice(0, 2).map((f: string) => `⚠️ ${f}`));
+      }
+    } else if (entity.xCommunityUrl) {
+      keyFindings.push(`X Community: ${entity.xCommunityUrl}`);
+    }
+
+    if (!communityAnalysis) {
+      keyFindings.push('OSINT-only scan (no X handle found)');
+    }
+
+    // Calculate trust score based on community analysis if available
+    const baseScore = communityAnalysis ? communityAnalysis.verdict.legitimacyScore * 10 : 50;
+    const trustTier = baseScore >= 70 ? 'trusted' as const :
+                      baseScore >= 40 ? 'neutral' as const : 'caution' as const;
 
     // Save the project to DB so redirect works (even without X handle)
     if (isSupabaseAvailable() && entity.tokenAddresses?.[0]?.address) {
       const tokenAddress = entity.tokenAddresses[0].address;
       const projectData = {
-        name: entity.name || entity.symbol || `Token ${tokenAddress.slice(0, 8)}...`,
-        description: entity.description || undefined,
+        name: entity.name || entity.symbol || communityAnalysis?.projectInfo?.name || `Token ${tokenAddress.slice(0, 8)}...`,
+        description: entity.description || communityAnalysis?.description || undefined,
         avatarUrl: entity.imageUrl || undefined,
         tokenAddress,
-        ticker: entity.symbol || undefined,
-        websiteUrl: entity.website || undefined,
+        ticker: entity.symbol || communityAnalysis?.projectInfo?.ticker?.replace('$', '') || undefined,
+        websiteUrl: entity.website || communityAnalysis?.projectInfo?.website || undefined,
         githubUrl: entity.github || undefined,
         telegramUrl: entity.telegram || undefined,
         discordUrl: entity.discord || undefined,
+        xCommunityUrl: entity.xCommunityUrl || undefined,
         trustScore: {
-          score: 50,
-          tier: 'neutral' as const,
-          confidence: 'low' as const,
+          score: baseScore,
+          tier: trustTier,
+          confidence: communityAnalysis ? 'medium' as const : 'low' as const,
           lastUpdated: new Date(),
         },
         marketData: entity.marketIntel ? {
@@ -220,12 +277,18 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
           holdersCount: entity.securityIntel.totalHolders,
           risks: entity.securityIntel.risks?.map(r => r.description || r.name) || [],
         } : undefined,
-        keyFindings: [
-          ...(entity.securityIntel?.isRugged ? ['⚠️ FLAGGED AS RUG PULL'] : []),
-          ...(entity.securityIntel?.mintAuthority === 'active' ? ['Mint authority active'] : []),
-          ...(entity.securityIntel?.freezeAuthority === 'active' ? ['Freeze authority active'] : []),
-          'OSINT-only scan (no X handle found)',
-        ],
+        keyFindings,
+        // Store community analysis data
+        communityIntel: communityAnalysis ? {
+          communityUrl: communityAnalysis.communityUrl,
+          communityName: communityAnalysis.communityName,
+          memberCount: communityAnalysis.memberCount,
+          isActive: communityAnalysis.isActive,
+          sentiment: communityAnalysis.communitySignals?.sentiment,
+          healthScore: communityAnalysis.verdict.communityHealth,
+          legitimacyScore: communityAnalysis.verdict.legitimacyScore,
+          analyzedAt: new Date(),
+        } : undefined,
         lastScanAt: new Date(),
       };
 
@@ -233,10 +296,12 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
       try {
         const savedProject = await upsertProjectByTokenAddress(tokenAddress, projectData);
         if (savedProject) {
-          console.log(`[UniversalScan] Saved OSINT-only project: ${savedProject.name}`);
+          console.log(`[UniversalScan] Saved ${communityAnalysis ? 'community-enhanced' : 'OSINT-only'} project: ${savedProject.name} (id: ${savedProject.id})`);
+        } else {
+          console.warn(`[UniversalScan] Failed to save project for token ${tokenAddress.slice(0, 8)}... - upsert returned null`);
         }
       } catch (err) {
-        console.error('[UniversalScan] Failed to save OSINT-only project:', err);
+        console.error('[UniversalScan] Failed to save project:', err);
       }
     }
 
@@ -258,6 +323,7 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
 
   // Save OSINT project immediately so user can see data while AI analyzes
   // This will be enriched later when the X analysis completes
+  // IMPORTANT: Await the save to prevent 404 race condition on redirect
   if (isSupabaseAvailable() && entity.tokenAddresses?.[0]?.address) {
     const tokenAddress = entity.tokenAddresses[0].address;
     const osintProjectData = {
@@ -300,10 +366,18 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
       lastScanAt: new Date(),
     };
 
-    // Save async - don't block the response
-    upsertProjectByTokenAddress(tokenAddress, osintProjectData)
-      .then(p => p && console.log(`[UniversalScan] Saved preliminary OSINT project: ${p.name}`))
-      .catch(err => console.error('[UniversalScan] Failed to save preliminary project:', err));
+    // Await the save to prevent 404 race condition with redirect
+    try {
+      const savedProject = await upsertProjectByTokenAddress(tokenAddress, osintProjectData);
+      if (savedProject) {
+        console.log(`[UniversalScan] Saved preliminary OSINT project: ${savedProject.name} (id: ${savedProject.id})`);
+      } else {
+        // This shouldn't happen anymore with the x_handle check fix, but log for debugging
+        console.warn(`[UniversalScan] Failed to save project for token ${tokenAddress.slice(0, 8)}... - upsert returned null`);
+      }
+    } catch (err) {
+      console.error('[UniversalScan] Failed to save preliminary project:', err);
+    }
   }
 
   const xScanResult = await submitScan({
@@ -1582,19 +1656,136 @@ async function upsertProjectFromAnalysis(
     hardwareProducts: [],
   } : undefined;
 
-  // Key findings from OSINT + Grok
+  // Key findings from OSINT + Grok - comprehensive analysis for ANY Solana token
   const keyFindings: string[] = [];
-  if (osintEntity?.securityIntel?.isRugged) keyFindings.push('⚠️ FLAGGED AS RUG PULL');
-  if (osintEntity?.securityIntel?.mintAuthority === 'active') keyFindings.push('Mint authority active - unlimited supply risk');
-  if (osintEntity?.securityIntel?.freezeAuthority === 'active') keyFindings.push('Freeze authority active - tokens can be frozen');
-  if (osintEntity?.securityIntel?.lpLocked === false && (osintEntity?.securityIntel?.totalLiquidityUsd || 0) > 1000)
-    keyFindings.push('Liquidity not locked');
-  if (osintEntity?.domainIntel?.ageRisk === 'new')
+  // Use raw OSINT data for key findings (securityIntel var above is transformed for projectData)
+  const rawSecurityIntel = osintEntity?.securityIntel;
+  const rawTokenData = osintEntity?.tokenData;
+  const rawMarketIntel = osintEntity?.marketIntel;
+
+  // === CRITICAL SECURITY FLAGS (show first) ===
+  if (rawSecurityIntel?.isRugged) keyFindings.push('⚠️ FLAGGED AS RUG PULL');
+  if (rawSecurityIntel?.mintAuthority === 'active') keyFindings.push('Mint authority active - unlimited supply risk');
+  if (rawSecurityIntel?.freezeAuthority === 'active') keyFindings.push('Freeze authority active - tokens can be frozen');
+
+  // === HOLDER CONCENTRATION (from RugCheck) ===
+  // High concentration is a major risk signal for ANY token
+  if (rawSecurityIntel?.topHoldersConcentration && rawSecurityIntel.topHoldersConcentration > 50) {
+    keyFindings.push(`Top 10 holders control ${rawSecurityIntel.topHoldersConcentration.toFixed(0)}% of supply`);
+  } else if (rawSecurityIntel?.topHolderPercent && rawSecurityIntel.topHolderPercent > 20) {
+    keyFindings.push(`Largest holder owns ${rawSecurityIntel.topHolderPercent.toFixed(1)}% of supply`);
+  }
+
+  // Insider detection
+  if (rawSecurityIntel?.insiderNetworks && rawSecurityIntel.insiderNetworks > 10) {
+    keyFindings.push(`${rawSecurityIntel.insiderNetworks} insider network accounts detected`);
+  }
+
+  // Creator holdings
+  if (rawSecurityIntel?.creatorBalancePercent && rawSecurityIntel.creatorBalancePercent > 10) {
+    keyFindings.push(`Creator still holds ${rawSecurityIntel.creatorBalancePercent.toFixed(1)}% of supply`);
+  }
+
+  // === LIQUIDITY STATUS ===
+  if (rawSecurityIntel?.lpLocked === false && (rawSecurityIntel?.totalLiquidityUsd || 0) > 1000) {
+    keyFindings.push('Liquidity not locked - can be pulled');
+  } else if (rawSecurityIntel?.lpLocked === true) {
+    keyFindings.push('LP locked ✓');
+  }
+
+  // === TRADING VENUE INFO (for ANY token) ===
+  const tokenDexType = rawTokenData?.dexType;
+  const tokenRawDexId = rawTokenData?.rawDexId;
+  const tokenLiquidity = rawTokenData?.liquidity || rawMarketIntel?.liquidity;
+
+  // Format DEX name nicely
+  const formatDexName = (dex: string | undefined, raw: string | undefined): string => {
+    if (!dex && !raw) return 'Unknown DEX';
+    if (dex === 'pumpswap') return 'PumpSwap';
+    if (dex === 'pump_fun') return 'Pump.fun (bonding curve)';
+    if (dex === 'raydium') return 'Raydium';
+    if (dex === 'meteora') return 'Meteora';
+    if (dex === 'orca') return 'Orca';
+    if (dex === 'moonshot') return 'Moonshot';
+    if (dex === 'jupiter') return 'Jupiter';
+    return raw || dex || 'DEX';
+  };
+
+  // === LAUNCHPAD + GRADUATION STATUS ===
+  // Detect launchpad from either address pattern or DexScreener dexId
+  const detectedLaunchpad = osintEntity?.launchpad || rawTokenData?.detectedLaunchpad;
+
+  if (detectedLaunchpad && detectedLaunchpad !== 'unknown') {
+    const isGraduatedFromDex = rawTokenData?.isGraduated;
+    const isGraduatedFromLaunchpad = osintEntity?.launchpadData?.isGraduated;
+    const tokenIsGraduated = isGraduatedFromDex ?? isGraduatedFromLaunchpad;
+
+    // Format launchpad name
+    const launchpadName = detectedLaunchpad === 'pump_fun' ? 'Pump.fun' :
+                          detectedLaunchpad === 'bags_fm' ? 'Bags.fm' :
+                          detectedLaunchpad === 'moonshot' ? 'Moonshot' :
+                          detectedLaunchpad === 'raydium_launchlab' ? 'Raydium LaunchLab' :
+                          detectedLaunchpad === 'meteora_dbc' ? 'Meteora DBC' :
+                          detectedLaunchpad === 'letsbonk' ? 'LetsBonk' :
+                          detectedLaunchpad;
+
+    if (tokenIsGraduated === true) {
+      const graduatedTo = formatDexName(tokenDexType, tokenRawDexId);
+      keyFindings.push(`Launched on ${launchpadName}: Graduated to ${graduatedTo}`);
+    } else if (tokenIsGraduated === false) {
+      keyFindings.push(`Launched on ${launchpadName}: Still on bonding curve`);
+    } else {
+      keyFindings.push(`Launched on ${launchpadName}`);
+    }
+  } else if (tokenDexType && tokenDexType !== 'unknown') {
+    // For non-launchpad tokens, show where they're trading
+    const dexName = formatDexName(tokenDexType, tokenRawDexId);
+    const liqStr = tokenLiquidity ? ` ($${(tokenLiquidity / 1000).toFixed(0)}K liquidity)` : '';
+    keyFindings.push(`Trading on ${dexName}${liqStr}`);
+  }
+
+  // === TOKEN AGE ===
+  if (rawTokenData?.pairCreatedAt) {
+    const ageMs = Date.now() - rawTokenData.pairCreatedAt;
+    const ageDays = Math.floor(ageMs / (1000 * 60 * 60 * 24));
+    if (ageDays < 7) {
+      keyFindings.push(`New token: created ${ageDays === 0 ? 'today' : ageDays === 1 ? 'yesterday' : `${ageDays} days ago`}`);
+    } else if (ageDays < 30) {
+      keyFindings.push(`Token age: ${Math.floor(ageDays / 7)} week${ageDays >= 14 ? 's' : ''} old`);
+    }
+  }
+
+  // === HOLDER COUNT ===
+  const holderCount = rawSecurityIntel?.totalHolders || rawMarketIntel?.totalHolders;
+  if (holderCount) {
+    if (holderCount < 100) {
+      keyFindings.push(`Low holder count: ${holderCount} wallets`);
+    } else if (holderCount > 10000) {
+      keyFindings.push(`Large holder base: ${(holderCount / 1000).toFixed(0)}K+ wallets`);
+    }
+  }
+
+  // === POSITIVE SIGNALS ===
+  if (osintEntity?.domainIntel?.ageRisk === 'established') {
+    keyFindings.push(`Established domain: ${osintEntity.domainIntel.ageInMonths}+ months old`);
+  } else if (osintEntity?.domainIntel?.ageRisk === 'new') {
     keyFindings.push(`New domain: registered ${osintEntity.domainIntel.ageInDays} days ago`);
-  if (githubIntelData && githubIntelData.stars > 100)
+  }
+
+  if (githubIntelData && githubIntelData.stars > 100) {
     keyFindings.push(`Strong GitHub presence: ${githubIntelData.stars} stars`);
-  if (osintEntity?.launchpadData)
-    keyFindings.push(`Launched on ${osintEntity.launchpad}: ${osintEntity.launchpadData.isGraduated ? 'Graduated from bonding curve' : 'Still on bonding curve'}`);
+  }
+
+  if (rawMarketIntel?.isListed) {
+    keyFindings.push('Listed on CoinGecko ✓');
+  }
+
+  // === RUGCHECK SCORE (as summary) ===
+  if (rawSecurityIntel?.riskLevel && rawSecurityIntel.riskLevel !== 'Unknown') {
+    const emoji = rawSecurityIntel.riskLevel === 'Good' ? '✓' :
+                  rawSecurityIntel.riskLevel === 'Warn' ? '⚠️' : '🚨';
+    keyFindings.push(`RugCheck: ${rawSecurityIntel.normalizedScore}/10 (${rawSecurityIntel.riskLevel}) ${emoji}`);
+  }
 
   // Map Grok's entityType to our EntityType (normalize 'company' to 'organization')
   const normalizedEntityType = entityType === 'company' ? 'organization' as const :
@@ -1716,7 +1907,10 @@ function extractTags(
     // Launchpad
     if (osintEntity.launchpad === 'pump_fun') tags.push('pump-fun');
     if (osintEntity.launchpad === 'bags_fm') tags.push('bags-fm');
-    if (osintEntity.launchpadData?.isGraduated) tags.push('graduated');
+
+    // Graduation status - prefer DexScreener data over launchpad API
+    const tokenGraduated = osintEntity.tokenData?.isGraduated ?? osintEntity.launchpadData?.isGraduated;
+    if (tokenGraduated) tags.push('graduated');
 
     // Security status from RugCheck
     if (osintEntity.securityIntel?.isAccessible) {

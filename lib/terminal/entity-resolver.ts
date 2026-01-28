@@ -73,6 +73,7 @@ export interface ResolvedEntity {
 
   // Discovered links
   xHandle?: string;
+  xCommunityUrl?: string; // X community URL (x.com/i/communities/...)
   website?: string;
   github?: string;
   telegram?: string;
@@ -212,20 +213,26 @@ export function detectInputType(input: string): InputType {
  * Extract X handle from various URL formats
  */
 function extractXHandle(input: string): string | null {
+  let handle: string | null = null;
+
   if (input.startsWith('@')) {
-    return input.slice(1).toLowerCase();
+    handle = input.slice(1).toLowerCase();
+  } else {
+    const urlMatch = input.match(/(?:twitter\.com|x\.com)\/(@?[\w]+)/i);
+    if (urlMatch) {
+      handle = urlMatch[1].replace('@', '').toLowerCase();
+    } else if (/^[a-zA-Z0-9_]{1,15}$/.test(input)) {
+      handle = input.toLowerCase();
+    }
   }
 
-  const urlMatch = input.match(/(?:twitter\.com|x\.com)\/(@?[\w]+)/i);
-  if (urlMatch) {
-    return urlMatch[1].replace('@', '').toLowerCase();
+  // Validate the handle is not a reserved X path
+  if (handle && !isValidXHandle(handle)) {
+    console.log(`[EntityResolver] Ignoring reserved X path: ${handle}`);
+    return null;
   }
 
-  if (/^[a-zA-Z0-9_]{1,15}$/.test(input)) {
-    return input.toLowerCase();
-  }
-
-  return null;
+  return handle;
 }
 
 /**
@@ -255,12 +262,60 @@ function extractGitHub(input: string): { org: string; repo?: string } | null {
 }
 
 /**
+ * Reserved X paths that are not valid user handles
+ */
+const RESERVED_X_PATHS = new Set([
+  'i', 'home', 'explore', 'search', 'notifications', 'messages',
+  'settings', 'compose', 'intent', 'share', 'login', 'logout',
+  'signup', 'tos', 'privacy', 'about', 'help', 'download',
+  'hashtag', 'who_to_follow', 'lists', 'bookmarks', 'communities',
+  'verified', 'premium', 'analytics', 'ads', 'media', 'likes',
+  'followers', 'following', 'status', 'statuses', 'moments',
+]);
+
+/**
+ * Check if a handle is a valid X username (not a reserved path)
+ */
+function isValidXHandle(handle: string): boolean {
+  if (!handle || handle.length < 1 || handle.length > 15) return false;
+  if (RESERVED_X_PATHS.has(handle.toLowerCase())) return false;
+  // X handles can only contain alphanumeric and underscore
+  if (!/^[a-zA-Z0-9_]+$/.test(handle)) return false;
+  return true;
+}
+
+/**
+ * Extract X community URL from internal X paths
+ * Returns the full URL if it's a community link
+ */
+function extractXCommunityUrl(url: string): string | null {
+  const match = url.match(/(?:twitter\.com|x\.com)\/i\/communities\/(\d+)/i);
+  if (match) {
+    // Normalize to x.com format
+    return `https://x.com/i/communities/${match[1]}`;
+  }
+  return null;
+}
+
+/**
  * Extract X handle from Twitter URL
+ * Handles edge cases like x.com/i/communities/... which are NOT user profiles
  */
 function extractXHandleFromUrl(url: string): string | null {
+  // Skip internal X paths like /i/communities, /i/lists, /i/spaces, etc.
+  if (/(?:twitter\.com|x\.com)\/i\//i.test(url)) {
+    console.log(`[EntityResolver] Ignoring internal X path: ${url}`);
+    return null;
+  }
+
   const match = url.match(/(?:twitter\.com|x\.com)\/(@?[\w]+)/i);
   if (match) {
-    return match[1].replace('@', '').toLowerCase();
+    const handle = match[1].replace('@', '').toLowerCase();
+    if (!isValidXHandle(handle)) {
+      console.log(`[EntityResolver] Ignoring reserved X path: ${handle}`);
+      return null;
+    }
+    return handle;
   }
   return null;
 }
@@ -340,6 +395,11 @@ async function resolveFromTokenAddress(address: string): Promise<ResolutionResul
 
   // Extract initial links from DexScreener
   let xHandle = token.twitterUrl ? extractXHandleFromUrl(token.twitterUrl) ?? undefined : undefined;
+  // Also check for X community URL (x.com/i/communities/...)
+  let xCommunityUrl = token.twitterUrl ? extractXCommunityUrl(token.twitterUrl) ?? undefined : undefined;
+  if (xCommunityUrl) {
+    console.log(`[EntityResolver] Found X community: ${xCommunityUrl}`);
+  }
   let website = token.websiteUrl;
   let telegram = token.telegramUrl;
   let discord: string | undefined;
@@ -576,6 +636,7 @@ async function resolveFromTokenAddress(address: string): Promise<ResolutionResul
       symbol: token.symbol,
       imageUrl: token.imageUrl || undefined,
       xHandle,
+      xCommunityUrl,
       website,
       github,
       telegram,

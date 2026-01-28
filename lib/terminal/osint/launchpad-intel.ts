@@ -1,10 +1,22 @@
 /**
- * Launchpad Intelligence - Pump.fun & Bags.fm
+ * Launchpad Intelligence - Solana Token Launchpad Detection
  *
  * Detects tokens from popular Solana launchpads and fetches their metadata.
- * These platforms have specific address patterns that identify their tokens.
+ * Supports multiple detection methods:
+ * 1. Address suffix patterns (pump.fun ends with "pump")
+ * 2. DexScreener dexId (moonshot, pumpswap, etc.)
+ * 3. Pool/market type detection
  *
- * For Bags.fm tokens, we use the official Bags API when available.
+ * Supported Launchpads:
+ * - Pump.fun: Most popular, tokens end with "pump"
+ * - Bags.fm: Community tokens, specific suffix pattern
+ * - Moonshot: By DexScreener, detected via dexId
+ * - Raydium LaunchLab: Raydium's launchpad
+ * - Jupiter LFG: Jupiter's launch platform
+ * - Meteora DBC: Dynamic Bonding Curve
+ * - LetsBonk/Bonkfun: Bonk ecosystem launchpad
+ * - Boop.fun: Newer launchpad
+ * - Sugar.money: Another launchpad
  */
 
 import { getTokenCreator, getLifetimeFees, getTokenInfo } from '@/lib/bags/client';
@@ -13,7 +25,17 @@ import { getTokenCreator, getLifetimeFees, getTokenInfo } from '@/lib/bags/clien
 // TYPES
 // ============================================================================
 
-export type LaunchpadType = 'pump_fun' | 'bags_fm' | 'moonshot' | 'unknown';
+export type LaunchpadType =
+  | 'pump_fun'
+  | 'bags_fm'
+  | 'moonshot'
+  | 'raydium_launchlab'
+  | 'jupiter_lfg'
+  | 'meteora_dbc'
+  | 'letsbonk'
+  | 'boop_fun'
+  | 'sugar'
+  | 'unknown';
 
 export interface LaunchpadTokenInfo {
   // Identifiers
@@ -57,11 +79,13 @@ export interface LaunchpadTokenInfo {
 // Pump.fun tokens end with "pump"
 const PUMP_FUN_SUFFIX = 'pump';
 
-// Bags.fm tokens end with "BAGS" (case-sensitive, uppercase)
+// Bags.fm tokens end with this specific address (BAGS mint authority)
 const BAGS_FM_SUFFIX = 'BAGS';
 
 /**
  * Detect which launchpad a token was created on based on address pattern
+ * Note: Some launchpads (Moonshot, etc.) don't have address patterns -
+ * use detectLaunchpadFromDexId() for those
  */
 export function detectLaunchpad(tokenAddress: string): LaunchpadType {
   if (!tokenAddress || typeof tokenAddress !== 'string') {
@@ -75,12 +99,59 @@ export function detectLaunchpad(tokenAddress: string): LaunchpadType {
     return 'pump_fun';
   }
 
-  // Bags.fm: ends with "BAGS" (case-sensitive - Solana addresses are base58)
+  // Bags.fm: ends with "BAGS" (their token addresses contain this)
   if (address.endsWith(BAGS_FM_SUFFIX)) {
     return 'bags_fm';
   }
 
-  // Moonshot: TBD (need to find pattern)
+  return 'unknown';
+}
+
+/**
+ * Detect launchpad from DexScreener dexId
+ * Use this for launchpads that don't have address patterns (Moonshot, etc.)
+ *
+ * @param dexId - The dexId from DexScreener (e.g., "moonshot", "pumpswap", "raydium")
+ */
+export function detectLaunchpadFromDexId(dexId: string): LaunchpadType {
+  if (!dexId) return 'unknown';
+
+  const normalized = dexId.toLowerCase();
+
+  // Moonshot by DexScreener
+  if (normalized.includes('moonshot') || normalized.includes('moonit')) {
+    return 'moonshot';
+  }
+
+  // Pump.fun or PumpSwap (graduated pump.fun)
+  if (normalized === 'pumpfun' || normalized === 'pumpswap') {
+    return 'pump_fun';
+  }
+
+  // Meteora Dynamic Bonding Curve
+  if (normalized.includes('meteora') && normalized.includes('dbc')) {
+    return 'meteora_dbc';
+  }
+
+  // LetsBonk / Bonkfun
+  if (normalized.includes('bonk') || normalized.includes('letsbonk')) {
+    return 'letsbonk';
+  }
+
+  // Boop.fun
+  if (normalized.includes('boop')) {
+    return 'boop_fun';
+  }
+
+  // Sugar.money
+  if (normalized.includes('sugar')) {
+    return 'sugar';
+  }
+
+  // Raydium LaunchLab (distinct from regular Raydium)
+  if (normalized.includes('launchlab')) {
+    return 'raydium_launchlab';
+  }
 
   return 'unknown';
 }
@@ -93,10 +164,39 @@ export function getLaunchpadUrl(tokenAddress: string, launchpad: LaunchpadType):
     case 'pump_fun':
       return `https://pump.fun/coin/${tokenAddress}`;
     case 'bags_fm':
-      // Bags.fm uses the address directly in the URL path
       return `https://bags.fm/${tokenAddress}`;
+    case 'moonshot':
+      return `https://dexscreener.com/moonshot/${tokenAddress}`;
+    case 'raydium_launchlab':
+      return `https://raydium.io/launchpad/${tokenAddress}`;
+    case 'letsbonk':
+      return `https://letsbonk.fun/token/${tokenAddress}`;
+    case 'boop_fun':
+      return `https://boop.fun/${tokenAddress}`;
+    case 'sugar':
+      return `https://sugar.money/token/${tokenAddress}`;
+    case 'meteora_dbc':
+      return `https://app.meteora.ag/pools/${tokenAddress}`;
     default:
       return undefined;
+  }
+}
+
+/**
+ * Get human-readable launchpad name
+ */
+export function getLaunchpadDisplayName(launchpad: LaunchpadType): string {
+  switch (launchpad) {
+    case 'pump_fun': return 'Pump.fun';
+    case 'bags_fm': return 'Bags.fm';
+    case 'moonshot': return 'Moonshot';
+    case 'raydium_launchlab': return 'Raydium LaunchLab';
+    case 'jupiter_lfg': return 'Jupiter LFG';
+    case 'meteora_dbc': return 'Meteora DBC';
+    case 'letsbonk': return 'LetsBonk';
+    case 'boop_fun': return 'Boop.fun';
+    case 'sugar': return 'Sugar';
+    default: return 'Unknown';
   }
 }
 
