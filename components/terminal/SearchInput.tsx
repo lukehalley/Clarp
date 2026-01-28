@@ -32,9 +32,7 @@ const RECENT_SEARCHES_KEY = 'clarp-recent-searches';
 const MAX_RECENT_SEARCHES = 5;
 
 const PLACEHOLDER_OPTIONS = [
-  'Paste token address...',
-  'Enter @handle...',
-  'Paste website URL...',
+  'Paste Solana token address...',
 ];
 
 export default function SearchInput({ compact, initialValue = '', onSearch }: SearchInputProps) {
@@ -271,12 +269,9 @@ export default function SearchInput({ compact, initialValue = '', onSearch }: Se
 
           {/* Input format hints */}
           <div className="p-2 border-t border-ivory-light/10">
-            <div className="text-[11px] sm:text-xs font-mono text-ivory-light/40 px-2 py-1">Accepted formats</div>
-            <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[10px] sm:text-xs font-mono text-ivory-light/50 px-2">
-              <span className="flex items-center gap-1">{INPUT_ICONS.token_address} <span className="truncate">Token</span></span>
-              <span className="flex items-center gap-1">{INPUT_ICONS.x_handle} @handle</span>
-              <span className="flex items-center gap-1">{INPUT_ICONS.website} <span className="truncate">Website</span></span>
-              <span className="flex items-center gap-1">{INPUT_ICONS.github} GitHub</span>
+            <div className="text-[11px] sm:text-xs font-mono text-ivory-light/40 px-2 py-1">Accepted format</div>
+            <div className="text-[10px] sm:text-xs font-mono text-ivory-light/50 px-2">
+              <span className="flex items-center gap-1">{INPUT_ICONS.token_address} Solana token address (32-44 chars)</span>
             </div>
           </div>
         </div>
