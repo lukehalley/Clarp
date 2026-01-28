@@ -18,6 +18,7 @@ yarn-error.log*
 # Local env files
 .env
 .env.local
+.env.local.*.backup
 .env.development.local
 .env.test.local
 .env.production.local
@@ -48,6 +49,7 @@ Thumbs.db
 # Internal/Private - Do not commit to public repo
 chats/
 marketing-assets/
+marketing-assets.zip
 moodboard/
 research/
 MARKETING_PLAN.md
