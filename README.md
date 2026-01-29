@@ -63,17 +63,30 @@ any input → entity resolution → OSINT gathering (free) → AI analysis (Grok
 
 <br>
 
-## the plot twist
+## access
+
+terminal requires **100K $CLARP** in your wallet. no subscriptions, no monthly fees. connect wallet, we check balance, you're in.
+
+scanning costs money to run. instead of ads, we gate with the token.
+
+<br>
+
+## tokenomics
+
+every trade on Bags.fm generates a 1% creator fee. distributed automatically:
 
 ```
-╔═══════════════════════════════════════════════════════════════╗
-║                                                               ║
-║   100% of protocol fees go to charity.                        ║
-║                                                               ║
-║   rug detection that funds AI safety research.                ║
-║   full circle.                                                ║
-║                                                               ║
-╚═══════════════════════════════════════════════════════════════╝
+50%  development & growth
+30%  operations (API costs, infra)
+20%  burn (buy CLARP on Bags → burn address)
+```
+
+the burn is real. 20% of all fees buy $CLARP and remove it from supply. every tx on Solscan. verify it yourself.
+
+```
+hold CLARP → use terminal → trading = fees →
+fees fund ops + burns → supply shrinks →
+product improves → more users → more fees → repeat
 ```
 
 <br>

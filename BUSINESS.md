@@ -174,8 +174,47 @@ Confidence level (low / medium / high) reflects data completeness.
 | Chain | Solana |
 | CA | `GtwMkjRY8Vi5oGaLaEsd1xnsr3AkZ6ZYBqsG5ipTBAGS` |
 | DEX | Bags.fm (Meteora DBC) |
+| Creator fee | 1% of all buy/sell volume on Bags.fm |
 
-100% of protocol fees go to AI safety research.
+---
+
+## Access Model
+
+Terminal access is token-gated. No subscriptions, no monthly fees -- hold $CLARP to use the product.
+
+| Requirement | Access |
+|-------------|--------|
+| 100K CLARP in wallet | Full terminal access |
+| Connect wallet | Balance verified on-chain |
+
+The scanner costs money to run (AI analysis, OSINT lookups, on-chain data). Instead of ads or subscriptions, access is gated by token holdings. As new features ship, alpha access may require higher balances -- early holders get first access.
+
+---
+
+## Tokenomics
+
+Every buy and sell on Bags.fm generates a 1% creator fee. That fee is distributed automatically:
+
+```
+trading volume → 1% creator fee →
+    50% development & growth (new features, partnerships, expansion)
+    30% operations (API costs, infrastructure)
+    20% burn (buy CLARP on Bags, send to burn address)
+```
+
+### The Burn
+
+20% of all fees automatically buy $CLARP on Bags and send it to a burn address. Supply shrinks every day. Every transaction is verifiable on Solscan.
+
+### The Loop
+
+```
+hold CLARP → use terminal → trading generates fees →
+    fees fund ops + burns → burns reduce supply →
+    product gets better → more users → more fees → repeat
+```
+
+Sustainable. Transparent. Verifiable.
 
 ---
 
@@ -200,11 +239,14 @@ Confidence level (low / medium / high) reflects data completeness.
 
 | Feature | Status |
 |---------|--------|
-| Token staking (tier-gated access) | Proposed (ADR-002) |
+| Token-gated terminal access (100K CLARP) | Building |
+| Automated fee distribution (50/30/20) | Building |
+| Daily CLARP burn (20% of fees) | Building |
+| Tokenomics dashboard (real-time) | Building |
+| Token staking with tiers | Proposed (ADR-002) |
 | Watchlist + alerts | Planned |
 | Shareable report pages | Planned |
 | Compare mode | Planned |
-| Weekly risk digest | Planned |
 
 ---
 
