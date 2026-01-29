@@ -8,13 +8,13 @@
  */
 
 import { useWallet } from '@solana/wallet-adapter-react';
-import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Lock, Wallet, Zap, ArrowRight, ExternalLink, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react';
 import { useTokenBalance } from '@/hooks/useTokenBalance';
 import { TIER_THRESHOLDS, BAGS_FM_URL } from '@/lib/config/tokenomics';
 import BagsSwap from '@/components/swap/BagsSwap';
+import WalletSelect from '@/components/WalletSelect';
 
 interface WalletGateProps {
   children: React.ReactNode;
@@ -31,7 +31,6 @@ export default function WalletGate({
   showPreview = true,
 }: WalletGateProps) {
   const { connected } = useWallet();
-  const { setVisible } = useWalletModal();
   const { balance, isLoading: balanceLoading } = useTokenBalance();
   const [freeScanUsed, setFreeScanUsed] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -188,17 +187,10 @@ export default function WalletGate({
                 </>
               )}
 
-              {/* Not connected */}
+              {/* Not connected — show inline wallet selection */}
               {!isConnected && (
                 <>
-                  <button
-                    onClick={() => setVisible(true)}
-                    className="w-full bg-danger-orange hover:bg-danger-orange/90 text-black font-mono font-bold
-                               py-3 transition-colors flex items-center justify-center gap-2"
-                  >
-                    <Wallet className="w-5 h-5" />
-                    CONNECT WALLET
-                  </button>
+                  <WalletSelect />
 
                   {/* Show free scan option if not used */}
                   {canTryFreeScan && (

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { useWalletModal } from '@solana/wallet-adapter-react-ui';
+import { useWalletModal } from '@/contexts/WalletModalContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserTier } from '@/hooks/useUserTier';
 import { useTokenBalance } from '@/hooks/useTokenBalance';
