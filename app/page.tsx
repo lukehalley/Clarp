@@ -69,7 +69,6 @@ export default function Home() {
   const [heroSentenceIndex, setHeroSentenceIndex] = useState(0);
 
   // Easter egg states
-  const [showWhitepaperModal, setShowWhitepaperModal] = useState(false);
   const [showLoadingModal, setShowLoadingModal] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
   const [loadingProgress, setLoadingProgress] = useState(0);
@@ -300,8 +299,19 @@ export default function Home() {
             // Middle bottom
             { size: 80, bottom: '3%', left: '48%', duration: '6.5s', delay: '3s' },
             { size: 60, bottom: '12%', left: '55%', duration: '9.5s', delay: '5.5s' },
+            // Extra density
+            { size: 48, top: '12%', left: '32%', duration: '7s', delay: '1s' },
+            { size: 52, top: '55%', left: '5%', duration: '9s', delay: '3.5s' },
+            { size: 44, top: '80%', right: '30%', duration: '6s', delay: '2s' },
+            { size: 56, top: '8%', right: '25%', duration: '10s', delay: '4.5s' },
+            { size: 40, top: '45%', left: '45%', duration: '8.5s', delay: '0s' },
+            { size: 50, bottom: '25%', right: '15%', duration: '7.5s', delay: '5s' },
+            { size: 46, top: '30%', left: '60%', duration: '11s', delay: '2.5s' },
+            { size: 54, bottom: '35%', left: '18%', duration: '6.5s', delay: '1.5s' },
+            { size: 42, top: '65%', left: '35%', duration: '8s', delay: '4s' },
+            { size: 60, top: '20%', right: '40%', duration: '9.5s', delay: '3s' },
           ].map(({ size, duration, delay, ...pos }, i) => (
-            <svg key={i} className="absolute animate-float" style={{ ...pos, animationDuration: duration, animationDelay: delay }} width={size} height={size} viewBox="0 0 400 400" fill="none" aria-hidden="true">
+            <svg key={i} className="absolute animate-float" style={{ ...pos, animationDuration: duration, animationDelay: delay, opacity: 0.12 }} width={size} height={size} viewBox="0 0 400 400" fill="none" aria-hidden="true">
               <rect x="60" y="68" width="280" height="168" fill="#0a0a09"/><rect x="32" y="104" width="28" height="42" fill="#0a0a09"/><rect x="340" y="104" width="28" height="42" fill="#0a0a09"/><rect x="116" y="124" width="42" height="70" fill="#FAF9F5"/><rect x="242" y="124" width="42" height="70" fill="#FAF9F5"/><rect x="74" y="236" width="56" height="96" fill="#0a0a09"/><rect x="158" y="236" width="42" height="96" fill="#0a0a09"/><rect x="200" y="236" width="42" height="96" fill="#0a0a09"/><rect x="270" y="236" width="56" height="96" fill="#0a0a09"/>
             </svg>
           ))}
@@ -494,12 +504,14 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <button
-                className="btn-outline text-sm sm:text-base"
-                onClick={() => setShowWhitepaperModal(true)}
+              <a
+                href="https://github.com/lukehalley/Clarp"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-outline text-sm sm:text-base inline-block"
               >
-                whitepaper (still blank though)
-              </button>
+                view source (it's real)
+              </a>
             </div>
             <div className="flex justify-center order-first lg:order-last">
               <div className="scale-75 sm:scale-100">
@@ -701,40 +713,6 @@ export default function Home() {
 
       {/* activity notifications */}
       <ActivityNotifications />
-
-      {/* whitepaper modal - easter egg */}
-      {showWhitepaperModal && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-          style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
-          onClick={() => setShowWhitepaperModal(false)}
-          data-modal-open="true"
-        >
-          <div className="absolute inset-0 bg-slate-dark/95 backdrop-blur-sm" />
-          <div
-            className="relative bg-ivory-light border-2 sm:border-4 border-slate-dark p-6 sm:p-12 w-full max-w-[min(90vw,500px)] sm:max-w-[600px] flex flex-col items-center justify-center"
-            style={{
-              boxShadow: '4px 4px 0 #0a0a09',
-              aspectRatio: '1 / 1.414',
-              maxHeight: 'calc(100vh - 4rem)'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* close button - inside on mobile, outside on desktop */}
-            <button
-              className="absolute top-2 right-2 sm:-top-4 sm:-right-4 w-8 h-8 sm:w-10 sm:h-10 bg-larp-red text-black font-mono font-bold text-lg sm:text-xl flex items-center justify-center border-2 border-black hover:bg-danger-orange active:translate-x-0.5 active:translate-y-0.5 transition-all"
-              style={{ boxShadow: '2px 2px 0 black' }}
-              onClick={() => setShowWhitepaperModal(false)}
-            >
-              ✗
-            </button>
-
-            <div className="text-center flex flex-col items-center justify-center h-full">
-              {/* blank whitepaper - that's the joke */}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* loading modal - cycles through messages then fails */}
       {showLoadingModal && (

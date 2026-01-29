@@ -16,26 +16,12 @@ const LINK_MESSAGES = [
 export default function Footer() {
   const [clickedLink, setClickedLink] = useState<string | null>(null);
   const [message, setMessage] = useState('');
-  const [copyrightClicks, setCopyrightClicks] = useState(0);
-
   const handleLinkClick = (e: React.MouseEvent, linkName: string) => {
     e.preventDefault();
     const msg = LINK_MESSAGES[Math.floor(Math.random() * LINK_MESSAGES.length)];
     setMessage(msg);
     setClickedLink(linkName);
     setTimeout(() => setClickedLink(null), 2000);
-  };
-
-  const handleCopyrightClick = () => {
-    setCopyrightClicks(prev => prev + 1);
-  };
-
-  const getCopyrightText = () => {
-    if (copyrightClicks >= 10) return '© 2025 clarp. you clicked the copyright 10 times. seek help.';
-    if (copyrightClicks >= 5) return '© 2025 clarp. stop clicking this.';
-    if (copyrightClicks >= 3) return '© 2025 clarp. why are you clicking the copyright?';
-    if (copyrightClicks >= 1) return '© 2025 clarp. yes, you clicked the copyright.';
-    return '© 2025 clarp. all rights reserved.';
   };
 
   return (
@@ -151,32 +137,24 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Bottom */}
-        <div className="pt-6 sm:pt-8 border-t border-slate-light/20">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4">
-            <p
-              className="text-[10px] sm:text-xs text-ivory-light/40 text-center md:text-left cursor-pointer hover:text-ivory-light/60 transition-colors"
-              onClick={handleCopyrightClick}
-            >
-              {getCopyrightText()}
-            </p>
-          </div>
+        {/* Terminal CTA */}
+        <div className="py-6 sm:py-8 border-t border-slate-light/20 text-center">
+          <p className="text-sm sm:text-base text-ivory-light/60 mb-4 font-mono">
+            scan projects. scan people. trust with receipts.
+          </p>
+          <a
+            href="/terminal"
+            className="inline-block px-6 py-3 bg-danger-orange text-black font-mono font-bold text-sm border-2 border-danger-orange hover:bg-transparent hover:text-danger-orange transition-colors"
+          >
+            launch terminal
+          </a>
         </div>
 
-        {/* Easter egg - hidden on mobile */}
-        <div className="mt-8 sm:mt-12 text-center hidden sm:block">
-          <pre className="inline-block text-[6px] sm:text-[8px] text-ivory-light/20 font-mono leading-tight hover:text-ivory-light/40 transition-colors cursor-help">
-{`
-    ╭───────────────────────────────────────╮
-    │  you scrolled all the way down?       │
-    │  just like checking "ai agent" repos  │
-    │  and finding nothing but readmes.     │
-    │                                       │
-    │  anyway                               │
-    │                                       │
-    ╰───────────────────────────────────────╯
-`}
-          </pre>
+        {/* Copyright */}
+        <div className="pt-4 border-t border-slate-light/10">
+          <p className="text-[10px] sm:text-xs text-ivory-light/40 text-center">
+            © 2025 clarp. all rights reserved.
+          </p>
         </div>
       </div>
     </footer>
