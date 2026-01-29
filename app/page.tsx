@@ -14,7 +14,7 @@ import Roadmap from '@/components/Roadmap';
 import TERMINAL_CONVERSATIONS from '@/data/terminal-conversations.json';
 import HERO_SENTENCES from '@/data/hero-sentences.json';
 import WARNING_TICKERS from '@/data/warning-tickers.json';
-import DONATIONS from '@/data/donations.json';
+
 
 const ASCII_LOGO = `
  ██████╗██╗      █████╗ ██████╗ ██████╗
@@ -401,10 +401,10 @@ export default function Home() {
               </h1>
 
               <p className="text-lg sm:text-xl md:text-2xl text-slate-light mb-1 sm:mb-4">
-                first autonomous trust pilot
+                trust intelligence for crypto
               </p>
               <p className="text-base sm:text-lg text-danger-orange font-mono mb-2 sm:mb-6 font-bold">
-                polymarket odds + on-chain receipts
+                scan projects. scan people. trust with receipts.
               </p>
 
               <p className="text-sm sm:text-base text-slate-light mb-3 sm:mb-8 max-w-md mx-auto lg:mx-0 min-h-[3rem] sm:min-h-[4.5rem]">
@@ -483,9 +483,9 @@ export default function Home() {
               </p>
               <ul className="space-y-2 sm:space-y-3 mb-6 sm:mb-8 text-left">
                 {[
-                  'the official mascot of autonomous rug detection.',
-                  'more due diligence than your $50m ai agent.',
-                  'scanning polymarket while you sleep.',
+                  'the official mascot of trust intelligence.',
+                  'scanning projects and people 24/7.',
+                  '9 OSINT sources + AI analysis. one trust score.',
                   'CLARP spots LARP. that\'s the whole product.',
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-2 sm:gap-3 text-xs sm:text-sm text-ivory-light/80">
@@ -535,131 +535,105 @@ export default function Home() {
       {/* ticker: products → charity */}
       <WarningTicker messages={WARNING_TICKERS[2].messages} direction={WARNING_TICKERS[2].direction as 'left' | 'right'} />
 
-      {/* charity section - the plot twist */}
+      {/* tokenomics section */}
       <section className="py-16 sm:py-24 px-4 sm:px-6 overflow-hidden bg-slate-dark">
         <div className="max-w-6xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            {/* Left: The twist */}
+            {/* Left: Tokenomics */}
             <div className="text-center lg:text-left">
-              <span className="badge badge-success mb-4 sm:mb-6">plot twist</span>
-              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-ivory-light mb-4 sm:mb-6 font-display">
-                <span className="text-larp-green">100%</span>
+              <span className="badge badge-success mb-4 sm:mb-6">tokenomics</span>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-ivory-light mb-4 sm:mb-6 font-display">
+                hold <span className="text-danger-orange">$CLARP</span>. use terminal.
               </h2>
-              <p className="text-lg sm:text-xl md:text-2xl text-ivory-light/90 mb-2">
-                of fees go to charity.
+              <p className="text-lg sm:text-xl text-ivory-light/90 mb-2">
+                100K CLARP to access. no subscriptions.
               </p>
               <div className="w-32 sm:w-48 h-1 bg-danger-orange mb-6 mx-auto lg:mx-0" />
               <p className="text-base sm:text-lg text-ivory-light/70 mb-6 sm:mb-8 max-w-md mx-auto lg:mx-0">
-                rug detection that funds ai safety research. full circle.
+                every trade on Bags.fm generates a 1% creator fee. distributed automatically.
               </p>
               <ul className="space-y-2 sm:space-y-3 mb-6 sm:mb-8 text-left max-w-md mx-auto lg:mx-0">
                 {[
-                  'every transaction.',
-                  'public proof.',
-                  'no trust required.',
+                  '50% development & growth.',
+                  '30% operations (API costs, infra).',
+                  '20% burn (buy CLARP → burn address, daily).',
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-2 sm:gap-3 text-sm sm:text-base text-ivory-light/80">
-                    <span className="text-larp-green shrink-0">▸</span>
+                    <span className="text-danger-orange shrink-0">▸</span>
                     {item}
                   </li>
                 ))}
               </ul>
-              <p className="text-xs sm:text-sm text-danger-orange font-mono font-bold">
-                utility with a conscience.
+              <p className="text-xs sm:text-sm text-larp-green font-mono font-bold">
+                supply shrinks. product improves. verifiable on-chain.
               </p>
             </div>
 
-            {/* Right: Receipt/proof card */}
+            {/* Right: Fee distribution card */}
             <div className="flex justify-center order-first lg:order-last">
               <div
                 className="relative bg-ivory-light border-2 sm:border-3 border-slate-dark w-full max-w-sm"
                 style={{ boxShadow: '4px 4px 0 #0a0a09' }}
               >
-                {/* Receipt header */}
+                {/* Card header */}
                 <div className="bg-slate-dark px-4 sm:px-6 py-3 sm:py-4">
-                  <p className="text-ivory-light font-mono text-sm sm:text-base text-center">DONATION RECEIPT</p>
+                  <p className="text-ivory-light font-mono text-sm sm:text-base text-center">FEE DISTRIBUTION</p>
                 </div>
 
-                {/* Receipt content */}
+                {/* Card content */}
                 <div className="p-4 sm:p-6 space-y-4">
                   <div>
-                    <p className="text-slate-light font-mono text-xs mb-1">FROM:</p>
-                    <p className="text-slate-dark font-mono text-sm">$CLARP Protocol Fees</p>
+                    <p className="text-slate-light font-mono text-xs mb-1">SOURCE:</p>
+                    <p className="text-slate-dark font-mono text-sm">1% creator fee on all Bags.fm trades</p>
                   </div>
 
                   <div className="border-t border-dashed border-slate-light/30" />
 
-                  <div>
-                    <p className="text-slate-light font-mono text-xs mb-1">TO:</p>
-                    <p className="text-slate-dark font-mono text-sm">Verified Charity Partner</p>
-                  </div>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-sm text-slate-dark">development & growth</span>
+                      <span className="font-mono text-lg font-bold text-danger-orange">50%</span>
+                    </div>
+                    <div className="h-2 bg-slate-light/20 overflow-hidden">
+                      <div className="h-full bg-danger-orange" style={{ width: '50%' }} />
+                    </div>
 
-                  <div className="border-t border-dashed border-slate-light/30" />
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-sm text-slate-dark">operations</span>
+                      <span className="font-mono text-lg font-bold text-slate-dark">30%</span>
+                    </div>
+                    <div className="h-2 bg-slate-light/20 overflow-hidden">
+                      <div className="h-full bg-slate-dark" style={{ width: '30%' }} />
+                    </div>
 
-                  <div>
-                    <p className="text-slate-light font-mono text-xs mb-1">AMOUNT:</p>
-                    <p className="text-larp-green font-mono text-xl sm:text-2xl font-bold">100% OF FEES</p>
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-sm text-slate-dark">daily burn</span>
+                      <span className="font-mono text-lg font-bold text-larp-green">20%</span>
+                    </div>
+                    <div className="h-2 bg-slate-light/20 overflow-hidden">
+                      <div className="h-full bg-larp-green" style={{ width: '20%' }} />
+                    </div>
                   </div>
 
                   <div className="border-t border-dashed border-slate-light/30" />
 
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-slate-light font-mono text-xs mb-1">STATUS:</p>
+                      <p className="text-slate-light font-mono text-xs mb-1">BURN STATUS:</p>
                       <span className="inline-block bg-larp-green text-black font-mono text-xs px-3 py-1 font-bold">
-                        VERIFIED
+                        ACTIVE
                       </span>
                     </div>
                     <span className="text-larp-green text-3xl">✓</span>
                   </div>
 
                   <p className="text-slate-light/60 font-mono text-[10px] text-center pt-2">
-                    on-chain proof available
+                    every burn tx verifiable on solscan
                   </p>
                 </div>
               </div>
             </div>
           </div>
-
-          {/* Donations list */}
-          {DONATIONS.length > 0 && (
-            <div className="mt-12 sm:mt-16">
-              <div className="flex items-center gap-3 mb-6">
-                <span className="text-larp-green text-lg">▸</span>
-                <h3 className="text-lg sm:text-xl font-mono text-ivory-light font-bold">
-                  verified donations ({DONATIONS.length})
-                </h3>
-              </div>
-              <div className="space-y-3">
-                {DONATIONS.map((donation, i) => (
-                  <a
-                    key={i}
-                    href={`https://solscan.io/tx/${donation.tx}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-between p-4 bg-ivory-light/5 border border-ivory-light/10 hover:border-larp-green/50 transition-colors group"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <span className="text-larp-green shrink-0">✓</span>
-                      <span className="font-mono text-sm text-ivory-light/80 truncate">
-                        {donation.tx.slice(0, 8)}...{donation.tx.slice(-8)}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-3 shrink-0">
-                      {donation.amount && (
-                        <span className="font-mono text-sm text-larp-green">{donation.amount}</span>
-                      )}
-                      <span className="text-xs text-ivory-light/40 font-mono">{donation.date}</span>
-                      <span className="text-ivory-light/40 group-hover:text-larp-green transition-colors">→</span>
-                    </div>
-                  </a>
-                ))}
-              </div>
-              <p className="text-xs text-ivory-light/30 font-mono mt-4 text-center">
-                click any transaction to verify on solscan
-              </p>
-            </div>
-          )}
         </div>
       </section>
 
@@ -715,7 +689,7 @@ export default function Home() {
             </button>
           </div>
           <p className="text-xs text-ivory-light/50 mt-6 font-mono">
-            {ctaClicks.doIt + ctaClicks.pretend >= 5 ? 'you\'ve clicked ' + (ctaClicks.doIt + ctaClicks.pretend) + ' times. you\'re early.' : 'polymarket odds + on-chain analysis. first of its kind.'}
+            {ctaClicks.doIt + ctaClicks.pretend >= 5 ? 'you\'ve clicked ' + (ctaClicks.doIt + ctaClicks.pretend) + ' times. you\'re early.' : 'scan projects. scan people. trust with receipts.'}
           </p>
         </div>
       </section>

@@ -4,14 +4,12 @@ import { useState } from 'react';
 
 const LINK_MESSAGES = [
   'this feature is coming. check the roadmap.',
-  'polymarket integration in progress.',
-  'building the rug detector. patience.',
-  'autonomous trust pilot loading...',
-  'first mover advantage: secured.',
+  'building. check the roadmap.',
   'CLARP spots LARP. soon you will too.',
-  'Q1 shipping. check the roadmap.',
-  'connecting to polymarket...',
   'scanning for rugs...',
+  'token gate shipping soon.',
+  'staking program in development.',
+  'trust intelligence loading...',
   'rebrand detection: coming soon',
 ];
 
@@ -50,7 +48,7 @@ export default function Footer() {
               <span className="text-danger-orange">$</span>clarp
             </div>
             <p className="text-sm sm:text-base text-ivory-light/60 mb-4 sm:mb-6 max-w-sm">
-              first autonomous trust pilot. polymarket + on-chain analysis.
+              trust intelligence for crypto. scan projects. scan people.
             </p>
             <div className="flex gap-3 sm:gap-4">
               <a
@@ -97,10 +95,10 @@ export default function Footer() {
             <h4 className="font-mono text-xs sm:text-sm text-danger-orange mb-3 sm:mb-4 h-5">coming soon</h4>
             <ul className="space-y-2 sm:space-y-3">
               {[
-                { name: 'markets dashboard', note: 'q1' },
-                { name: 'x bot (@CLARP)', note: 'q1' },
-                { name: 'rebrand detector', note: 'q1/q2' },
-                { name: 'snitch mode', note: 'q2' },
+                { name: 'token-gated access', note: 'building' },
+                { name: 'daily CLARP burn', note: 'building' },
+                { name: 'staking program', note: 'planned' },
+                { name: 'rebrand detector', note: 'planned' },
               ].map(item => (
                 <li key={item.name} className="min-h-[24px] flex items-center">
                   <button
@@ -118,36 +116,24 @@ export default function Footer() {
           </div>
 
           <div className="h-full">
-            <h4 className="font-mono text-xs sm:text-sm text-danger-orange mb-3 sm:mb-4 h-5">honesty</h4>
+            <h4 className="font-mono text-xs sm:text-sm text-danger-orange mb-3 sm:mb-4 h-5">links</h4>
             <ul className="space-y-2 sm:space-y-3">
               {[
-                { label: 'docs', note: 'you\'re looking at it', href: null },
-                { label: 'whitepaper', note: 'blank', href: null },
-                { label: 'github', note: 'actually exists', href: 'https://github.com/lukehalley/Clarp' },
-                { label: 'audit', note: '"gpt said it\'s fine"', href: null },
+                { label: 'terminal', note: 'live', href: '/terminal' },
+                { label: 'github', note: 'open source', href: 'https://github.com/lukehalley/Clarp' },
+                { label: 'dexscreener', note: '$CLARP', href: 'https://dexscreener.com/solana/6c71mun334bafcuvn3cwajfqnk6skztzk9vfzrthstwj' },
+                { label: 'bags.fm', note: 'trade', href: 'https://bags.fm/token/GtwMkjRY8Vi5oGaLaEsd1xnsr3AkZ6ZYBqsG5ipTBAGS' },
               ].map(item => (
                 <li key={item.label} className="min-h-[24px] flex items-center">
-                  {item.href ? (
-                    <a
-                      href={item.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-left transition-colors flex items-center gap-2 text-ivory-light/60 hover:text-danger-orange"
-                    >
-                      {item.label}
-                      <span className="text-[10px] text-larp-green shrink-0">({item.note})</span>
-                    </a>
-                  ) : (
-                    <button
-                      onClick={(e) => handleLinkClick(e, item.label)}
-                      className={`text-sm text-left transition-colors flex items-center gap-2 ${
-                        clickedLink === item.label ? 'text-larp-red' : 'text-ivory-light/60 hover:text-ivory-light'
-                      }`}
-                    >
-                      {clickedLink === item.label ? '✗ ' : ''}{item.label}
-                      <span className="text-[10px] text-slate-light shrink-0">({item.note})</span>
-                    </button>
-                  )}
+                  <a
+                    href={item.href}
+                    target={item.href.startsWith('http') ? '_blank' : undefined}
+                    rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                    className="text-sm text-left transition-colors flex items-center gap-2 text-ivory-light/60 hover:text-danger-orange"
+                  >
+                    {item.label}
+                    <span className="text-[10px] text-larp-green shrink-0">({item.note})</span>
+                  </a>
                 </li>
               ))}
             </ul>

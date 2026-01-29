@@ -48,11 +48,11 @@ export default function Navbar() {
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-4">
             <a
-              href="/clarp-agent"
-              onClick={(e) => handleNavClick(e, '/clarp-agent')}
-              className="text-sm text-danger-orange hover:text-larp-red transition-colors font-mono font-bold preserve-case cursor-pointer"
+              href="/roadmap"
+              onClick={(e) => handleNavClick(e, '/roadmap')}
+              className="text-sm text-slate-dark hover:text-danger-orange transition-colors font-mono font-bold cursor-pointer"
             >
-              C[LARP] AGENT
+              roadmap
             </a>
             <div className="flex items-center gap-2 ml-2">
               <a
@@ -117,11 +117,11 @@ export default function Navbar() {
           <div className="md:hidden border-t border-slate-dark/20 bg-ivory-light">
             <div className="px-4 py-4 space-y-3">
               <a
-                href="/clarp-agent"
-                onClick={(e) => handleNavClick(e, '/clarp-agent')}
-                className="block py-2 text-danger-orange hover:text-larp-red transition-colors font-mono font-bold preserve-case cursor-pointer"
+                href="/roadmap"
+                onClick={(e) => handleNavClick(e, '/roadmap')}
+                className="block py-2 text-slate-dark hover:text-danger-orange transition-colors font-mono font-bold cursor-pointer"
               >
-                C[LARP] AGENT
+                roadmap
               </a>
               <div className="flex gap-3 pt-3 border-t border-slate-dark/10">
                 <a
@@ -159,12 +159,12 @@ export default function Navbar() {
                 </a>
               </div>
               <a
-                href="/roadmap"
-                onClick={(e) => handleNavClick(e, '/roadmap')}
-                className="block w-full text-center mt-2 px-5 py-3 bg-white text-slate-dark font-mono font-bold text-sm border-2 border-slate-dark transition-all duration-150 cursor-pointer active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_#0a0a09]"
-                style={{ boxShadow: '3px 3px 0 #0a0a09' }}
+                href="/terminal"
+                onClick={(e) => handleNavClick(e, '/terminal')}
+                className="block w-full text-center mt-2 px-5 py-3 bg-black text-ivory-light font-mono font-bold text-sm border-2 border-danger-orange transition-all duration-150 cursor-pointer active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_#FF6B35]"
+                style={{ boxShadow: '3px 3px 0 #FF6B35' }}
               >
-                view roadmap
+                launch terminal
               </a>
             </div>
           </div>
