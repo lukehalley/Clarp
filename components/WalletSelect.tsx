@@ -13,7 +13,7 @@ import { getWalletIcon } from '@/components/icons/WalletIcons';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function WalletSelect() {
-  const { wallets, wallet: selectedWallet, select, connect, connecting } = useWallet();
+  const { wallets, wallet: selectedWallet, select, connect } = useWallet();
   const [error, setError] = useState<string | null>(null);
   const [connectingWallet, setConnectingWallet] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
@@ -74,7 +74,7 @@ export default function WalletSelect() {
           key={wallet.adapter.name}
           wallet={wallet}
           loading={connectingWallet === wallet.adapter.name}
-          disabled={connecting}
+          disabled={!!connectingWallet}
           onClick={() => handleSelect(wallet)}
         />
       ))}
@@ -124,7 +124,7 @@ export default function WalletSelect() {
                   key={wallet.adapter.name}
                   wallet={wallet}
                   loading={connectingWallet === wallet.adapter.name}
-                  disabled={connecting}
+                  disabled={!!connectingWallet}
                   onClick={() => handleSelect(wallet)}
                 />
               ))}

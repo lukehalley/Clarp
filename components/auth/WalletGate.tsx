@@ -83,7 +83,7 @@ export default function WalletGate({
       )}
 
       {/* Gate Overlay */}
-      <div className="absolute inset-0 bg-slate-dark/90 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="absolute inset-0 z-10 bg-slate-dark/90 backdrop-blur-sm flex items-center justify-center p-4">
         <div className="max-w-md w-full">
           {/* Main Gate Card */}
           <div className="bg-slate-medium border-2 border-ivory-light/20 overflow-hidden">
