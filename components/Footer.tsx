@@ -124,7 +124,7 @@ export default function Footer() {
                 { label: 'terminal', note: 'live', href: '/terminal/projects' },
                 { label: 'github', note: 'open source', href: 'https://github.com/lukehalley/Clarp' },
                 { label: 'dexscreener', note: '$CLARP', href: 'https://dexscreener.com/solana/GtwMkjRY8Vi5oGaLaEsd1xnsr3AkZ6ZYBqsG5ipTBAGS' },
-                { label: 'bags.fm', note: 'trade', href: 'https://bags.fm/token/GtwMkjRY8Vi5oGaLaEsd1xnsr3AkZ6ZYBqsG5ipTBAGS' },
+                { label: 'bags.fm', note: 'trade', href: 'https://bags.fm/GtwMkjRY8Vi5oGaLaEsd1xnsr3AkZ6ZYBqsG5ipTBAGS' },
               ].map(item => (
                 <li key={item.label} className="min-h-[24px] flex items-center">
                   <a

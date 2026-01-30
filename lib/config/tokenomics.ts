@@ -78,7 +78,7 @@ export const REVENUE_SPLIT = {
 export const MIN_DISTRIBUTION_SOL = 0.1;
 
 // Bags.fm URL for buying CLARP
-export const BAGS_FM_URL = 'https://bags.fm/token/GtwMkjRY8Vi5oGaLaEsd1xnsr3AkZ6ZYBqsG5ipTBAGS';
+export const BAGS_FM_URL = 'https://bags.fm/GtwMkjRY8Vi5oGaLaEsd1xnsr3AkZ6ZYBqsG5ipTBAGS';
 
 // Tier display config - icon names reference Lucide icons
 // Uses brutalist design system colors for high visibility

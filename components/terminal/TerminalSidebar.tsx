@@ -8,12 +8,9 @@ import {
   Boxes,
   User,
   Building2,
-  Bookmark,
-  Bell,
   ChevronLeft,
   ChevronRight,
   Search,
-  Coins,
 } from 'lucide-react';
 
 interface NavItem {
@@ -30,9 +27,6 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'people', label: 'People', icon: <User size={18} />, href: '/terminal/people' },
   { id: 'orgs', label: 'Orgs', icon: <Building2 size={18} />, href: '/terminal/orgs' },
   { id: 'scan', label: 'Scan', icon: <Search size={18} />, href: '/terminal/scan' },
-  { id: 'tokenomics', label: 'Tokenomics', icon: <Coins size={18} />, href: '/terminal/tokenomics' },
-  { id: 'watchlist', label: 'Watchlist', icon: <Bookmark size={18} />, disabled: true, disabledLabel: 'Coming Soon' },
-  { id: 'alerts', label: 'Alerts', icon: <Bell size={18} />, disabled: true, disabledLabel: 'Coming Soon' },
 ];
 
 export default function TerminalSidebar() {
