@@ -40,16 +40,29 @@ export function buildResearchPrompt(
 
 ${contextBlock}## INSTRUCTIONS
 - Search for: "${query}" crypto project, team, funding, audit, controversies
+- CRITICAL — Search for identifiers on these specific sites:
+  - "${query}" site:dexscreener.com OR site:coingecko.com OR site:coinmarketcap.com (to find token address, chain, ticker)
+  - "${query}" site:github.com (to find GitHub org/repo URL)
+  - "${query}" official website (look in X bio, CoinGecko info, project docs)
+- The "identifiers" field is HIGH PRIORITY — search hard for token contract address, website URL, and GitHub URL
 - ONLY report facts you can cite with source URLs
 - If you cannot find information for a field, use null — do NOT guess or infer
 - Distinguish between verified facts and unverified claims
 - Include recent news (last 6 months if available)
+- For team members: search for founders, developers, core team. Check X bios, LinkedIn, blog posts, GitHub profiles
 
 ## REQUIRED JSON OUTPUT
 Return ONLY a valid JSON object:
 {
   "projectName": "Official project name",
   "description": "What the project does (1-2 sentences)",
+  "identifiers": {
+    "tokenAddress": "Solana/EVM contract address from DexScreener, CoinGecko, or project site — or null",
+    "website": "Official website URL or null",
+    "githubUrl": "GitHub org or repo URL or null",
+    "ticker": "$SYMBOL or null",
+    "chain": "solana|ethereum|base|null"
+  },
   "foundingDate": "YYYY-MM-DD or null",
   "teamMembers": [
     {

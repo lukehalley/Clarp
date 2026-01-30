@@ -275,6 +275,13 @@ export class PerplexityClient {
         projectName: parsed.projectName || null,
         description: parsed.description || null,
         foundingDate: parsed.foundingDate || null,
+        identifiers: parsed.identifiers ? {
+          tokenAddress: (parsed.identifiers.tokenAddress as string) || null,
+          website: (parsed.identifiers.website as string) || null,
+          githubUrl: (parsed.identifiers.githubUrl as string) || null,
+          ticker: (parsed.identifiers.ticker as string) || null,
+          chain: (parsed.identifiers.chain as string) || null,
+        } : undefined,
         teamMembers: Array.isArray(parsed.teamMembers) ? parsed.teamMembers.map((m: Record<string, unknown>) => ({
           name: String(m.name || ''),
           role: String(m.role || ''),

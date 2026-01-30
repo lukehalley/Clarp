@@ -266,16 +266,30 @@ export async function searchToken(query: string): Promise<TokenSearchResult> {
       return { found: false, error: 'Token not found' };
     }
 
-    // Filter for Solana tokens and sort by liquidity
+    // Filter for Solana tokens whose symbol or name matches the query
+    const queryLower = query.toLowerCase().replace('$', '');
     const solanaPairs = data.pairs
       .filter((pair: any) => pair.chainId === 'solana')
       .sort((a: any, b: any) => parseFloat(b.liquidity?.usd || '0') - parseFloat(a.liquidity?.usd || '0'));
 
-    if (solanaPairs.length === 0) {
-      return { found: false, error: 'No Solana tokens found' };
-    }
+    // Prefer exact symbol/name match over highest-liquidity unrelated token
+    const exactMatch = solanaPairs.find((pair: any) => {
+      const symbol = (pair.baseToken?.symbol || '').toLowerCase();
+      const name = (pair.baseToken?.name || '').toLowerCase();
+      return symbol === queryLower || name === queryLower;
+    });
 
-    const pair = solanaPairs[0];
+    const fuzzyMatch = solanaPairs.find((pair: any) => {
+      const symbol = (pair.baseToken?.symbol || '').toLowerCase();
+      const name = (pair.baseToken?.name || '').toLowerCase();
+      return symbol.includes(queryLower) || name.includes(queryLower) || queryLower.includes(symbol);
+    });
+
+    const pair = exactMatch || fuzzyMatch;
+
+    if (!pair) {
+      return { found: false, error: 'No matching Solana tokens found' };
+    }
     const tokenInfo = pair.baseToken;
     const tokenAddress = tokenInfo?.address || '';
 

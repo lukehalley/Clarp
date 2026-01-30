@@ -33,11 +33,13 @@ export type Database = {
           market_data: Json | null
           name: string
           negative_indicators: Json | null
+          perplexity_citations: Json | null
           positive_indicators: Json | null
           roadmap: Json | null
           security_intel: Json | null
           shipping_history: Json | null
           social_metrics: Json | null
+          source_attribution: Json | null
           tags: string[] | null
           team: Json | null
           tech_stack: Json | null
@@ -74,11 +76,13 @@ export type Database = {
           market_data?: Json | null
           name: string
           negative_indicators?: Json | null
+          perplexity_citations?: Json | null
           positive_indicators?: Json | null
           roadmap?: Json | null
           security_intel?: Json | null
           shipping_history?: Json | null
           social_metrics?: Json | null
+          source_attribution?: Json | null
           tags?: string[] | null
           team?: Json | null
           tech_stack?: Json | null
@@ -115,11 +119,13 @@ export type Database = {
           market_data?: Json | null
           name?: string
           negative_indicators?: Json | null
+          perplexity_citations?: Json | null
           positive_indicators?: Json | null
           roadmap?: Json | null
           security_intel?: Json | null
           shipping_history?: Json | null
           social_metrics?: Json | null
+          source_attribution?: Json | null
           tags?: string[] | null
           team?: Json | null
           tech_stack?: Json | null

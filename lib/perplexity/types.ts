@@ -88,6 +88,15 @@ export interface PerplexityResearchResult {
   description?: string | null;
   foundingDate?: string | null;
 
+  // Project identifiers (discovered from web with citations)
+  identifiers?: {
+    tokenAddress?: string | null;
+    website?: string | null;
+    githubUrl?: string | null;
+    ticker?: string | null;
+    chain?: string | null;
+  };
+
   // Team (with real names and background - cited)
   teamMembers?: PerplexityTeamMember[];
 

@@ -58,6 +58,8 @@ export function rowToProject(row: ProjectRow): Project {
     keyFindings: row.key_findings || undefined,
     theStory: row.the_story || undefined,
     controversies: row.controversies || undefined,
+    sourceAttribution: row.source_attribution as unknown as Project['sourceAttribution'] || undefined,
+    perplexityCitations: row.perplexity_citations as unknown as Project['perplexityCitations'] || undefined,
     lastScanAt: new Date(row.last_scan_at),
     createdAt: new Date(row.created_at),
   };
@@ -103,6 +105,8 @@ export function projectToInsert(project: Partial<Project> & { name: string }): P
     key_findings: project.keyFindings || null,
     the_story: project.theStory || null,
     controversies: project.controversies || null,
+    source_attribution: (project.sourceAttribution || null) as unknown as ProjectInsert['source_attribution'],
+    perplexity_citations: (project.perplexityCitations || null) as unknown as ProjectInsert['perplexity_citations'],
   };
 }
 
@@ -149,6 +153,8 @@ export function projectToUpdate(updates: Partial<Project>): ProjectUpdate {
   if (updates.keyFindings !== undefined) result.key_findings = updates.keyFindings || null;
   if (updates.theStory !== undefined) result.the_story = updates.theStory || null;
   if (updates.controversies !== undefined) result.controversies = updates.controversies || null;
+  if (updates.sourceAttribution !== undefined) result.source_attribution = (updates.sourceAttribution || null) as unknown as ProjectUpdate['source_attribution'];
+  if (updates.perplexityCitations !== undefined) result.perplexity_citations = (updates.perplexityCitations || null) as unknown as ProjectUpdate['perplexity_citations'];
   if (updates.lastScanAt !== undefined) result.last_scan_at = updates.lastScanAt.toISOString();
 
   return result;

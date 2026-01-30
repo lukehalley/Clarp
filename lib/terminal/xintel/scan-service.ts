@@ -27,7 +27,18 @@ import { BEHAVIORAL_ANALYSIS_PROMPT } from '@/lib/grok/prompts';
 import { getPerplexityClient, isPerplexityAvailable } from '@/lib/perplexity/client';
 import type { PerplexityResearchResult } from '@/lib/perplexity/types';
 import { crossReference } from '@/lib/terminal/xintel/cross-reference';
-import { fetchGitHubRepoIntel, checkWebsiteLive, type GitHubRepoIntel } from '@/lib/terminal/osint';
+import {
+  fetchGitHubRepoIntel,
+  fetchComprehensiveGitHubIntel,
+  checkWebsiteLive,
+  scrapeWebsite,
+  getDomainIntel,
+  getWaybackIntel,
+  fetchRugCheckReport,
+  fetchMarketIntel,
+  type GitHubRepoIntel,
+} from '@/lib/terminal/osint';
+import { lookupTokenByAddress, searchToken } from '@/lib/terminal/xintel/tokenLookup';
 import {
   resolveEntity,
   detectInputType,
@@ -1527,6 +1538,240 @@ async function fetchXAvatarUrl(handle: string): Promise<string | undefined> {
 }
 
 /**
+ * Post-AI OSINT Enrichment
+ * After Grok + Perplexity discover identifiers (token address, website, GitHub),
+ * run OSINT modules on them to fill security_intel, market_data, github_intel, website_intel.
+ * This is critical for X handle inputs where the entity resolver has minimal data.
+ *
+ * Each stage runs independently — Perplexity is the identifier discovery engine,
+ * and OSINT modules are the data collection engines. They don't depend on each other.
+ */
+async function enrichOsintFromDiscoveredLinks(
+  osintEntity: ResolvedEntity | undefined,
+  analysis: GrokAnalysisResult,
+  perplexityResult: PerplexityResearchResult | null | undefined,
+): Promise<ResolvedEntity | undefined> {
+  if (!osintEntity) return undefined;
+
+  // Collect all discovered identifiers from Perplexity (best for web discovery) + Grok + existing OSINT
+  let tokenAddress: string | undefined = perplexityResult?.identifiers?.tokenAddress
+    || analysis.contract?.address
+    || osintEntity.tokenAddresses?.[0]?.address
+    || undefined;
+
+  const githubUrl = perplexityResult?.identifiers?.githubUrl
+    || analysis.github
+    || osintEntity.github;
+
+  const websiteUrl = perplexityResult?.identifiers?.website
+    || analysis.website
+    || osintEntity.website;
+
+  // === TOKEN DISCOVERY FALLBACK ===
+  // If no token address found from any source, search DexScreener by ticker or project name.
+  // This is critical for X handle inputs where Perplexity may find the ticker but not the address.
+  if (!tokenAddress) {
+    const ticker = perplexityResult?.identifiers?.ticker?.replace('$', '')
+      || analysis.contract?.ticker?.replace('$', '');
+    const searchQuery = ticker || osintEntity.name || analysis.profile?.displayName;
+
+    if (searchQuery) {
+      try {
+        console.log(`[XIntel] Post-AI OSINT: No token address — searching DexScreener for "${searchQuery}"`);
+        const searchResult = await searchToken(searchQuery);
+        if (searchResult.found && searchResult.token?.address) {
+          tokenAddress = searchResult.token.address;
+          console.log(`[XIntel] Post-AI OSINT: DexScreener found token ${searchResult.token.symbol} at ${tokenAddress.slice(0, 8)}...`);
+          // Pre-populate token data since we already have it
+          if (!osintEntity.tokenData) {
+            osintEntity = { ...osintEntity, tokenData: searchResult.token };
+          }
+          if (!osintEntity.tokenAddresses?.length) {
+            osintEntity = {
+              ...osintEntity,
+              tokenAddresses: [{
+                chain: perplexityResult?.identifiers?.chain || 'solana',
+                address: tokenAddress,
+                symbol: searchResult.token.symbol || '',
+              }],
+            };
+          }
+        } else {
+          console.log(`[XIntel] Post-AI OSINT: DexScreener search found no results for "${searchQuery}"`);
+        }
+      } catch (err) {
+        console.warn(`[XIntel] Post-AI OSINT: DexScreener search failed:`, err instanceof Error ? err.message : err);
+      }
+    }
+  }
+
+  // Determine what's missing — only enrich gaps
+  const needsSecurityIntel = !!tokenAddress && !osintEntity.securityIntel?.isAccessible;
+  const needsMarketIntel = !!tokenAddress && !osintEntity.marketIntel?.priceUsd;
+  const needsTokenData = !!tokenAddress && !osintEntity.tokenData;
+  const needsGithubIntel = !!githubUrl && !osintEntity.githubIntel;
+  const needsWebsiteIntel = !!websiteUrl && !osintEntity.websiteIntel;
+  const needsDomainIntel = !!websiteUrl && !osintEntity.domainIntel;
+  const needsHistoryIntel = !!websiteUrl && !osintEntity.historyIntel;
+
+  const enrichmentNeeded = needsSecurityIntel || needsMarketIntel || needsTokenData
+    || needsGithubIntel || needsWebsiteIntel || needsDomainIntel || needsHistoryIntel;
+
+  if (!enrichmentNeeded) {
+    console.log(`[XIntel] Post-AI OSINT: No enrichment needed — all data already present`);
+    return osintEntity;
+  }
+
+  console.log(`[XIntel] Post-AI OSINT enrichment starting:`, {
+    tokenAddress: tokenAddress ? `${tokenAddress.slice(0, 8)}...` : 'none',
+    githubUrl: githubUrl || 'none',
+    websiteUrl: websiteUrl || 'none',
+    gaps: {
+      needsSecurityIntel, needsMarketIntel, needsTokenData,
+      needsGithubIntel, needsWebsiteIntel, needsDomainIntel, needsHistoryIntel,
+    },
+  });
+
+  // Build enrichment as a shallow copy — additive only, never overwrite existing data
+  const enriched: ResolvedEntity = { ...osintEntity };
+
+  // Run all enrichment in parallel — each module is independent
+  const tasks: Promise<void>[] = [];
+
+  // Token-based enrichment (RugCheck + Market + DexScreener)
+  if (tokenAddress && (needsSecurityIntel || needsMarketIntel || needsTokenData)) {
+    if (needsSecurityIntel) {
+      tasks.push(
+        fetchRugCheckReport(tokenAddress)
+          .then(result => {
+            if (result) {
+              enriched.securityIntel = result;
+              console.log(`[XIntel] Post-AI OSINT: RugCheck enriched (score: ${result.normalizedScore}/10)`);
+            }
+          })
+          .catch(err => console.warn(`[XIntel] Post-AI OSINT: RugCheck failed:`, err.message))
+      );
+    }
+
+    if (needsMarketIntel) {
+      tasks.push(
+        fetchMarketIntel(tokenAddress)
+          .then(result => {
+            if (result) {
+              enriched.marketIntel = result;
+              console.log(`[XIntel] Post-AI OSINT: Market data enriched (price: $${result.priceUsd})`);
+            }
+          })
+          .catch(err => console.warn(`[XIntel] Post-AI OSINT: Market intel failed:`, err.message))
+      );
+    }
+
+    if (needsTokenData) {
+      tasks.push(
+        lookupTokenByAddress(tokenAddress)
+          .then(result => {
+            if (result.found && result.token) {
+              enriched.tokenData = result.token;
+              // Also update token addresses if not present
+              if (!enriched.tokenAddresses?.length) {
+                enriched.tokenAddresses = [{
+                  chain: perplexityResult?.identifiers?.chain || 'solana',
+                  address: tokenAddress,
+                  symbol: result.token.symbol || '',
+                }];
+              }
+              console.log(`[XIntel] Post-AI OSINT: Token data enriched (${result.token.symbol})`);
+            }
+          })
+          .catch(err => console.warn(`[XIntel] Post-AI OSINT: Token lookup failed:`, err.message))
+      );
+    }
+  }
+
+  // GitHub enrichment
+  if (githubUrl && needsGithubIntel) {
+    tasks.push(
+      fetchComprehensiveGitHubIntel(githubUrl)
+        .then(result => {
+          if (result) {
+            enriched.githubIntel = result;
+            enriched.github = enriched.github || githubUrl;
+            console.log(`[XIntel] Post-AI OSINT: GitHub enriched (${result.repo?.stars || 0} stars)`);
+          }
+        })
+        .catch(err => console.warn(`[XIntel] Post-AI OSINT: GitHub intel failed:`, err.message))
+    );
+  }
+
+  // Website enrichment (scrape + domain + wayback — all independent)
+  if (websiteUrl) {
+    const domain = (() => {
+      try { return new URL(websiteUrl.startsWith('http') ? websiteUrl : `https://${websiteUrl}`).hostname; }
+      catch { return null; }
+    })();
+
+    if (needsWebsiteIntel) {
+      tasks.push(
+        scrapeWebsite(websiteUrl.startsWith('http') ? websiteUrl : `https://${websiteUrl}`)
+          .then(result => {
+            if (result) {
+              enriched.websiteIntel = result;
+              enriched.website = enriched.website || websiteUrl;
+              console.log(`[XIntel] Post-AI OSINT: Website scraped (live: ${result.isLive})`);
+            }
+          })
+          .catch(err => console.warn(`[XIntel] Post-AI OSINT: Website scrape failed:`, err.message))
+      );
+    }
+
+    if (domain && needsDomainIntel) {
+      tasks.push(
+        getDomainIntel(domain)
+          .then(result => {
+            if (result) {
+              enriched.domainIntel = result;
+              console.log(`[XIntel] Post-AI OSINT: Domain intel enriched (age: ${result.ageInDays}d)`);
+            }
+          })
+          .catch(err => console.warn(`[XIntel] Post-AI OSINT: Domain intel failed:`, err.message))
+      );
+    }
+
+    if (domain && needsHistoryIntel) {
+      tasks.push(
+        getWaybackIntel(domain)
+          .then(result => {
+            if (result) {
+              enriched.historyIntel = result;
+              console.log(`[XIntel] Post-AI OSINT: Wayback enriched (archives: ${result.hasArchives})`);
+            }
+          })
+          .catch(err => console.warn(`[XIntel] Post-AI OSINT: Wayback intel failed:`, err.message))
+      );
+    }
+  }
+
+  // Also backfill identifiers discovered by Perplexity into the entity
+  if (perplexityResult?.identifiers) {
+    if (perplexityResult.identifiers.website && !enriched.website) {
+      enriched.website = perplexityResult.identifiers.website;
+    }
+    if (perplexityResult.identifiers.githubUrl && !enriched.github) {
+      enriched.github = perplexityResult.identifiers.githubUrl;
+    }
+    if (perplexityResult.identifiers.ticker && !enriched.symbol) {
+      enriched.symbol = perplexityResult.identifiers.ticker.replace('$', '');
+    }
+  }
+
+  await Promise.allSettled(tasks);
+
+  console.log(`[XIntel] Post-AI OSINT enrichment complete: ${tasks.length} modules ran`);
+
+  return enriched;
+}
+
+/**
  * Create or update a project entity from Grok analysis + OSINT data
  * Now uses the rich OSINT entity collected by entity-resolver for comprehensive data
  */
@@ -1542,7 +1787,7 @@ async function upsertProjectFromAnalysis(
   // ========================================================================
   // RETRIEVE OSINT ENTITY (collected by entity-resolver - FREE data!)
   // ========================================================================
-  const osintEntity = osintEntityCache.get(normalizedHandle);
+  let osintEntity = osintEntityCache.get(normalizedHandle);
   if (osintEntity) {
     console.log(`[XIntel] Found OSINT entity for @${normalizedHandle} with:`, {
       hasSecurityIntel: !!osintEntity.securityIntel?.isAccessible,
@@ -1557,6 +1802,19 @@ async function upsertProjectFromAnalysis(
     });
   } else {
     console.log(`[XIntel] No OSINT entity found for @${normalizedHandle}, using Grok data only`);
+  }
+
+  // ========================================================================
+  // POST-AI OSINT ENRICHMENT
+  // Use identifiers discovered by Perplexity + Grok to run OSINT modules
+  // that couldn't run earlier (e.g., X handle input had no token address)
+  // ========================================================================
+  const enrichedEntity = await enrichOsintFromDiscoveredLinks(osintEntity, analysis, perplexityResult);
+  if (enrichedEntity && enrichedEntity !== osintEntity) {
+    osintEntity = enrichedEntity;
+    // Update cache so any subsequent operations use enriched data
+    osintEntityCache.set(normalizedHandle, enrichedEntity);
+    console.log(`[XIntel] OSINT entity enriched with AI-discovered identifiers for @${normalizedHandle}`);
   }
 
   // Determine project name - prefer OSINT (more likely to be token name)
@@ -1645,16 +1903,18 @@ async function upsertProjectFromAnalysis(
     }
   }
 
-  // Extract ticker from OSINT or Grok
+  // Extract ticker from OSINT > Perplexity > Grok
   const ticker = osintEntity?.symbol ||
+    perplexityResult?.identifiers?.ticker?.replace('$', '') ||
     analysis.contract?.ticker?.replace('$', '') ||
     analysis.promotionHistory?.find(p =>
       p.project?.toLowerCase().includes(name.toLowerCase())
     )?.ticker?.replace('$', '') ||
     undefined;
 
-  // Extract token address from OSINT
+  // Extract token address from OSINT > Perplexity > Grok
   const tokenAddress = osintEntity?.tokenAddresses?.[0]?.address ||
+    perplexityResult?.identifiers?.tokenAddress ||
     analysis.contract?.address ||
     undefined;
 
@@ -1974,8 +2234,8 @@ async function upsertProjectFromAnalysis(
     tags: extractTags(analysis, githubIntelData, osintEntity),
     aiSummary: analysis.verdict?.summary || analysis.overallAssessment || undefined,
     xHandle: normalizedHandle,
-    githubUrl: osintEntity?.github || analysis.github || undefined,
-    websiteUrl: osintEntity?.website || analysis.website || undefined,
+    githubUrl: osintEntity?.github || perplexityResult?.identifiers?.githubUrl || analysis.github || undefined,
+    websiteUrl: osintEntity?.website || perplexityResult?.identifiers?.website || analysis.website || undefined,
     tokenAddress,
     ticker,
     discordUrl: osintEntity?.discord || undefined,
@@ -2028,7 +2288,8 @@ async function upsertProjectFromAnalysis(
       (analysis.controversies?.length ? analysis.controversies : undefined),
     // Source attribution and citations (multi-source verification)
     sourceAttribution: crossRef?.sourceAttribution || undefined,
-    perplexityCitations: crossRef?.citations.length ? crossRef.citations : undefined,
+    perplexityCitations: crossRef?.citations?.length ? crossRef.citations :
+      (perplexityResult?.citations?.length ? perplexityResult.citations : undefined),
     lastScanAt: new Date(),
   };
 
