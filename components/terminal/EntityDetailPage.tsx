@@ -14,7 +14,6 @@ import {
   AlertTriangle,
   AlertOctagon,
   Loader2,
-  RefreshCw,
   Twitter,
   Share2,
   ChevronDown,
@@ -57,6 +56,7 @@ import {
   Boxes,
 } from 'lucide-react';
 import ContractAvatar from '@/components/ContractAvatar';
+import ClarpLoader from '@/components/ClarpLoader';
 import type {
   Project,
   EntityType,
@@ -365,7 +365,7 @@ function SecurityIntelSection({ security }: { security?: SecurityIntel | null })
         <EmptyState
           icon={ShieldX}
           title="No security data available"
-          description="Rescan to gather RugCheck data"
+          description="No RugCheck data available"
         />
       </Card>
     );
@@ -1425,11 +1425,8 @@ function ControversiesSection({ controversies }: { controversies?: string[] | nu
 
 function LoadingState() {
   return (
-    <div className="h-full flex items-center justify-center">
-      <div className="flex flex-col items-center gap-4">
-        <Loader2 size={32} className="animate-spin text-danger-orange" />
-        <span className="font-mono text-xs text-ivory-light/40 tracking-wider">Loading...</span>
-      </div>
+    <div className="min-h-[60vh] flex items-center justify-center">
+      <ClarpLoader size={96} variant="light" label="loading..." />
     </div>
   );
 }
@@ -1457,28 +1454,7 @@ function NotFoundState() {
 
 export default function EntityDetailPage({ project, isLoading, expectedEntityType }: EntityDetailPageProps) {
   const router = useRouter();
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>('overview');
-
-  const handleRescan = async () => {
-    if (!project?.xHandle) return;
-    setIsRefreshing(true);
-    try {
-      const res = await fetch('/api/xintel/scan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ handle: project.xHandle, force: true }),
-      });
-      if (res.ok) {
-        // Reload the page after a delay
-        setTimeout(() => window.location.reload(), 2000);
-      }
-    } catch (err) {
-      console.error('[EntityDetailPage] Rescan failed:', err);
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
 
   const handleShare = async () => {
     if (!project) return;
@@ -1523,14 +1499,6 @@ export default function EntityDetailPage({ project, isLoading, expectedEntityTyp
           >
             <Share2 size={12} />
             <span className="hidden sm:inline">Share</span>
-          </button>
-          <button
-            onClick={handleRescan}
-            disabled={isRefreshing || !project.xHandle}
-            className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 text-xs bg-danger-orange text-black font-mono font-medium disabled:opacity-50 hover:bg-danger-orange/90 transition-colors"
-          >
-            <RefreshCw size={12} className={isRefreshing ? 'animate-spin' : ''} />
-            <span className="hidden xs:inline">Rescan</span>
           </button>
         </div>
       </div>

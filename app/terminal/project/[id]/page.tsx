@@ -22,7 +22,11 @@ export default function ProjectPage() {
     const fetchProject = async () => {
       try {
         setIsLoading(true);
-        let res = await fetch(`/api/projects/${projectId}`);
+        const [res_raw] = await Promise.all([
+          fetch(`/api/projects/${projectId}`),
+          new Promise(r => setTimeout(r, 2000)), // min loader display
+        ]);
+        let res = res_raw;
 
         if (!res.ok && res.status === 404) {
           res = await fetch(`/api/projects?q=${encodeURIComponent(projectId)}`);

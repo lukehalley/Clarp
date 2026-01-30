@@ -13,6 +13,7 @@
 
 import { useEffect, useState } from 'react';
 import { PieChart, Flame, DollarSign, TrendingUp, ExternalLink, RefreshCw, Zap } from 'lucide-react';
+import ClarpLoader from '@/components/ClarpLoader';
 
 interface BurnTransaction {
   signature: string;
@@ -114,10 +115,7 @@ export default function TokenomicsDashboard() {
   if (loading) {
     return (
       <div className="bg-slate-dark border-2 border-danger-orange p-6">
-        <div className="flex items-center justify-center gap-3">
-          <div className="w-5 h-5 border-2 border-danger-orange border-t-transparent animate-spin" />
-          <span className="font-mono text-sm text-ivory-light/60">loading tokenomics...</span>
-        </div>
+        <ClarpLoader size={64} variant="light" label="loading tokenomics..." />
       </div>
     );
   }

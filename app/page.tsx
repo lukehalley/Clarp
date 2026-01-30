@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from 'react';
 import Terminal from '@/components/Terminal';
 import { usePageTransition } from '@/components/ClientLayout';
 import ProductCarousel from '@/components/ProductCarousel';
-import Mascot from '@/components/Mascot';
 import DocsSection from '@/components/DocsSection';
 import Footer from '@/components/Footer';
 import ActivityNotifications from '@/components/ActivityNotifications';
@@ -12,6 +11,7 @@ import HallOfShame from '@/components/HallOfShame';
 import WarningTicker from '@/components/WarningTicker';
 import Roadmap from '@/components/Roadmap';
 import ParallaxMascots from '@/components/ParallaxMascots';
+import ClarpLoader from '@/components/ClarpLoader';
 import TERMINAL_CONVERSATIONS from '@/data/terminal-conversations.json';
 import HERO_SENTENCES from '@/data/hero-sentences.json';
 import WARNING_TICKERS from '@/data/warning-tickers.json';
@@ -445,8 +445,8 @@ export default function Home() {
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <div className="text-center lg:text-left">
               <span className="badge badge-error mb-4 sm:mb-6">mascot</span>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6 font-display">
-                this is <span className="text-danger-orange">clarp</span>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6 font-display flex items-center gap-3 justify-center lg:justify-start flex-wrap">
+                this is clarp
               </h2>
               <p className="text-sm sm:text-base text-ivory-light/70 mb-4 sm:mb-6">
                 you're about to scroll past 100 fake products.
@@ -476,7 +476,7 @@ export default function Home() {
             </div>
             <div className="flex justify-center order-first lg:order-last">
               <div className="scale-75 sm:scale-100">
-                <Mascot />
+                <ClarpLoader size={200} variant="light" />
               </div>
             </div>
           </div>
@@ -706,7 +706,7 @@ export default function Home() {
                     ✗
                   </div>
                 ) : (
-                  <div className="inline-block w-10 h-10 sm:w-12 sm:h-12 border-4 border-danger-orange border-t-transparent rounded-full animate-spin" />
+                  <ClarpLoader size={64} variant="light" />
                 )}
               </div>
               <p className={`font-mono text-xs sm:text-sm mb-2 transition-colors ${loadingFailed ? 'text-larp-red' : 'text-danger-orange'}`}>

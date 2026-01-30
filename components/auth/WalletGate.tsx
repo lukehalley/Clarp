@@ -15,6 +15,7 @@ import { useTokenBalance } from '@/hooks/useTokenBalance';
 import { TIER_THRESHOLDS, BAGS_FM_URL } from '@/lib/config/tokenomics';
 import BagsSwap from '@/components/swap/BagsSwap';
 import WalletSelect from '@/components/WalletSelect';
+import ClarpLoader from '@/components/ClarpLoader';
 
 interface WalletGateProps {
   children: React.ReactNode;
@@ -63,6 +64,12 @@ export default function WalletGate({
 
   // If pending free scan, allow through
   if (isPendingFreeScan) {
+    return <>{children}</>;
+  }
+
+  // Connected but still checking balance — pass through to children
+  // so the page's own loader renders seamlessly
+  if (connected && balanceLoading) {
     return <>{children}</>;
   }
 
@@ -224,13 +231,7 @@ export default function WalletGate({
                 </>
               )}
 
-              {/* Balance loading */}
-              {connected && balanceLoading && (
-                <div className="text-center py-4">
-                  <div className="animate-spin w-8 h-8 border-2 border-danger-orange border-t-transparent mx-auto" />
-                  <p className="font-mono text-xs text-ivory-light/40 mt-2">Checking balance...</p>
-                </div>
-              )}
+              {/* Balance loading is handled by the early return above */}
             </div>
 
             {/* Footer - Tier Info */}

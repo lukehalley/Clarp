@@ -22,7 +22,11 @@ export default function PersonPage() {
     const fetchEntity = async () => {
       try {
         setIsLoading(true);
-        let res = await fetch(`/api/projects/${entityId}`);
+        const [res_raw] = await Promise.all([
+          fetch(`/api/projects/${entityId}`),
+          new Promise(r => setTimeout(r, 2000)),
+        ]);
+        let res = res_raw;
 
         if (!res.ok && res.status === 404) {
           res = await fetch(`/api/projects?q=${encodeURIComponent(entityId)}`);

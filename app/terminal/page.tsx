@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  Loader2,
   Filter,
   CheckCircle,
   AlertTriangle,
@@ -17,6 +16,7 @@ import {
 import IntelCard from '@/components/terminal/IntelCard';
 import WalletGate from '@/components/auth/WalletGate';
 import TokenomicsDashboard from '@/components/tokenomics/Dashboard';
+import ClarpLoader from '@/components/ClarpLoader';
 import type { Project } from '@/types/project';
 
 // ============================================================================
@@ -219,9 +219,8 @@ function FilterBar({
 
 function LoadingState() {
   return (
-    <div className="py-16 flex items-center justify-center gap-3">
-      <Loader2 size={18} className="animate-spin text-ivory-light/40" />
-      <span className="font-mono text-sm text-ivory-light/40">Loading projects...</span>
+    <div className="min-h-[60vh] flex items-center justify-center">
+      <ClarpLoader size={80} variant="light" label="loading projects..." />
     </div>
   );
 }
@@ -278,7 +277,10 @@ export default function TerminalPage() {
     try {
       setIsLoading(true);
       setError(null);
-      const res = await fetch('/api/projects?limit=50&orderBy=last_scan_at&order=desc');
+      const [res] = await Promise.all([
+        fetch('/api/projects?limit=50&orderBy=last_scan_at&order=desc'),
+        new Promise(r => setTimeout(r, 2000)), // min loader display
+      ]);
       if (!res.ok) throw new Error('Failed to fetch projects');
       const data = await res.json();
       setProjects(data.projects || []);
@@ -372,36 +374,37 @@ export default function TerminalPage() {
     <WalletGate showPreview={true}>
       <div className="px-4 sm:px-6 py-6">
         <div className="max-w-7xl mx-auto">
-          {/* Entity Type Tabs */}
-          <EntityTypeTabs
-          entityFilter={entityFilter}
-          setEntityFilter={setEntityFilter}
-          counts={entityCounts}
-        />
-
-        {/* Filter Bar */}
-        <FilterBar
-          category={category}
-          setCategory={setCategory}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
-          verifiedOnly={verifiedOnly}
-          setVerifiedOnly={setVerifiedOnly}
-          hasActiveFilters={hasActiveFilters}
-          onReset={resetFilters}
-        />
-
-        {/* Results count */}
-        <div className="flex items-center justify-between py-4">
-          <span className="font-mono text-xs text-ivory-light/40">
-            {filteredProjects.length} {getResultsLabel()}
-          </span>
-        </div>
-
-        {/* Project List */}
         {isLoading ? (
           <LoadingState />
-        ) : error ? (
+        ) : (
+          <>
+          {/* Entity Type Tabs */}
+          <EntityTypeTabs
+            entityFilter={entityFilter}
+            setEntityFilter={setEntityFilter}
+            counts={entityCounts}
+          />
+
+          {/* Filter Bar */}
+          <FilterBar
+            category={category}
+            setCategory={setCategory}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            verifiedOnly={verifiedOnly}
+            setVerifiedOnly={setVerifiedOnly}
+            hasActiveFilters={hasActiveFilters}
+            onReset={resetFilters}
+          />
+
+          {/* Results count */}
+          <div className="flex items-center justify-between py-4">
+            <span className="font-mono text-xs text-ivory-light/40">
+              {filteredProjects.length} {getResultsLabel()}
+            </span>
+          </div>
+
+          {error ? (
           <div className="py-16 text-center">
             <p className="font-mono text-sm text-larp-red/80">{error}</p>
             <button
@@ -476,6 +479,8 @@ export default function TerminalPage() {
               </button>
             </p>
           </div>
+        )}
+          </>
         )}
         </div>
       </div>
