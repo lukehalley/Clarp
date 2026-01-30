@@ -1779,7 +1779,7 @@ function NotFoundState() {
 export default function EntityDetailPage({ project, isLoading, expectedEntityType }: EntityDetailPageProps) {
   const router = useRouter();
   const { activeSectionGroup, setActiveSectionGroup, setIsDetailPage } = useTerminalNav();
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const fullHeaderRef = useRef<HTMLDivElement>(null);
   const [isHeaderCompact, setIsHeaderCompact] = useState(false);
 
   // Register as a detail page
@@ -1791,8 +1791,6 @@ export default function EntityDetailPage({ project, isLoading, expectedEntityTyp
   // Scroll spy: observe section group headings
   useEffect(() => {
     if (!project) return;
-    const container = scrollContainerRef.current;
-    if (!container) return;
 
     const groupIds = SECTION_GROUPS.map(g => `group-${g.id}`);
     const observer = new IntersectionObserver(
@@ -1808,7 +1806,6 @@ export default function EntityDetailPage({ project, isLoading, expectedEntityTyp
         }
       },
       {
-        root: container,
         rootMargin: '-120px 0px -70% 0px',
         threshold: 0,
       }
@@ -1822,17 +1819,24 @@ export default function EntityDetailPage({ project, isLoading, expectedEntityTyp
     return () => observer.disconnect();
   }, [project, setActiveSectionGroup]);
 
-  // Sticky header detection
+  // Sticky header detection: observe when full header leaves viewport
   useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
+    const header = fullHeaderRef.current;
+    if (!header) return;
 
-    const handleScroll = () => {
-      setIsHeaderCompact(container.scrollTop > 100);
-    };
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // When the full header is NOT intersecting (scrolled out), show compact
+        setIsHeaderCompact(!entry.isIntersecting);
+      },
+      {
+        threshold: 0,
+        rootMargin: '-10px 0px 0px 0px',
+      }
+    );
 
-    container.addEventListener('scroll', handleScroll, { passive: true });
-    return () => container.removeEventListener('scroll', handleScroll);
+    observer.observe(header);
+    return () => observer.disconnect();
   }, []);
 
   const handleGroupClick = useCallback((id: SectionGroupId) => {
@@ -1856,15 +1860,11 @@ export default function EntityDetailPage({ project, isLoading, expectedEntityTyp
   const entityStyle = getEntityTypeStyle(project.entityType);
 
   return (
-    <div className="h-full flex flex-col bg-slate-dark">
-      {/* ================================================================ */}
-      {/* SCROLLABLE CONTENT */}
-      {/* ================================================================ */}
-      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
+    <>
         {/* ============================================================ */}
         {/* FULL HEADER (scrolls away) */}
         {/* ============================================================ */}
-        <div className="px-4 sm:px-6 py-4 sm:py-6 border-b border-ivory-light/5">
+        <div ref={fullHeaderRef} className="px-4 sm:px-6 py-4 sm:py-6 border-b border-ivory-light/5">
           {/* Entity badge + share row */}
           <div className="flex items-center justify-between mb-4 gap-2">
             <div
@@ -1975,8 +1975,21 @@ export default function EntityDetailPage({ project, isLoading, expectedEntityTyp
         <div className="sticky top-0 z-10 bg-slate-dark/95 backdrop-blur-sm border-b border-ivory-light/10">
           {/* Compact header row — visible when scrolled */}
           {isHeaderCompact && (
-            <div className="flex items-center justify-between px-4 sm:px-6 py-2 gap-3 border-b border-ivory-light/5">
+            <div
+              className="flex items-center justify-between px-4 sm:px-6 py-2 gap-3 border-b border-ivory-light/5"
+            >
               <div className="flex items-center gap-3 min-w-0">
+                <div className={`shrink-0 w-6 h-6 overflow-hidden ${project.entityType === 'person' ? 'rounded-full' : 'rounded'} border border-ivory-light/10`}>
+                  {project.avatarUrl ? (
+                    <Image src={project.avatarUrl} alt={project.name} width={24} height={24} className="w-full h-full object-cover" />
+                  ) : project.tokenAddress ? (
+                    <ContractAvatar address={project.tokenAddress} size={24} bgColor="transparent" />
+                  ) : (
+                    <div className="w-full h-full bg-slate-medium flex items-center justify-center text-[10px] font-mono text-ivory-light/40">
+                      {project.name.charAt(0)}
+                    </div>
+                  )}
+                </div>
                 <span className="text-sm text-ivory-light font-bold truncate">{project.name}</span>
                 {project.ticker && (
                   <span className="font-mono text-xs text-danger-orange shrink-0">${project.ticker}</span>
@@ -2087,7 +2100,6 @@ export default function EntityDetailPage({ project, isLoading, expectedEntityTyp
             <span>Last scan {formatDate(project.lastScanAt)}</span>
           </div>
         </div>
-      </div>
-    </div>
+    </>
   );
 }

@@ -121,7 +121,7 @@ export default function IntelCard({ project }: IntelCardProps) {
       className="group block cursor-pointer"
     >
       <div className={`
-        flex items-center gap-3 sm:gap-4 px-3 sm:px-5 py-4 sm:py-5 border bg-ivory-light/[0.02] transition-all duration-200
+        flex items-stretch border bg-ivory-light/[0.02] transition-all duration-200 overflow-hidden
         ${isPerson
           ? 'border-larp-purple/15 hover:border-larp-purple/30'
           : isOrganization
@@ -129,95 +129,98 @@ export default function IntelCard({ project }: IntelCardProps) {
           : 'border-ivory-light/10 hover:border-danger-orange/25'
         }
       `}>
-        {/* Avatar / Entity icon fallback */}
+        {/* Avatar / Entity icon fallback — flush left, square */}
         <div className={`
-          shrink-0 w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center overflow-hidden
-          ${entityStyle.bgColor} ${entityStyle.borderColor} border ${entityStyle.color}
+          shrink-0 w-16 sm:w-[72px] relative overflow-hidden
+          ${entityStyle.color}
         `}>
           {project.avatarUrl ? (
             <Image
               src={project.avatarUrl}
               alt={project.name}
-              width={44}
-              height={44}
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
             />
           ) : (
-            entityStyle.iconLarge
+            <div className="absolute inset-0 flex items-center justify-center">
+              {entityStyle.iconLarge}
+            </div>
           )}
         </div>
 
         {/* Content — left side */}
-        <div className="flex-1 min-w-0">
-          {/* Row 1: Name */}
-          <h3 className="font-mono font-bold text-ivory-light text-sm truncate">
-            {project.name}
-          </h3>
+        <div className="flex-1 min-w-0 flex items-center gap-3 sm:gap-4 px-3 sm:px-5 py-3 sm:py-4">
+          <div className="flex-1 min-w-0">
+            {/* Row 1: Name */}
+            <h3 className="font-mono font-bold text-ivory-light text-sm truncate">
+              {project.name}
+            </h3>
 
-          {/* Row 2: Ticker (always rendered for uniform height) */}
-          <span className="font-mono text-[11px] mt-0.5 block h-[16px]">
-            {project.ticker ? (
-              <span className="text-danger-orange/70">${project.ticker}</span>
-            ) : (
-              <span className="text-ivory-light/15">&mdash;</span>
-            )}
-          </span>
-        </div>
-
-        {/* Right side — socials | score */}
-        <div className="shrink-0 hidden sm:flex items-center gap-4">
-          {/* Social presence icons */}
-          {socials.map((s, i) => (
-            <span
-              key={i}
-              className={s.active ? 'text-ivory-light/60' : 'text-ivory-light/15'}
-              title={s.label}
-            >
-              {s.icon}
+            {/* Row 2: Ticker (always rendered for uniform height) */}
+            <span className="font-mono text-[11px] mt-0.5 block h-[16px]">
+              {project.ticker ? (
+                <span className="text-danger-orange/70">${project.ticker}</span>
+              ) : (
+                <span className="text-ivory-light/15">&mdash;</span>
+              )}
             </span>
-          ))}
-
-          {/* Separator */}
-          <div className="w-px h-5 bg-ivory-light/15" />
-
-          {/* Trust score badge */}
-          <div
-            className="flex items-center gap-1 px-2 py-1 border font-mono text-sm font-bold"
-            style={{
-              color: isVerified ? '#22c55e' : scoreColor,
-              borderColor: (isVerified ? '#22c55e' : scoreColor) + '40',
-              backgroundColor: (isVerified ? '#22c55e' : scoreColor) + '10',
-            }}
-          >
-            {isVerified ? (
-              <CheckCircle size={12} />
-            ) : displayScore >= 70 ? (
-              <Shield size={12} />
-            ) : displayScore < 40 ? (
-              <AlertTriangle size={12} />
-            ) : null}
-            {displayScore}
           </div>
-        </div>
 
-        {/* Mobile-only score */}
-        <div className="shrink-0 sm:hidden">
-          <div
-            className="flex items-center gap-1 px-2 py-1 border font-mono text-sm font-bold"
-            style={{
-              color: isVerified ? '#22c55e' : scoreColor,
-              borderColor: (isVerified ? '#22c55e' : scoreColor) + '40',
-              backgroundColor: (isVerified ? '#22c55e' : scoreColor) + '10',
-            }}
-          >
-            {isVerified ? (
-              <CheckCircle size={12} />
-            ) : displayScore >= 70 ? (
-              <Shield size={12} />
-            ) : displayScore < 40 ? (
-              <AlertTriangle size={12} />
-            ) : null}
-            {displayScore}
+          {/* Right side — socials | score */}
+          <div className="shrink-0 hidden sm:flex items-center gap-4">
+            {/* Social presence icons */}
+            {socials.map((s, i) => (
+              <span
+                key={i}
+                className={s.active ? 'text-ivory-light/60' : 'text-ivory-light/15'}
+                title={s.label}
+              >
+                {s.icon}
+              </span>
+            ))}
+
+            {/* Separator */}
+            <div className="w-px h-5 bg-ivory-light/15" />
+
+            {/* Trust score badge */}
+            <div
+              className="flex items-center gap-1 px-2 py-1 border font-mono text-sm font-bold"
+              style={{
+                color: isVerified ? '#22c55e' : scoreColor,
+                borderColor: (isVerified ? '#22c55e' : scoreColor) + '40',
+                backgroundColor: (isVerified ? '#22c55e' : scoreColor) + '10',
+              }}
+            >
+              {isVerified ? (
+                <CheckCircle size={12} />
+              ) : displayScore >= 70 ? (
+                <Shield size={12} />
+              ) : displayScore < 40 ? (
+                <AlertTriangle size={12} />
+              ) : null}
+              {displayScore}
+            </div>
+          </div>
+
+          {/* Mobile-only score */}
+          <div className="shrink-0 sm:hidden">
+            <div
+              className="flex items-center gap-1 px-2 py-1 border font-mono text-sm font-bold"
+              style={{
+                color: isVerified ? '#22c55e' : scoreColor,
+                borderColor: (isVerified ? '#22c55e' : scoreColor) + '40',
+                backgroundColor: (isVerified ? '#22c55e' : scoreColor) + '10',
+              }}
+            >
+              {isVerified ? (
+                <CheckCircle size={12} />
+              ) : displayScore >= 70 ? (
+                <Shield size={12} />
+              ) : displayScore < 40 ? (
+                <AlertTriangle size={12} />
+              ) : null}
+              {displayScore}
+            </div>
           </div>
         </div>
       </div>
