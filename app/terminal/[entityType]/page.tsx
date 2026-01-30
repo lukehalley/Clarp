@@ -9,13 +9,10 @@ import {
   Shield,
   ArrowUpDown,
   RotateCcw,
-  Boxes,
-  User,
-  Building2,
 } from 'lucide-react';
 import IntelCard from '@/components/terminal/IntelCard';
+import SearchInput from '@/components/terminal/SearchInput';
 import WalletGate from '@/components/auth/WalletGate';
-import TokenomicsDashboard from '@/components/tokenomics/Dashboard';
 import ClarpLoader from '@/components/ClarpLoader';
 import type { Project } from '@/types/project';
 
@@ -48,12 +45,6 @@ const SORT_OPTIONS: { id: SortOption; label: string }[] = [
   { id: 'score-low', label: 'Trust: Low to High' },
   { id: 'recent', label: 'Recently Scanned' },
   { id: 'name-asc', label: 'Name: A to Z' },
-];
-
-const ENTITY_FILTERS: { id: EntityFilter; slug: string; label: string; shortLabel: string; icon: React.ReactNode; color: string }[] = [
-  { id: 'project', slug: 'projects', label: 'Projects', shortLabel: 'Projects', icon: <Boxes size={14} />, color: 'text-danger-orange' },
-  { id: 'person', slug: 'people', label: 'People', shortLabel: 'People', icon: <User size={14} />, color: 'text-larp-purple' },
-  { id: 'organization', slug: 'orgs', label: 'Orgs', shortLabel: 'Orgs', icon: <Building2 size={14} />, color: 'text-larp-yellow' },
 ];
 
 const CATEGORY_FILTERS: { id: CategoryFilter; label: string; icon: React.ReactNode }[] = [
@@ -94,80 +85,10 @@ function buildUrl(entitySlug: string, filters: {
 }
 
 // ============================================================================
-// ENTITY TYPE TABS
-// ============================================================================
-
-function EntityTypeTabs({
-  entityFilter,
-  onNavigate,
-  counts,
-}: {
-  entityFilter: EntityFilter;
-  onNavigate: (slug: string) => void;
-  counts: { project: number; person: number; organization: number };
-}) {
-  return (
-    <div className="border-b-2 border-ivory-light/10">
-      <div className="flex">
-        {ENTITY_FILTERS.map((filter, index) => {
-          const isActive = entityFilter === filter.id;
-          const count = counts[filter.id];
-
-          return (
-            <button
-              key={filter.id}
-              onClick={() => onNavigate(filter.slug)}
-              className={`
-                relative flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-3 sm:py-4
-                font-mono text-[11px] sm:text-xs transition-all duration-200
-                border-b-2 -mb-[2px]
-                ${isActive
-                  ? `${filter.color} border-current font-bold bg-current/5`
-                  : 'text-ivory-light/40 border-transparent hover:text-ivory-light/60 hover:bg-ivory-light/[0.02]'
-                }
-                ${index === 0 ? '' : 'border-l border-ivory-light/5'}
-              `}
-            >
-              <span className={`transition-transform duration-200 ${isActive ? 'scale-110' : ''}`}>
-                {filter.icon}
-              </span>
-              <span className="hidden xs:inline">{filter.label}</span>
-              <span className="xs:hidden">{filter.shortLabel}</span>
-              {count > 0 && (
-                <span className={`
-                  ml-1 px-1.5 py-0.5 text-[9px] sm:text-[10px] rounded-sm
-                  ${isActive
-                    ? 'bg-current/20 text-current'
-                    : 'bg-ivory-light/10 text-ivory-light/40'
-                  }
-                `}>
-                  {count}
-                </span>
-              )}
-              {/* Active indicator glow */}
-              {isActive && (
-                <div
-                  className="absolute bottom-0 left-0 right-0 h-[2px] blur-sm"
-                  style={{
-                    backgroundColor: filter.id === 'project' ? '#FF6B35'
-                      : filter.id === 'person' ? '#9B59B6'
-                      : '#FFD93D'
-                  }}
-                />
-              )}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-// ============================================================================
 // FILTER BAR
 // ============================================================================
 
-function FilterBar({
+function ToolBar({
   category,
   setCategory,
   sortBy,
@@ -187,73 +108,74 @@ function FilterBar({
   onReset: () => void;
 }) {
   return (
-    <div className="space-y-3 py-4 border-b border-ivory-light/10">
-      {/* Row 1: Category filters - scrollable on mobile */}
-      <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0 scrollbar-hide">
-        <div className="flex items-center gap-1 min-w-max sm:min-w-0">
-          {CATEGORY_FILTERS.map((filter) => (
-            <button
-              key={filter.id}
-              onClick={() => setCategory(filter.id)}
-              className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 font-mono text-[11px] sm:text-xs transition-colors border whitespace-nowrap ${
-                category === filter.id
-                  ? 'bg-danger-orange text-black font-bold border-danger-orange'
-                  : 'bg-transparent border-ivory-light/20 text-ivory-light/60 hover:text-ivory-light hover:border-ivory-light/40'
-              }`}
-            >
-              {filter.icon}
-              {filter.label}
-            </button>
-          ))}
-        </div>
+    <div className="flex items-center gap-2 py-3 border-b border-ivory-light/10 overflow-x-auto scrollbar-hide">
+      {/* Search */}
+      <div className="flex-1 min-w-[180px]">
+        <SearchInput compact />
       </div>
 
-      {/* Row 2: Sort + Verified + Reset */}
-      <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-        {/* Sort */}
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          <ArrowUpDown size={12} className="text-ivory-light/40 sm:w-3.5 sm:h-3.5" />
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as SortOption)}
-            className="px-1.5 sm:px-2 py-1.5 bg-transparent border border-ivory-light/20 text-ivory-light/60 font-mono text-[11px] sm:text-xs focus:border-danger-orange/50 focus:outline-none cursor-pointer max-w-[140px] sm:max-w-none"
-          >
-            {SORT_OPTIONS.map((option) => (
-              <option key={option.id} value={option.id} className="bg-slate-dark">
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
+      {/* Divider */}
+      <div className="w-px h-6 bg-ivory-light/10 shrink-0 hidden sm:block" />
 
-        {/* Verified toggle */}
-        <button
-          onClick={() => setVerifiedOnly(!verifiedOnly)}
-          className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 font-mono text-[11px] sm:text-xs transition-colors border ${
-            verifiedOnly
-              ? 'bg-larp-green/20 border-larp-green/50 text-larp-green'
-              : 'bg-transparent border-ivory-light/20 text-ivory-light/40 hover:text-ivory-light/60'
-          }`}
-        >
-          <CheckCircle size={11} className="sm:w-3 sm:h-3" />
-          <span className="hidden xs:inline">Verified</span>
-          <span className="xs:hidden">✓</span>
-        </button>
-
-        {/* Spacer */}
-        <div className="flex-1" />
-
-        {/* Reset */}
-        {hasActiveFilters && (
+      {/* Category filters */}
+      <div className="flex items-center gap-1 shrink-0">
+        {CATEGORY_FILTERS.map((filter) => (
           <button
-            onClick={onReset}
-            className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 font-mono text-[11px] sm:text-xs text-ivory-light/40 hover:text-ivory-light/60 transition-colors"
+            key={filter.id}
+            onClick={() => setCategory(filter.id)}
+            className={`flex items-center gap-1 px-2 py-1.5 font-mono text-[11px] transition-colors border whitespace-nowrap ${
+              category === filter.id
+                ? 'bg-danger-orange text-black font-bold border-danger-orange'
+                : 'bg-transparent border-ivory-light/20 text-ivory-light/60 hover:text-ivory-light hover:border-ivory-light/40'
+            }`}
           >
-            <RotateCcw size={11} className="sm:w-3 sm:h-3" />
-            <span className="hidden xs:inline">Reset</span>
+            {filter.icon}
+            <span className="hidden sm:inline">{filter.label}</span>
           </button>
-        )}
+        ))}
       </div>
+
+      {/* Divider */}
+      <div className="w-px h-6 bg-ivory-light/10 shrink-0 hidden sm:block" />
+
+      {/* Sort */}
+      <div className="flex items-center gap-1.5 shrink-0">
+        <ArrowUpDown size={12} className="text-ivory-light/40" />
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as SortOption)}
+          className="px-1.5 py-1.5 bg-transparent border border-ivory-light/20 text-ivory-light/60 font-mono text-[11px] focus:border-danger-orange/50 focus:outline-none cursor-pointer"
+        >
+          {SORT_OPTIONS.map((option) => (
+            <option key={option.id} value={option.id} className="bg-slate-dark">
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Verified toggle */}
+      <button
+        onClick={() => setVerifiedOnly(!verifiedOnly)}
+        className={`flex items-center gap-1 px-2 py-1.5 font-mono text-[11px] transition-colors border shrink-0 ${
+          verifiedOnly
+            ? 'bg-larp-green/20 border-larp-green/50 text-larp-green'
+            : 'bg-transparent border-ivory-light/20 text-ivory-light/40 hover:text-ivory-light/60'
+        }`}
+      >
+        <CheckCircle size={11} />
+        <span className="hidden sm:inline">Verified</span>
+      </button>
+
+      {/* Reset */}
+      {hasActiveFilters && (
+        <button
+          onClick={onReset}
+          className="flex items-center gap-1 px-2 py-1.5 font-mono text-[11px] text-ivory-light/40 hover:text-ivory-light/60 transition-colors shrink-0"
+        >
+          <RotateCcw size={11} />
+        </button>
+      )}
     </div>
   );
 }
@@ -393,10 +315,6 @@ export default function TerminalEntityPage() {
   }, [router]);
 
   // Filter change handlers — update URL (state is derived from URL)
-  const handleEntityFilter = (slug: string) => {
-    updateUrl(slug, { category, sort: sortBy, verified: verifiedOnly });
-  };
-
   const handleCategory = (c: CategoryFilter) => {
     updateUrl(ENTITY_TO_SLUG[entityFilter], { category: c, sort: sortBy, verified: verifiedOnly });
   };
@@ -435,21 +353,13 @@ export default function TerminalEntityPage() {
 
   return (
     <WalletGate showPreview={true}>
-      <div className="px-4 sm:px-6 py-6">
-        <div className="max-w-7xl mx-auto">
+      <div className="px-4 sm:px-6 py-4">
         {isInitialLoad ? (
           <LoadingState />
         ) : (
           <>
-          {/* Entity Type Tabs */}
-          <EntityTypeTabs
-            entityFilter={entityFilter}
-            onNavigate={handleEntityFilter}
-            counts={entityCounts}
-          />
-
-          {/* Filter Bar */}
-          <FilterBar
+          {/* Search + Filters + Sort — single horizontal bar */}
+          <ToolBar
             category={category}
             setCategory={handleCategory}
             sortBy={sortBy}
@@ -524,11 +434,6 @@ export default function TerminalEntityPage() {
           </div>
         )}
 
-        {/* Tokenomics Dashboard */}
-        <div className="mt-8 pt-6 border-t-2 border-ivory-light/10">
-          <TokenomicsDashboard />
-        </div>
-
         {/* Bottom hint */}
         {totalCount > 0 && (
           <div className="mt-8 pt-6 border-t border-ivory-light/5 text-center">
@@ -545,7 +450,6 @@ export default function TerminalEntityPage() {
         )}
           </>
         )}
-        </div>
       </div>
     </WalletGate>
   );

@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTerminalNav } from '@/contexts/TerminalNavContext';
 import Image from 'next/image';
 import {
   ArrowLeft,
@@ -1454,17 +1455,19 @@ function NotFoundState() {
 
 export default function EntityDetailPage({ project, isLoading, expectedEntityType }: EntityDetailPageProps) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<TabId>('overview');
+  const { activeDetailTab: activeTab, setActiveDetailTab: setActiveTab, setIsDetailPage } = useTerminalNav();
+
+  // Register as a detail page so sidebar/bottom nav show detail tabs
+  useEffect(() => {
+    setIsDetailPage(true);
+    return () => setIsDetailPage(false);
+  }, [setIsDetailPage]);
 
   const handleShare = async () => {
     if (!project) return;
     const url = window.location.href;
     if (navigator.share) navigator.share({ title: project.name, url });
     else navigator.clipboard.writeText(url);
-  };
-
-  const handleBack = () => {
-    router.push('/terminal/projects');
   };
 
   if (isLoading) return <LoadingState />;
@@ -1474,38 +1477,28 @@ export default function EntityDetailPage({ project, isLoading, expectedEntityTyp
   const entityStyle = getEntityTypeStyle(project.entityType);
 
   return (
-    <div className="h-full flex flex-col overflow-hidden bg-slate-dark">
-      {/* Header */}
-      <div className="shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-ivory-light/5 gap-2">
-        <button
-          onClick={handleBack}
-          className="flex items-center gap-1.5 sm:gap-2 text-sm text-ivory-light/50 hover:text-ivory-light transition-colors shrink-0"
+    <div className="h-full flex flex-col bg-slate-dark">
+      {/* Compact sub-header: entity badge + share */}
+      <div className="shrink-0 flex items-center justify-between px-4 sm:px-6 py-2 border-b border-ivory-light/5 gap-2">
+        <div
+          className={`flex items-center gap-1.5 px-2 py-1 border text-xs font-mono ${entityStyle.bgColor} ${entityStyle.borderColor}`}
+          style={{ color: entityStyle.color }}
         >
-          <ArrowLeft size={16} />
-          <span className="font-mono text-xs hidden sm:inline">Back</span>
-        </button>
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* Entity type badge */}
-          <div
-            className={`flex items-center gap-1.5 px-2 py-1 border text-xs font-mono ${entityStyle.bgColor} ${entityStyle.borderColor}`}
-            style={{ color: entityStyle.color }}
-          >
-            {entityStyle.icon}
-            <span className="hidden sm:inline">{entityStyle.label}</span>
-          </div>
-          <button
-            onClick={handleShare}
-            className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-xs text-ivory-light/50 border border-ivory-light/10 hover:border-ivory-light/20 hover:text-ivory-light transition-colors"
-          >
-            <Share2 size={12} />
-            <span className="hidden sm:inline">Share</span>
-          </button>
+          {entityStyle.icon}
+          <span className="hidden sm:inline">{entityStyle.label}</span>
         </div>
+        <button
+          onClick={handleShare}
+          className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-xs text-ivory-light/50 border border-ivory-light/10 hover:border-ivory-light/20 hover:text-ivory-light transition-colors cursor-pointer"
+        >
+          <Share2 size={12} />
+          <span className="hidden sm:inline">Share</span>
+        </button>
       </div>
 
-      {/* Main content */}
+      {/* Main content — full width */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+        <div className="px-4 sm:px-6 py-4 sm:py-6">
           {/* Entity Header - Always visible */}
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-6">
             {/* Avatar + Trust Score Row on Mobile */}
@@ -1649,11 +1642,6 @@ export default function EntityDetailPage({ project, isLoading, expectedEntityTyp
                 </span>
               </div>
             </div>
-          </div>
-
-          {/* Tab Navigation */}
-          <div className="mb-6">
-            <TabNav activeTab={activeTab} onTabChange={setActiveTab} />
           </div>
 
           {/* Tab Content */}
