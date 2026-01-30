@@ -11,6 +11,7 @@ import {
 } from './types';
 import {
   ANALYSIS_PROMPT,
+  BEHAVIORAL_ANALYSIS_PROMPT,
   CLASSIFICATION_PROMPT,
   DEEP_ANALYSIS_PROMPT,
   X_COMMUNITY_ANALYSIS_PROMPT,
@@ -191,19 +192,34 @@ IMPORTANT:
     console.log(`[Grok] Classifying @${normalizedHandle}...`);
 
     try {
-      const response = await fetch(`${XAI_BASE_URL}/responses`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${XAI_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: this.model,
-          input: [{ role: 'user', content: prompt }],
-          tools: [{ type: 'x_search' }],
-          temperature: 0.1, // Low temperature for consistent classification
-        }),
-      });
+      // 30-second timeout for classification (lightweight call)
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 30_000);
+
+      let response: Response;
+      try {
+        response = await fetch(`${XAI_BASE_URL}/responses`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${XAI_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: this.model,
+            input: [{ role: 'user', content: prompt }],
+            tools: [{ type: 'x_search' }],
+            temperature: 0.1, // Low temperature for consistent classification
+          }),
+          signal: controller.signal,
+        });
+      } catch (err) {
+        clearTimeout(timeout);
+        if (err instanceof Error && err.name === 'AbortError') {
+          throw new GrokApiError(`Grok classification timed out after 30s for @${normalizedHandle}`, 408);
+        }
+        throw err;
+      }
+      clearTimeout(timeout);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -288,31 +304,46 @@ IMPORTANT:
    */
   async analyzeProfile(
     handle: string,
-    options: { isProject?: boolean; useSearchTools?: boolean; osintGaps?: OsintGaps } = {}
+    options: {
+      isProject?: boolean;
+      useSearchTools?: boolean;
+      osintGaps?: OsintGaps;
+      /** Override the default prompt (e.g., behavioral-only when Perplexity handles web research) */
+      promptOverride?: string;
+      /** Override the default tools (e.g., x_search only when Perplexity handles web search) */
+      toolsOverride?: Array<{ type: string }>;
+    } = {}
   ): Promise<GrokAnalysisResult> {
     if (!XAI_API_KEY) {
       throw new GrokApiError('Grok API client not configured. Set XAI_API_KEY environment variable.');
     }
 
-    const { isProject = false, useSearchTools = true, osintGaps } = options;
+    const { isProject = false, useSearchTools = true, osintGaps, promptOverride, toolsOverride } = options;
     const normalizedHandle = handle.toLowerCase().replace('@', '');
 
-    // Choose base prompt based on whether we're using search tools
-    let prompt = useSearchTools
-      ? ANALYSIS_PROMPT.replace(/{handle}/g, normalizedHandle)
-      : DEEP_ANALYSIS_PROMPT.replace(/{handle}/g, normalizedHandle);
+    // Choose prompt: override > search-based > deep analysis
+    let prompt: string;
+    if (promptOverride) {
+      prompt = promptOverride.replace(/{handle}/g, normalizedHandle);
+    } else {
+      prompt = useSearchTools
+        ? ANALYSIS_PROMPT.replace(/{handle}/g, normalizedHandle)
+        : DEEP_ANALYSIS_PROMPT.replace(/{handle}/g, normalizedHandle);
+    }
 
     // Append OSINT gap-filler instructions if there are gaps to fill
-    if (osintGaps && Object.values(osintGaps).some(v => v)) {
+    // (skip when using behavioral-only prompt — gaps are handled by Perplexity)
+    if (!promptOverride && osintGaps && Object.values(osintGaps).some(v => v)) {
       const gapPrompt = buildOsintGapFinderPrompt(osintGaps);
       prompt = prompt + '\n\n' + gapPrompt;
       console.log(`[Grok] Adding OSINT gap-filler for: ${Object.entries(osintGaps).filter(([, v]) => v).map(([k]) => k).join(', ')}`);
     }
 
-    // Configure tools based on options
-    // When useSearchTools is false, we don't provide any tools and rely on training data
+    // Configure tools: override > computed
     let tools: Array<{ type: string }> | undefined;
-    if (useSearchTools) {
+    if (toolsOverride) {
+      tools = toolsOverride;
+    } else if (useSearchTools) {
       // For user scans, only use x_search (cheaper)
       // For project scans, also include web_search for deeper research
       tools = isProject
@@ -321,7 +352,8 @@ IMPORTANT:
     }
 
     const toolsDesc = tools ? tools.map(t => t.type).join(', ') : 'none (training data only)';
-    console.log(`[Grok] Analyzing @${normalizedHandle} with tools: ${toolsDesc}`);
+    const mode = promptOverride ? 'behavioral-only' : (useSearchTools ? 'search' : 'training-data');
+    console.log(`[Grok] Analyzing @${normalizedHandle} [${mode}] with tools: ${toolsDesc}`);
 
     try {
       // Build request body - only include tools if we're using them
@@ -346,14 +378,29 @@ IMPORTANT:
         requestBody.tools = tools;
       }
 
-      const response = await fetch(`${XAI_BASE_URL}/responses`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${XAI_API_KEY}`,
-        },
-        body: JSON.stringify(requestBody),
-      });
+      // 90-second timeout — Grok with agent tools can take 30-60s, but never more than 90
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 90_000);
+
+      let response: Response;
+      try {
+        response = await fetch(`${XAI_BASE_URL}/responses`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${XAI_API_KEY}`,
+          },
+          body: JSON.stringify(requestBody),
+          signal: controller.signal,
+        });
+      } catch (err) {
+        clearTimeout(timeout);
+        if (err instanceof Error && err.name === 'AbortError') {
+          throw new GrokApiError(`Grok API timed out after 90s for @${normalizedHandle}`, 408);
+        }
+        throw err;
+      }
+      clearTimeout(timeout);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));

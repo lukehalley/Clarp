@@ -161,6 +161,96 @@ SCORING MATRIX:
 Return ONLY valid JSON.`;
 
 // ============================================================================
+// BEHAVIORAL-ONLY ANALYSIS PROMPT (when Perplexity handles web research)
+// ============================================================================
+
+/**
+ * Focused X/Twitter behavioral analysis prompt.
+ * Used when Perplexity Sonar handles factual web research.
+ * Grok focuses ONLY on what it's best at: live X behavioral analysis.
+ *
+ * This separation reduces hallucinations — Grok no longer needs to
+ * guess at project details, team info, or factual claims.
+ */
+export const BEHAVIORAL_ANALYSIS_PROMPT = `Analyze @{handle}'s X/Twitter BEHAVIOR for crypto trust assessment.
+
+IMPORTANT: You are ONLY analyzing X/Twitter behavior. Do NOT research project background, team, funding, or technology — that data comes from another source. Focus exclusively on what you can observe from X posts.
+
+SEARCH: "@{handle}" (recent posts) and "@{handle} scam OR rug" (allegations on X)
+
+Return JSON:
+{
+  "handle": "{handle}",
+  "profile": {
+    "displayName": "",
+    "bio": "",
+    "avatarUrl": null,
+    "verified": false,
+    "followers": 0,
+    "following": 0,
+    "createdAt": "YYYY-MM-DD"
+  },
+  "positiveIndicators": {
+    "isDoxxed": false,
+    "doxxedDetails": null,
+    "hasActiveGithub": false,
+    "githubUrl": null,
+    "hasRealProduct": false,
+    "productDetails": null,
+    "accountAgeDays": 0,
+    "hasConsistentHistory": false,
+    "hasOrganicEngagement": false,
+    "hasCredibleBackers": false,
+    "backersDetails": null,
+    "teamMembers": []
+  },
+  "negativeIndicators": {
+    "hasScamAllegations": false,
+    "scamDetails": null,
+    "hasRugHistory": false,
+    "rugDetails": null,
+    "isAnonymousTeam": true,
+    "hasHypeLanguage": false,
+    "hypeExamples": [],
+    "hasSuspiciousFollowers": false,
+    "hasAggressivePromotion": false
+  },
+  "promotionHistory": [{"project":"","ticker":"","firstMention":"","lastMention":"","mentionCount":0,"outcome":"active|rugged|unknown"}],
+  "topInteractions": [{"handle":"","relationship":"team|collaborator|investor|promoter|critic","interactionCount":1,"context":""}],
+  "theStory": "2-3 sentence summary of their X presence and behavior",
+  "keyFindings": ["finding1","finding2"],
+  "controversies": [],
+  "evidence": [{"date":"","tweetExcerpt":"","tweetUrl":"","label":"shill|backlash|toxic|hype|positive|neutral","relevance":""}],
+  "verdict": {"trustLevel":5,"riskLevel":"medium","confidence":"medium","summary":""},
+  "github": null,
+  "website": null,
+  "contract": null,
+  "legalEntity": {"companyName":null,"jurisdiction":null,"isRegistered":false,"registrationDetails":null},
+  "affiliations": [{"name":"","type":"legal|council|partnership|exchange","details":""}],
+  "shippingHistory": [{"milestone":"","date":"YYYY-MM-DD","details":""}],
+  "techStack": {"blockchain":null,"zkTech":null,"offlineCapability":false,"hardwareProducts":[]}
+}
+
+BEHAVIORAL ANALYSIS FOCUS:
+1. Shilling: What tokens/projects do they promote? How aggressively? Paid promotions?
+2. Backlash: Are people calling them out? Scam allegations on X? Community warnings?
+3. Toxicity/Aggression: Hostile responses, attacks on critics, defensive behavior
+4. Hype language: "100x", "guaranteed", "moon", "ape now", "generational wealth"
+5. Engagement patterns: Bot-like activity, spam bursts, suspicious reply ratios
+6. Network: Who do they interact with most? Promoters, critics, collaborators?
+7. Consistency: Topic drift, contradictions, narrative shifts
+
+CRITICAL RULES:
+- ONLY report what you can verify from X posts and profiles
+- If you cannot find information, use null or empty arrays
+- You MAY report team members, collaborators, legal counsel, and affiliations that are visible in X posts or bio (e.g. "Lead dev @dev_skill_issue" or "Legal: @PorzioLaw")
+- Do NOT do deep web research for project fundamentals — another source handles that
+- Evidence must include actual tweet excerpts where possible
+- Focus on BEHAVIOR patterns, but also capture identity signals visible in posts
+
+Return ONLY valid JSON.`;
+
+// ============================================================================
 // SYSTEM PROMPT
 // ============================================================================
 

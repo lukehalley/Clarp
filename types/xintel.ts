@@ -11,6 +11,7 @@ export type ScanStatus =
   | 'queued'
   | 'fetching'
   | 'extracting'
+  | 'researching'   // Perplexity web research (grounded facts)
   | 'analyzing'
   | 'scoring'
   | 'enriching'
@@ -34,6 +35,7 @@ export const SCAN_STATUS_LABELS: Record<ScanStatus, string> = {
   queued: 'Queued',
   fetching: 'Fetching Posts',
   extracting: 'Extracting Entities',
+  researching: 'Researching Project',
   analyzing: 'Analyzing Behavior',
   scoring: 'Building Report',
   enriching: 'Enriching Token Data',
@@ -46,6 +48,7 @@ export const SCAN_STATUS_PROGRESS: Record<ScanStatus, number> = {
   queued: 0,
   fetching: 15,
   extracting: 30,
+  researching: 42,
   analyzing: 55,
   scoring: 75,
   enriching: 90,

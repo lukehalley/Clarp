@@ -23,6 +23,10 @@ import {
 } from '@/lib/supabase/client';
 import { upsertProjectByHandle, upsertProjectByTokenAddress } from '@/lib/terminal/project-service';
 import type { GrokAnalysisResult, GrokCommunityAnalysisResult } from '@/lib/grok/types';
+import { BEHAVIORAL_ANALYSIS_PROMPT } from '@/lib/grok/prompts';
+import { getPerplexityClient, isPerplexityAvailable } from '@/lib/perplexity/client';
+import type { PerplexityResearchResult } from '@/lib/perplexity/types';
+import { crossReference } from '@/lib/terminal/xintel/cross-reference';
 import { fetchGitHubRepoIntel, checkWebsiteLive, type GitHubRepoIntel } from '@/lib/terminal/osint';
 import {
   resolveEntity,
@@ -43,6 +47,11 @@ const USE_REAL_API = process.env.ENABLE_REAL_X_API === 'true'
 // Check if search tools should be disabled for deeper training-data analysis
 // Set DISABLE_SEARCH_TOOLS=true to use Grok's knowledge instead of live search
 const DISABLE_SEARCH_TOOLS = process.env.DISABLE_SEARCH_TOOLS === 'true';
+
+// Perplexity Sonar integration for grounded web research with citations
+// When enabled: Perplexity handles factual web research, Grok focuses on X behavioral analysis
+// When disabled: Grok does everything (current behavior, more hallucination-prone)
+const USE_PERPLEXITY = process.env.ENABLE_PERPLEXITY !== 'false' && isPerplexityAvailable();
 
 // In-memory job storage (would be Redis/DB in production)
 const scanJobs: Map<string, ScanJob> = new Map();
@@ -807,27 +816,35 @@ export async function submitScan(options: SubmitScanOptions): Promise<SubmitScan
   if (isSupabaseAvailable()) {
     const activeJob = await getActiveScanJobByHandle(normalizedHandle);
     if (activeJob) {
-      console.log(`[XIntel] Found active scan job ${activeJob.id} for @${normalizedHandle}, resuming`);
-      // Restore to in-memory cache for polling
-      const restoredJob: ScanJob = {
-        id: activeJob.id,
-        handle: activeJob.handle,
-        depth: activeJob.depth,
-        status: activeJob.status as ScanStatus,
-        progress: activeJob.progress,
-        statusMessage: activeJob.status_message || undefined,
-        startedAt: new Date(activeJob.started_at),
-        completedAt: activeJob.completed_at ? new Date(activeJob.completed_at) : undefined,
-        error: activeJob.error || undefined,
-      };
-      scanJobs.set(activeJob.id, restoredJob);
-      return {
-        jobId: activeJob.id,
-        handle: normalizedHandle,
-        status: activeJob.status as ScanStatus,
-        cached: false,
-        useRealApi: USE_REAL_API,
-      };
+      // Auto-expire stale jobs instead of resuming them
+      if (isJobStale(activeJob)) {
+        console.warn(`[XIntel] Expiring stale scan job ${activeJob.id} for @${normalizedHandle}, starting fresh`);
+        updateScanJob(activeJob.id, { status: 'failed', error: 'Scan timed out', completedAt: new Date() })
+          .catch(err => console.error('[XIntel] Failed to expire stale job:', err));
+        // Fall through to create a new job
+      } else {
+        console.log(`[XIntel] Found active scan job ${activeJob.id} for @${normalizedHandle}, resuming`);
+        // Restore to in-memory cache for polling
+        const restoredJob: ScanJob = {
+          id: activeJob.id,
+          handle: activeJob.handle,
+          depth: activeJob.depth,
+          status: activeJob.status as ScanStatus,
+          progress: activeJob.progress,
+          statusMessage: activeJob.status_message || undefined,
+          startedAt: new Date(activeJob.started_at),
+          completedAt: activeJob.completed_at ? new Date(activeJob.completed_at) : undefined,
+          error: activeJob.error || undefined,
+        };
+        scanJobs.set(activeJob.id, restoredJob);
+        return {
+          jobId: activeJob.id,
+          handle: normalizedHandle,
+          status: activeJob.status as ScanStatus,
+          cached: false,
+          useRealApi: USE_REAL_API,
+        };
+      }
     }
   }
 
@@ -906,6 +923,17 @@ export async function getScanJob(jobId: string): Promise<ScanJob | null> {
 /**
  * Get active scan job by handle (for resuming scans after page refresh)
  */
+// Max age for an active scan job before it's considered stale/stuck (3 minutes)
+const SCAN_JOB_TIMEOUT_MS = 3 * 60 * 1000;
+
+/**
+ * Check if a scan job is stale (stuck for too long)
+ */
+function isJobStale(job: ScanJob | { started_at: string }): boolean {
+  const startedAt = 'startedAt' in job ? (job as ScanJob).startedAt : new Date((job as { started_at: string }).started_at);
+  return Date.now() - startedAt.getTime() > SCAN_JOB_TIMEOUT_MS;
+}
+
 export async function getActiveScanByHandle(handle: string): Promise<ScanJob | null> {
   const normalizedHandle = handle.toLowerCase().replace('@', '');
 
@@ -915,6 +943,20 @@ export async function getActiveScanByHandle(handle: string): Promise<ScanJob | n
         job.status !== 'complete' &&
         job.status !== 'failed' &&
         job.status !== 'cached') {
+      // Auto-expire stale jobs so they don't block new scans
+      if (isJobStale(job)) {
+        console.warn(`[XIntel] Auto-expiring stale scan job ${job.id} for @${normalizedHandle} (stuck for >${SCAN_JOB_TIMEOUT_MS / 1000}s)`);
+        job.status = 'failed';
+        job.error = 'Scan timed out — please try again';
+        job.completedAt = new Date();
+        scanJobs.set(job.id, job);
+        // Also update DB
+        if (isSupabaseAvailable()) {
+          updateScanJob(job.id, { status: 'failed', error: job.error, completedAt: job.completedAt })
+            .catch(err => console.error('[XIntel] Failed to persist stale job expiry:', err));
+        }
+        continue; // Skip this stale job, check for others
+      }
       return job;
     }
   }
@@ -923,6 +965,13 @@ export async function getActiveScanByHandle(handle: string): Promise<ScanJob | n
   if (isSupabaseAvailable()) {
     const dbJob = await getActiveScanJobByHandle(normalizedHandle);
     if (dbJob) {
+      // Auto-expire stale DB jobs
+      if (isJobStale(dbJob)) {
+        console.warn(`[XIntel] Auto-expiring stale DB scan job ${dbJob.id} for @${normalizedHandle}`);
+        updateScanJob(dbJob.id, { status: 'failed', error: 'Scan timed out — please try again', completedAt: new Date() })
+          .catch(err => console.error('[XIntel] Failed to expire stale DB job:', err));
+        return null; // Job is stale, allow new scan
+      }
       const job: ScanJob = {
         id: dbJob.id,
         handle: dbJob.handle,
@@ -1150,24 +1199,89 @@ async function processRealScan(job: ScanJob): Promise<void> {
   await sleep(200);
 
   // Stage 5: AI Analysis (this is the long-running part)
+  // When Perplexity is available: run both in parallel (Perplexity for web facts, Grok for X behavior)
+  // When Perplexity is unavailable: Grok does everything (legacy behavior)
   const useSearchTools = !DISABLE_SEARCH_TOOLS;
-  const analysisMode = DISABLE_SEARCH_TOOLS
-    ? 'Deep analysis (training data)'
-    : (isProject ? 'Search analysis with web search' : 'Search analysis (X only)');
+  const usePerplexityForThisScan = USE_PERPLEXITY && isProject && useSearchTools;
+  const analysisMode = usePerplexityForThisScan
+    ? 'Perplexity (web research) + Grok (X behavioral)'
+    : DISABLE_SEARCH_TOOLS
+      ? 'Deep analysis (training data)'
+      : (isProject ? 'Search analysis with web search' : 'Search analysis (X only)');
   console.log(`[XIntel] Stage 5: Analyzing @${job.handle} - ${analysisMode}`);
-  updateJobStatus(job, 'analyzing', 45, DISABLE_SEARCH_TOOLS ? 'Deep knowledge analysis...' : (isProject ? 'Deep analysis with web search...' : 'Analyzing X activity...'));
 
-  // Start a progress simulation while waiting for Grok
+  // Show Perplexity research status if active
+  if (usePerplexityForThisScan) {
+    updateJobStatus(job, 'researching', 42, 'Researching project background...');
+  }
+  updateJobStatus(job, 'analyzing', 45, usePerplexityForThisScan
+    ? 'Analyzing X behavior + web research (parallel)...'
+    : DISABLE_SEARCH_TOOLS ? 'Deep knowledge analysis...' : (isProject ? 'Deep analysis with web search...' : 'Analyzing X activity...'));
+
+  // Start a progress simulation while waiting for AI
   const progressInterval = startAnalysisProgress(job);
+
+  // Variable to hold Perplexity result for later use in upsert
+  let perplexityResult: PerplexityResearchResult | null = null;
 
   try {
     // Extract OSINT gaps to pass to Grok for targeted discovery
     const osintEntity = osintEntityCache.get(job.handle.toLowerCase());
     const osintGaps = osintEntity ? extractOsintGaps(osintEntity) : undefined;
 
-    const analysis = await grokClient.analyzeProfile(job.handle, { isProject, useSearchTools, osintGaps });
+    // Build Grok options — when Perplexity is active, use behavioral-only prompt with x_search only
+    const grokOptions: Parameters<typeof grokClient.analyzeProfile>[1] = {
+      isProject,
+      useSearchTools,
+      osintGaps,
+      ...(usePerplexityForThisScan && {
+        promptOverride: BEHAVIORAL_ANALYSIS_PROMPT,
+        toolsOverride: [{ type: 'x_search' }], // No web_search — Perplexity handles that
+      }),
+    };
+
+    // Build Perplexity query from OSINT context
+    // For X handle inputs, OSINT entity is sparse — build a search-friendly query
+    const queryParts = [
+      osintEntity?.name,
+      osintEntity?.symbol,
+    ].filter(Boolean);
+
+    let perplexityQuery: string;
+    if (queryParts.length >= 2) {
+      // We have name + symbol from OSINT (e.g., token address input)
+      perplexityQuery = [...queryParts, job.handle].join(' ');
+    } else {
+      // X handle input — use "@handle" and expand to a natural search query
+      // Also try humanizing the handle (zeralabs -> "Zera Labs")
+      const handleHumanized = job.handle
+        .replace(/([a-z])([A-Z])/g, '$1 $2')   // camelCase -> "camel Case"
+        .replace(/[_-]/g, ' ')                   // snake_case -> "snake case"
+        .replace(/labs$/i, ' Labs')              // "zeralabs" -> "zera Labs"
+        .trim();
+      perplexityQuery = `"${handleHumanized}" OR "@${job.handle}" cryptocurrency blockchain project`;
+    }
+
+    // Run Perplexity and Grok in PARALLEL (zero added latency)
+    const [analysis, pplxResult] = await Promise.all([
+      grokClient.analyzeProfile(job.handle, grokOptions),
+      usePerplexityForThisScan
+        ? getPerplexityClient().researchProject(perplexityQuery, osintGaps).catch(err => {
+            console.error(`[Perplexity] Research failed for @${job.handle}, falling back to Grok-only:`, err);
+            return null; // Graceful fallback — Grok still works
+          })
+        : Promise.resolve(null),
+    ]);
+
+    perplexityResult = pplxResult;
     clearInterval(progressInterval);
-    console.log(`[XIntel] Grok analysis complete for @${job.handle}, risk: ${analysis.riskLevel}`);
+
+    // Multi-source pipeline observability logging
+    const pplxInfo = perplexityResult
+      ? `confidence=${perplexityResult.confidence}, citations=${perplexityResult.citations.length}, team=${perplexityResult.teamMembers?.length || 0}, legal=${!!perplexityResult.legalEntity?.companyName}`
+      : 'skipped';
+    const grokInfo = `risk=${analysis.riskLevel}, team=${analysis.positiveIndicators?.teamMembers?.length || 0}, doxxed=${analysis.positiveIndicators?.isDoxxed || false}`;
+    console.log(`[XIntel] Analysis complete for @${job.handle}:\n  [Grok] ${grokInfo}\n  [Perplexity] ${pplxInfo}`);
 
     // Stage 5: Building report
     console.log(`[XIntel] Stage 5: Building report for @${job.handle}`);
@@ -1222,7 +1336,7 @@ async function processRealScan(job: ScanJob): Promise<void> {
 
       // Await project upsert so it exists before client redirects
       try {
-        await upsertProjectFromAnalysis(job.handle, analysis, report, classifiedEntityType);
+        await upsertProjectFromAnalysis(job.handle, analysis, report, classifiedEntityType, perplexityResult);
       } catch (err) {
         console.error('[XIntel] Failed to upsert project:', err);
       }
@@ -1420,7 +1534,8 @@ async function upsertProjectFromAnalysis(
   handle: string,
   analysis: GrokAnalysisResult,
   report: XIntelReport,
-  entityType?: 'project' | 'person' | 'company' | 'unknown'
+  entityType?: 'project' | 'person' | 'company' | 'unknown',
+  perplexityResult?: PerplexityResearchResult | null,
 ): Promise<void> {
   const normalizedHandle = handle.toLowerCase().replace('@', '');
 
@@ -1454,7 +1569,7 @@ async function upsertProjectFromAnalysis(
 
   // Merge teams, deduplicate by handle/name
   const seenMembers = new Set<string>();
-  const mergedTeam: Array<{ handle: string; displayName?: string; role?: string; avatarUrl?: string; isDoxxed?: boolean; linkedIn?: string }> = [];
+  const mergedTeam: Array<{ handle: string; displayName?: string; role?: string; avatarUrl?: string; isDoxxed?: boolean; linkedIn?: string; realName?: string; previousEmployers?: string[] }> = [];
 
   // Add Grok team first (usually has roles from AI)
   for (const member of grokTeam) {
@@ -1471,6 +1586,48 @@ async function upsertProjectFromAnalysis(
         isDoxxed: !!member.linkedIn,
         linkedIn: member.linkedIn || undefined,
       });
+    }
+  }
+
+  // Fallback: if Grok teamMembers is empty but doxxedDetails has a handle, extract it
+  // This is common in behavioral-only mode where Grok puts team info in doxxedDetails string
+  if (mergedTeam.length === 0 && analysis.positiveIndicators?.isDoxxed && analysis.positiveIndicators?.doxxedDetails) {
+    const details = analysis.positiveIndicators.doxxedDetails;
+    // Extract @handle patterns from doxxed details string (e.g., "@dev_skill_issue (lead dev, prev MetaMask)")
+    const handleMatch = details.match(/@([a-zA-Z0-9_]{1,15})/);
+    if (handleMatch) {
+      const handle = handleMatch[1].toLowerCase();
+      if (!seenMembers.has(handle)) {
+        seenMembers.add(handle);
+        // Parse role and background info from the details string
+        const roleMatch = details.match(/\(([^)]+)\)/);
+        const roleStr = roleMatch ? roleMatch[1] : 'team member';
+        // Extract previous employers from parenthetical (e.g., "former MetaMask developer, USAA")
+        const employers: string[] = [];
+        const employerPatterns = details.match(/(?:former|prev|ex-?)\s+([A-Z][A-Za-z0-9]+)/gi);
+        if (employerPatterns) {
+          for (const ep of employerPatterns) {
+            const emp = ep.replace(/^(?:former|prev|ex-?)\s+/i, '').trim();
+            if (emp) employers.push(emp);
+          }
+        }
+        // Also check for known company names in the details
+        const knownCompanies = ['MetaMask', 'USAA', 'Twitter', 'Coinbase', 'Binance', 'Google', 'Meta', 'Apple', 'Microsoft'];
+        for (const company of knownCompanies) {
+          if (details.toLowerCase().includes(company.toLowerCase()) && !employers.some(e => e.toLowerCase() === company.toLowerCase())) {
+            employers.push(company);
+          }
+        }
+        const avatarUrl = await fetchXAvatarUrl(handle);
+        mergedTeam.push({
+          handle,
+          displayName: details.split('(')[0]?.replace(/@\w+/g, '').trim() || undefined,
+          role: normalizeRole(roleStr.split(',')[0].trim()),
+          avatarUrl,
+          isDoxxed: true,
+          previousEmployers: employers.length > 0 ? employers : undefined,
+        });
+      }
     }
   }
 
@@ -1792,11 +1949,27 @@ async function upsertProjectFromAnalysis(
                                entityType === 'project' ? 'project' as const :
                                entityType === 'person' ? 'person' as const : undefined;
 
-  // Build project data with comprehensive OSINT
+  // ========================================================================
+  // CROSS-REFERENCE (when Perplexity is available)
+  // Reconcile OSINT + Perplexity + Grok data, flag conflicts
+  // ========================================================================
+  const crossRef = perplexityResult
+    ? crossReference({ osintEntity, perplexityResult, grokAnalysis: analysis })
+    : null;
+
+  if (crossRef) {
+    console.log(`[XIntel] Cross-referenced data for @${normalizedHandle}:\n` +
+      `  team=${crossRef.teamMembers.length}, legal=${!!crossRef.legalEntity}, affiliations=${crossRef.affiliations?.length || 0}\n` +
+      `  techStack=${crossRef.techStack?.blockchain || 'none'}, audit=${!!crossRef.audit?.hasAudit}\n` +
+      `  citations=${crossRef.citations.length}, conflicts=${crossRef.sourceAttribution.conflicts?.length || 0}\n` +
+      `  findings=${crossRef.keyFindings.length}, controversies=${crossRef.controversies.length}`);
+  }
+
+  // Build project data with comprehensive OSINT + multi-source verification
   const projectData = {
     name,
     entityType: normalizedEntityType,
-    description: analysis.theStory || osintEntity?.description || analysis.overallAssessment || undefined,
+    description: crossRef?.theStory || analysis.theStory || osintEntity?.description || analysis.overallAssessment || undefined,
     avatarUrl: osintEntity?.imageUrl || analysis.profile?.avatarUrl || await fetchXAvatarUrl(normalizedHandle),
     tags: extractTags(analysis, githubIntelData, osintEntity),
     aiSummary: analysis.verdict?.summary || analysis.overallAssessment || undefined,
@@ -1814,7 +1987,16 @@ async function upsertProjectFromAnalysis(
       confidence: report.score.confidence,
       lastUpdated: new Date(),
     },
-    team: mergedTeam,
+    // Use cross-referenced team when available (merges OSINT + Perplexity + Grok, deduped)
+    team: crossRef?.teamMembers.length ? crossRef.teamMembers.map(m => ({
+      handle: m.handle,
+      displayName: m.displayName,
+      realName: m.realName,
+      role: normalizeRole(m.role),
+      isDoxxed: m.isDoxxed,
+      previousEmployers: m.previousEmployers,
+      linkedIn: m.linkedIn,
+    })) : mergedTeam,
     socialMetrics: {
       followers: analysis.profile?.followers,
       engagement: undefined,
@@ -1825,21 +2007,28 @@ async function upsertProjectFromAnalysis(
     githubIntel: githubIntelData,
     websiteIntel: websiteIntelData,
     securityIntel,
-    // OSINT primary, Grok fallback
-    tokenomics: tokenomics || analysis.tokenomics,
-    liquidity: liquidity || analysis.liquidity,
-    techStack: techStack || analysis.techStack,
+    // OSINT primary, cross-ref second, Grok fallback
+    tokenomics: crossRef?.tokenomics || tokenomics || analysis.tokenomics,
+    liquidity: crossRef?.liquidity || liquidity || analysis.liquidity,
+    techStack: crossRef?.techStack || techStack || analysis.techStack,
     positiveIndicators,
     negativeIndicators,
-    keyFindings: keyFindings.length > 0 ? keyFindings : undefined,
-    theStory: analysis.theStory || undefined,
-    // Grok-provided deep analysis fields
-    legalEntity: analysis.legalEntity || undefined,
-    affiliations: analysis.affiliations?.length ? analysis.affiliations : undefined,
+    // Cross-referenced key findings include all sources with attribution
+    keyFindings: crossRef?.keyFindings.length ? [...keyFindings, ...crossRef.keyFindings.filter(
+      f => !keyFindings.some(k => k.toLowerCase().includes(f.toLowerCase().slice(0, 20)))
+    )] : (keyFindings.length > 0 ? keyFindings : undefined),
+    theStory: crossRef?.theStory || analysis.theStory || undefined,
+    // Cross-referenced deep analysis fields (Perplexity > Grok for factual claims)
+    legalEntity: crossRef?.legalEntity || analysis.legalEntity || undefined,
+    affiliations: crossRef?.affiliations || (analysis.affiliations?.length ? analysis.affiliations : undefined),
     roadmap: analysis.roadmap?.length ? analysis.roadmap : undefined,
-    audit: analysis.audit || undefined,
+    audit: crossRef?.audit || analysis.audit || undefined,
     shippingHistory: analysis.shippingHistory?.length ? analysis.shippingHistory : undefined,
-    controversies: analysis.controversies?.length ? analysis.controversies : undefined,
+    controversies: crossRef?.controversies.length ? crossRef.controversies :
+      (analysis.controversies?.length ? analysis.controversies : undefined),
+    // Source attribution and citations (multi-source verification)
+    sourceAttribution: crossRef?.sourceAttribution || undefined,
+    perplexityCitations: crossRef?.citations.length ? crossRef.citations : undefined,
     lastScanAt: new Date(),
   };
 
@@ -1889,9 +2078,20 @@ function extractTags(
   if (analysis.positiveIndicators?.hasCredibleBackers) tags.push('backed');
 
   // Risk indicators from Grok
-  if (analysis.negativeIndicators?.hasScamAllegations) tags.push('allegations');
+  // Only tag 'allegations' if they appear credible (not just isolated low-engagement noise)
+  if (analysis.negativeIndicators?.hasScamAllegations) {
+    const scamDetails = (analysis.negativeIndicators.scamDetails || '').toLowerCase();
+    const isIsolatedNoise = scamDetails.includes('isolated') ||
+      scamDetails.includes('low-engagement') ||
+      scamDetails.includes('no-follower') ||
+      scamDetails.includes('unverified') ||
+      scamDetails.includes('0 likes');
+    if (!isIsolatedNoise) {
+      tags.push('allegations');
+    }
+  }
   if (analysis.negativeIndicators?.hasRugHistory) tags.push('rug-history');
-  if (analysis.negativeIndicators?.isAnonymousTeam) tags.push('anon');
+  if (analysis.negativeIndicators?.isAnonymousTeam && !analysis.positiveIndicators?.isDoxxed) tags.push('anon');
 
   // GitHub-based tags
   if (githubIntel) {

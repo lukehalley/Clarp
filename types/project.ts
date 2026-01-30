@@ -284,6 +284,16 @@ export interface Project {
   // The Story (narrative summary from Grok)
   theStory?: string;
 
+  // ==========================================================================
+  // SOURCE ATTRIBUTION (multi-source verification)
+  // ==========================================================================
+
+  // Track which source provided each piece of data
+  sourceAttribution?: SourceAttribution;
+
+  // Perplexity web research citations (URLs backing factual claims)
+  perplexityCitations?: Array<{ url: string; title?: string }>;
+
   // Scan metadata
   lastScanAt: Date;
   createdAt: Date;
@@ -299,6 +309,36 @@ export interface TeamMember {
   isDoxxed?: boolean;
   previousEmployers?: string[];   // e.g., ["MetaMask", "USAA", "Twitter"]
   linkedIn?: string | null;
+}
+
+// ============================================================================
+// SOURCE ATTRIBUTION (multi-source verification)
+// ============================================================================
+
+export type DataSourceId = 'osint' | 'grok' | 'perplexity';
+
+export interface SourceFieldInfo {
+  source: DataSourceId;
+  confidence: 'low' | 'medium' | 'high';
+  citationUrl?: string;
+  retrievedAt: Date;
+}
+
+export interface SourceConflict {
+  field: string;
+  sources: Array<{
+    source: DataSourceId;
+    value: string;
+    citationUrl?: string;
+  }>;
+  resolution: 'perplexity_wins' | 'grok_wins' | 'osint_wins' | 'unresolved';
+}
+
+export interface SourceAttribution {
+  /** Which source provided each key field */
+  fieldSources: Record<string, SourceFieldInfo>;
+  /** Conflicts between sources */
+  conflicts?: SourceConflict[];
 }
 
 // ============================================================================
