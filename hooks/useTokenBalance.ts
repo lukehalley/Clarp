@@ -8,6 +8,7 @@ import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { PublicKey } from '@solana/web3.js';
 import { getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
 import { CLARP_MINT, CLARP_DECIMALS } from '@/lib/config/tokenomics';
+import { withRetry } from '@/lib/solana/rpc';
 
 /**
  * Format large numbers in compact form (e.g., 19.61B, 1.5M, 750K)
@@ -42,6 +43,7 @@ export function useTokenBalance(): TokenBalanceState {
   const [balanceRaw, setBalanceRaw] = useState<bigint | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const [consecutiveFailures, setConsecutiveFailures] = useState(0);
 
   const fetchBalance = useCallback(async () => {
     if (!publicKey || !connected) {
@@ -55,24 +57,27 @@ export function useTokenBalance(): TokenBalanceState {
 
     try {
       const ata = await getAssociatedTokenAddress(CLARP_MINT, publicKey);
-      const account = await getAccount(connection, ata);
+      const account = await withRetry(() => getAccount(connection, ata));
 
       const rawBalance = account.amount;
       const formattedBalance = Number(rawBalance) / Math.pow(10, CLARP_DECIMALS);
 
       setBalanceRaw(rawBalance);
       setBalance(formattedBalance);
+      setConsecutiveFailures(0);
     } catch (err) {
       // TokenAccountNotFoundError means user has no CLARP
       if (err instanceof Error && err.name === 'TokenAccountNotFoundError') {
         setBalance(0);
         setBalanceRaw(BigInt(0));
+        setConsecutiveFailures(0);
       } else {
-        console.error('[useTokenBalance] Error:', err);
+        console.error('[useTokenBalance] Error after retries:', err);
         setError(err instanceof Error ? err : new Error('Failed to fetch balance'));
         // Still set to 0 on error so UI can render
         setBalance(0);
         setBalanceRaw(BigInt(0));
+        setConsecutiveFailures((c) => c + 1);
       }
     } finally {
       setIsLoading(false);
@@ -84,13 +89,14 @@ export function useTokenBalance(): TokenBalanceState {
     fetchBalance();
   }, [fetchBalance]);
 
-  // Auto-refresh every 30 seconds when connected
+  // Auto-refresh: 30s normally, 60s when RPC is degraded
   useEffect(() => {
     if (!connected) return;
 
-    const interval = setInterval(fetchBalance, 30000);
+    const intervalMs = consecutiveFailures >= 2 ? 60000 : 30000;
+    const interval = setInterval(fetchBalance, intervalMs);
     return () => clearInterval(interval);
-  }, [connected, fetchBalance]);
+  }, [connected, fetchBalance, consecutiveFailures]);
 
   return {
     balance,

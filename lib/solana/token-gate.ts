@@ -5,6 +5,7 @@ import { PublicKey } from '@solana/web3.js';
 import { getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
 import { getConnection } from './connection';
 import { CLARP_MINT, CLARP_DECIMALS, TIER_THRESHOLDS, Tier } from '@/lib/config/tokenomics';
+import { withRetry } from './rpc';
 
 /**
  * Get CLARP token balance for a wallet
@@ -16,7 +17,7 @@ export async function getWalletBalance(wallet: string): Promise<number> {
 
   try {
     const ata = await getAssociatedTokenAddress(CLARP_MINT, walletPubkey);
-    const account = await getAccount(connection, ata);
+    const account = await withRetry(() => getAccount(connection, ata));
     return Number(account.amount) / Math.pow(10, CLARP_DECIMALS);
   } catch {
     // No token account = 0 balance

@@ -79,7 +79,7 @@ export default function WalletGate({
   const canTryFreeScan = !connected && !freeScanUsed;
 
   return (
-    <div className="relative min-h-[80vh]">
+    <div className="relative min-h-screen">
       {/* Blurred Preview */}
       {showPreview && (
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
