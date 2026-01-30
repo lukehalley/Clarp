@@ -35,6 +35,7 @@ Rules:
   * Person is a crypto trader, developer, founder, or influencer
 - entityType: "person" = individual, "project" = token/protocol/company/tool account
 - When in doubt about crypto relevance, lean toward isCryptoRelated=true
+- CONTENT POLICY: If the handle or project name contains racial slurs, ethnic slurs, or hate speech, set isCryptoRelated=false and reason="Rejected: contains slurs or hate speech"
 
 Return ONLY valid JSON.`;
 

@@ -46,6 +46,7 @@ import {
   type ResolutionResult,
   type InputType,
 } from '@/lib/terminal/entity-resolver';
+import { containsSlurs } from '@/lib/terminal/content-filter';
 
 // ============================================================================
 // CONFIGURATION
@@ -770,6 +771,17 @@ export async function submitScan(options: SubmitScanOptions): Promise<SubmitScan
   }
 
   const normalizedHandle = queryInfo.value.toLowerCase().replace('@', '');
+
+  // Reject queries containing slurs or hate speech
+  const slurCheck = containsSlurs(normalizedHandle);
+  if (slurCheck) {
+    return {
+      jobId: '',
+      status: 'failed',
+      cached: false,
+      error: 'This query was rejected. Slurs and hate speech are not permitted.',
+    };
+  }
 
   // Check rate limiting
   const lastScan = scanCooldowns.get(normalizedHandle);

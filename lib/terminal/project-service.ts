@@ -8,6 +8,7 @@ const getSupabaseClient = getServiceClient;
 const isSupabaseAvailable = () => !!getServiceClient();
 import type { ProjectRow, ProjectInsert, ProjectUpdate } from '@/types/supabase';
 import type { Project, TrustTier, TeamMember, EntityType } from '@/types/project';
+import { checkContentForSlurs } from '@/lib/terminal/content-filter';
 
 // ============================================================================
 // TYPE CONVERTERS
@@ -460,6 +461,13 @@ export async function upsertProjectByHandle(
 
   const normalizedHandle = handle.replace(/^@/, '').toLowerCase();
 
+  // Block projects with slurs in name or handle
+  const slurCheck = checkContentForSlurs({ name: project.name, handle: normalizedHandle });
+  if (slurCheck) {
+    console.warn(`[ProjectService] Blocked project with slur: ${slurCheck}`);
+    return null;
+  }
+
   try {
     const insert = {
       ...projectToInsert(project),
@@ -502,6 +510,13 @@ export async function upsertProjectByTokenAddress(
 ): Promise<Project | null> {
   const client = getSupabaseClient();
   if (!client) return null;
+
+  // Block projects with slurs in name
+  const slurCheck = checkContentForSlurs({ name: project.name });
+  if (slurCheck) {
+    console.warn(`[ProjectService] Blocked project with slur: ${slurCheck}`);
+    return null;
+  }
 
   try {
     // First check if a project with this token address already exists
