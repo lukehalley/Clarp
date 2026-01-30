@@ -386,8 +386,8 @@ export default function Home() {
 
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 justify-center lg:justify-start mb-0 sm:mb-8 w-full max-w-full whitespace-nowrap">
                 <a
-                  href="/terminal"
-                  onClick={(e) => { e.preventDefault(); navigateWithFade('/terminal'); }}
+                  href="/terminal/projects"
+                  onClick={(e) => { e.preventDefault(); navigateWithFade('/terminal/projects'); }}
                   className="relative overflow-hidden group cursor-pointer sm:hidden px-4 py-2.5 bg-black text-ivory-light font-mono font-bold text-sm border-2 border-danger-orange transition-all duration-150 text-center active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_#FF6B35]"
                   style={{ boxShadow: '3px 3px 0 #FF6B35' }}
                 >
@@ -397,8 +397,8 @@ export default function Home() {
                   </span>
                 </a>
                 <a
-                  href="/terminal"
-                  onClick={(e) => { e.preventDefault(); navigateWithFade('/terminal'); }}
+                  href="/terminal/projects"
+                  onClick={(e) => { e.preventDefault(); navigateWithFade('/terminal/projects'); }}
                   className="btn-primary relative overflow-hidden group cursor-pointer hidden sm:block"
                 >
                   launch terminal

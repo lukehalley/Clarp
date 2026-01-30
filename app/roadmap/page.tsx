@@ -1006,8 +1006,8 @@ export default function RoadmapPage() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="/terminal"
-              onClick={(e) => { e.preventDefault(); navigateWithFade('/terminal'); }}
+              href="/terminal/projects"
+              onClick={(e) => { e.preventDefault(); navigateWithFade('/terminal/projects'); }}
               className="btn-primary inline-flex items-center justify-center gap-2 text-base px-8 py-4 cursor-pointer"
             >
               <TerminalIcon size={20} />

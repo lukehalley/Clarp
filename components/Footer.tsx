@@ -121,7 +121,7 @@ export default function Footer() {
             <h4 className="font-mono text-xs sm:text-sm text-danger-orange mb-3 sm:mb-4 h-5">links</h4>
             <ul className="space-y-2 sm:space-y-3">
               {[
-                { label: 'terminal', note: 'live', href: '/terminal' },
+                { label: 'terminal', note: 'live', href: '/terminal/projects' },
                 { label: 'github', note: 'open source', href: 'https://github.com/lukehalley/Clarp' },
                 { label: 'dexscreener', note: '$CLARP', href: 'https://dexscreener.com/solana/GtwMkjRY8Vi5oGaLaEsd1xnsr3AkZ6ZYBqsG5ipTBAGS' },
                 { label: 'bags.fm', note: 'trade', href: 'https://bags.fm/token/GtwMkjRY8Vi5oGaLaEsd1xnsr3AkZ6ZYBqsG5ipTBAGS' },
@@ -159,7 +159,7 @@ export default function Footer() {
             scan projects. scan people. trust with receipts.
           </p>
           <a
-            href="/terminal"
+            href="/terminal/projects"
             className="inline-block px-6 py-3 bg-danger-orange text-black font-mono font-bold text-sm border-2 border-danger-orange hover:bg-transparent hover:text-danger-orange transition-colors"
           >
             launch terminal

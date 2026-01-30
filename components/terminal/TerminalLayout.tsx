@@ -50,7 +50,7 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
                 <ArrowLeft size={16} />
               </button>
               <Link
-                href="/terminal"
+                href="/terminal/projects"
                 className="flex items-center gap-2 text-ivory-light font-mono font-bold text-lg"
               >
                 <span className="text-danger-orange">CLARP</span>

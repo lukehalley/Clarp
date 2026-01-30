@@ -1439,7 +1439,7 @@ function NotFoundState() {
       <div className="font-mono text-6xl text-ivory-light/10 mb-2">404</div>
       <div className="font-mono text-sm text-ivory-light/40 mb-6">Entity not found</div>
       <button
-        onClick={() => router.push('/terminal')}
+        onClick={() => router.push('/terminal/projects')}
         className="font-mono text-xs text-danger-orange hover:text-danger-orange/80 transition-colors"
       >
         Back to Terminal
@@ -1464,7 +1464,7 @@ export default function EntityDetailPage({ project, isLoading, expectedEntityTyp
   };
 
   const handleBack = () => {
-    router.push('/terminal');
+    router.push('/terminal/projects');
   };
 
   if (isLoading) return <LoadingState />;

@@ -97,7 +97,7 @@ export default function Navbar() {
               </a>
             </div>
             <button
-              onClick={(e) => handleNavClick(e, '/terminal')}
+              onClick={(e) => handleNavClick(e, '/terminal/projects')}
               className="group relative ml-2 px-5 py-2.5 bg-black text-ivory-light font-mono font-bold text-sm border-2 border-danger-orange transition-all duration-150 overflow-hidden cursor-pointer hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[1px_1px_0_#FF6B35] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none"
               style={{ boxShadow: '3px 3px 0 #FF6B35' }}
             >
@@ -180,8 +180,8 @@ export default function Navbar() {
                 </a>
               </div>
               <a
-                href="/terminal"
-                onClick={(e) => handleNavClick(e, '/terminal')}
+                href="/terminal/projects"
+                onClick={(e) => handleNavClick(e, '/terminal/projects')}
                 className="block w-full text-center mt-2 px-5 py-3 bg-black text-ivory-light font-mono font-bold text-sm border-2 border-danger-orange transition-all duration-150 cursor-pointer active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_#FF6B35]"
                 style={{ boxShadow: '3px 3px 0 #FF6B35' }}
               >

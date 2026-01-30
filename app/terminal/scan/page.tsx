@@ -399,7 +399,7 @@ function ScanPageInner() {
     <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-4 relative">
       {/* Back button - positioned absolutely so it doesn't affect centering */}
       <button
-        onClick={() => router.push('/terminal')}
+        onClick={() => router.push('/terminal/projects')}
         className="absolute top-4 left-4 flex items-center gap-2 font-mono text-xs text-ivory-light/40 hover:text-danger-orange transition-colors group"
       >
         <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
@@ -564,7 +564,7 @@ function ScanPageInner() {
                   not crypto-related
                 </div>
                 <button
-                  onClick={() => router.push('/terminal')}
+                  onClick={() => router.push('/terminal/projects')}
                   className="font-mono text-[10px] text-danger-orange hover:text-danger-orange/80 transition-colors"
                 >
                   search again →
