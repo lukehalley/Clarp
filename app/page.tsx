@@ -11,10 +11,11 @@ import ActivityNotifications from '@/components/ActivityNotifications';
 import HallOfShame from '@/components/HallOfShame';
 import WarningTicker from '@/components/WarningTicker';
 import Roadmap from '@/components/Roadmap';
+import ParallaxMascots from '@/components/ParallaxMascots';
 import TERMINAL_CONVERSATIONS from '@/data/terminal-conversations.json';
 import HERO_SENTENCES from '@/data/hero-sentences.json';
 import WARNING_TICKERS from '@/data/warning-tickers.json';
-import DONATIONS from '@/data/donations.json';
+
 
 const ASCII_LOGO = `
  ██████╗██╗      █████╗ ██████╗ ██████╗
@@ -69,7 +70,6 @@ export default function Home() {
   const [heroSentenceIndex, setHeroSentenceIndex] = useState(0);
 
   // Easter egg states
-  const [showWhitepaperModal, setShowWhitepaperModal] = useState(false);
   const [showLoadingModal, setShowLoadingModal] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
   const [loadingProgress, setLoadingProgress] = useState(0);
@@ -271,16 +271,20 @@ export default function Home() {
 
   return (
     <main className="min-h-screen overflow-x-hidden">
+      {/* Parallax mascot background — spans all sections, inverts on dark */}
+      <ParallaxMascots />
+
       {/* hero section */}
-      <section className="relative py-12 sm:py-16 lg:py-24 px-4 sm:px-6 overflow-hidden">
+      <div className="h-[calc(100svh-5rem)] sm:h-[calc(100svh-5.6rem)] flex flex-col overflow-hidden">
+      <section className="relative flex-1 min-h-0 flex items-center py-4 sm:py-16 lg:py-24 px-4 sm:px-6 overflow-hidden">
         {/* background grid */}
         <div className="absolute inset-0 bg-grid bg-grid opacity-30" />
 
-        <div className="max-w-6xl mx-auto relative">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+        <div className="max-w-6xl w-full mx-auto relative">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-end">
             {/* left: terminal */}
-            <div className="order-2 lg:order-1">
-              <Terminal title="clarp">
+            <div className="order-2 lg:order-1 hidden md:block h-[380px] sm:h-[420px] min-w-0 overflow-hidden">
+              <Terminal title="clarp" className="h-full">
                 <div ref={terminalRef} className="h-[280px] sm:h-[320px] overflow-y-auto overflow-x-hidden scrollbar-hide">
                   {/* Mobile: simple text logo */}
                   <pre
@@ -320,7 +324,7 @@ export default function Home() {
                           {msg.role === 'user' ? (
                             <>
                               <span className="text-larp-green shrink-0">&gt;</span>
-                              <span className="text-ivory-light font-mono">
+                              <span className="text-ivory-light font-mono break-words min-w-0">
                                 {displayText}
                                 {isTyping && <span className="inline-block w-2 h-4 bg-larp-green animate-blink align-middle ml-0.5" />}
                               </span>
@@ -328,7 +332,7 @@ export default function Home() {
                           ) : (
                             <>
                               <span className="text-danger-orange shrink-0">ai:</span>
-                              <span className="text-ivory-light/80">
+                              <span className="text-ivory-light/80 break-words min-w-0">
                                 {displayText}
                                 {isTyping && <span className="inline-block w-2 h-4 bg-danger-orange animate-blink align-middle ml-0.5" />}
                               </span>
@@ -351,43 +355,66 @@ export default function Home() {
 
             {/* right: hero copy */}
             <div className="order-1 lg:order-2 text-center lg:text-left overflow-hidden">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-dark leading-tight mb-4 sm:mb-6 font-display">
+              {/* Mobile mascot */}
+              <div className="md:hidden flex justify-center mb-4 animate-float">
+                <svg width="120" height="120" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <rect x="60" y="68" width="280" height="168" fill="#0a0a09"/>
+                  <rect x="32" y="104" width="28" height="42" fill="#0a0a09"/>
+                  <rect x="340" y="104" width="28" height="42" fill="#0a0a09"/>
+                  <rect x="116" y="124" width="42" height="70" fill="#FAF9F5"/>
+                  <rect x="242" y="124" width="42" height="70" fill="#FAF9F5"/>
+                  <rect x="74" y="236" width="56" height="96" fill="#0a0a09"/>
+                  <rect x="158" y="236" width="42" height="96" fill="#0a0a09"/>
+                  <rect x="200" y="236" width="42" height="96" fill="#0a0a09"/>
+                  <rect x="270" y="236" width="56" height="96" fill="#0a0a09"/>
+                </svg>
+              </div>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-dark leading-tight mb-2 sm:mb-6 font-display">
                 $clarp
               </h1>
 
-              <p className="text-lg sm:text-xl md:text-2xl text-slate-light mb-2 sm:mb-4">
-                first autonomous trust pilot
+              <p className="text-lg sm:text-xl md:text-2xl text-slate-light mb-1 sm:mb-4">
+                trust intelligence for crypto
               </p>
-              <p className="text-base sm:text-lg text-danger-orange font-mono mb-4 sm:mb-6 font-bold">
-                polymarket odds + on-chain receipts
+              <p className="text-base sm:text-lg text-danger-orange font-mono mb-2 sm:mb-6 font-bold">
+                scan projects. scan people. trust with receipts.
               </p>
 
-              <p className="text-sm sm:text-base text-slate-light mb-6 sm:mb-8 max-w-md mx-auto lg:mx-0 min-h-[6rem] sm:min-h-[4.5rem]">
+              <p className="text-sm sm:text-base text-slate-light mb-3 sm:mb-8 max-w-md mx-auto lg:mx-0 h-[3rem] sm:h-[4.5rem] overflow-hidden">
                 {HERO_SENTENCES[heroSentenceIndex]}
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start mb-6 sm:mb-8 w-full max-w-full">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 justify-center lg:justify-start mb-0 sm:mb-8 w-full max-w-full whitespace-nowrap">
+                <a
+                  href="/terminal"
+                  onClick={(e) => { e.preventDefault(); navigateWithFade('/terminal'); }}
+                  className="relative overflow-hidden group cursor-pointer sm:hidden px-4 py-2.5 bg-black text-ivory-light font-mono font-bold text-sm border-2 border-danger-orange transition-all duration-150 text-center active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_#FF6B35]"
+                  style={{ boxShadow: '3px 3px 0 #FF6B35' }}
+                >
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="w-1.5 h-1.5 bg-danger-orange animate-pulse" />
+                    launch terminal
+                  </span>
+                </a>
+                <a
+                  href="/terminal"
+                  onClick={(e) => { e.preventDefault(); navigateWithFade('/terminal'); }}
+                  className="btn-primary relative overflow-hidden group cursor-pointer hidden sm:block"
+                >
+                  launch terminal
+                </a>
                 <a
                   href="/roadmap"
                   onClick={(e) => { e.preventDefault(); navigateWithFade('/roadmap'); }}
-                  className="btn-primary relative overflow-hidden group cursor-pointer"
+                  className="btn-secondary relative overflow-hidden group cursor-pointer"
                 >
                   view roadmap
                 </a>
-                <a
-                  href="https://dexscreener.com/solana/6c71mun334bafcuvn3cwajfqnk6skztzk9vfzrthstwj"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-secondary hover:opacity-100 transition-opacity inline-flex items-center gap-2"
-                >
-                  <img src="/dexscreener-icon.svg" alt="" className="w-5 h-5" />
-                  dexscreener
-                </a>
               </div>
 
-              {/* CA Box */}
+              {/* CA Box - hidden on mobile to fit hero in viewport */}
               <div
-                className="bg-slate-dark border-2 border-danger-orange px-4 sm:px-6 py-3 sm:py-4 font-mono flex items-center gap-3 sm:gap-4 group cursor-pointer hover:border-larp-green transition-colors w-full max-w-2xl overflow-hidden"
+                className="hidden sm:flex bg-slate-dark border-2 border-danger-orange px-4 sm:px-6 py-3 sm:py-4 font-mono items-center gap-3 sm:gap-4 group cursor-pointer hover:border-larp-green transition-colors w-full max-w-2xl overflow-hidden"
                 style={{ boxShadow: '4px 4px 0 #FF6B35' }}
                 onClick={() => {
                   navigator.clipboard.writeText(CA_ADDRESS);
@@ -407,7 +434,10 @@ export default function Home() {
       </section>
 
       {/* ticker: hero → mascot */}
-      <WarningTicker messages={WARNING_TICKERS[0].messages} direction={WARNING_TICKERS[0].direction as 'left' | 'right'} />
+      <div className="shrink-0">
+        <WarningTicker messages={WARNING_TICKERS[0].messages} direction={WARNING_TICKERS[0].direction as 'left' | 'right'} />
+      </div>
+      </div>
 
       {/* mascot section */}
       <section className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-dark text-ivory-light overflow-hidden">
@@ -424,9 +454,9 @@ export default function Home() {
               </p>
               <ul className="space-y-2 sm:space-y-3 mb-6 sm:mb-8 text-left">
                 {[
-                  'the official mascot of autonomous rug detection.',
-                  'more due diligence than your $50m ai agent.',
-                  'scanning polymarket while you sleep.',
+                  'the official mascot of trust intelligence.',
+                  'scanning projects and people 24/7.',
+                  '9 OSINT sources + AI analysis. one trust score.',
                   'CLARP spots LARP. that\'s the whole product.',
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-2 sm:gap-3 text-xs sm:text-sm text-ivory-light/80">
@@ -435,12 +465,14 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <button
-                className="btn-outline text-sm sm:text-base"
-                onClick={() => setShowWhitepaperModal(true)}
+              <a
+                href="https://github.com/lukehalley/Clarp"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-outline text-sm sm:text-base inline-block"
               >
-                whitepaper (still blank though)
-              </button>
+                view source (it's real)
+              </a>
             </div>
             <div className="flex justify-center order-first lg:order-last">
               <div className="scale-75 sm:scale-100">
@@ -476,131 +508,105 @@ export default function Home() {
       {/* ticker: products → charity */}
       <WarningTicker messages={WARNING_TICKERS[2].messages} direction={WARNING_TICKERS[2].direction as 'left' | 'right'} />
 
-      {/* charity section - the plot twist */}
+      {/* tokenomics section */}
       <section className="py-16 sm:py-24 px-4 sm:px-6 overflow-hidden bg-slate-dark">
         <div className="max-w-6xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            {/* Left: The twist */}
+            {/* Left: Tokenomics */}
             <div className="text-center lg:text-left">
-              <span className="badge badge-success mb-4 sm:mb-6">plot twist</span>
-              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-ivory-light mb-4 sm:mb-6 font-display">
-                <span className="text-larp-green">100%</span>
+              <span className="badge badge-success mb-4 sm:mb-6">tokenomics</span>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-ivory-light mb-4 sm:mb-6 font-display">
+                hold <span className="text-danger-orange">$CLARP</span>. use terminal.
               </h2>
-              <p className="text-lg sm:text-xl md:text-2xl text-ivory-light/90 mb-2">
-                of fees go to charity.
+              <p className="text-lg sm:text-xl text-ivory-light/90 mb-2">
+                100K CLARP to access. no subscriptions.
               </p>
               <div className="w-32 sm:w-48 h-1 bg-danger-orange mb-6 mx-auto lg:mx-0" />
               <p className="text-base sm:text-lg text-ivory-light/70 mb-6 sm:mb-8 max-w-md mx-auto lg:mx-0">
-                rug detection that funds ai safety research. full circle.
+                every trade on Bags.fm generates a 1% creator fee. distributed automatically.
               </p>
               <ul className="space-y-2 sm:space-y-3 mb-6 sm:mb-8 text-left max-w-md mx-auto lg:mx-0">
                 {[
-                  'every transaction.',
-                  'public proof.',
-                  'no trust required.',
+                  '50% development & growth.',
+                  '30% operations (API costs, infra).',
+                  '20% burn (buy CLARP → burn address, daily).',
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-2 sm:gap-3 text-sm sm:text-base text-ivory-light/80">
-                    <span className="text-larp-green shrink-0">▸</span>
+                    <span className="text-danger-orange shrink-0">▸</span>
                     {item}
                   </li>
                 ))}
               </ul>
-              <p className="text-xs sm:text-sm text-danger-orange font-mono font-bold">
-                utility with a conscience.
+              <p className="text-xs sm:text-sm text-larp-green font-mono font-bold">
+                supply shrinks. product improves. verifiable on-chain.
               </p>
             </div>
 
-            {/* Right: Receipt/proof card */}
+            {/* Right: Fee distribution card */}
             <div className="flex justify-center order-first lg:order-last">
               <div
                 className="relative bg-ivory-light border-2 sm:border-3 border-slate-dark w-full max-w-sm"
                 style={{ boxShadow: '4px 4px 0 #0a0a09' }}
               >
-                {/* Receipt header */}
+                {/* Card header */}
                 <div className="bg-slate-dark px-4 sm:px-6 py-3 sm:py-4">
-                  <p className="text-ivory-light font-mono text-sm sm:text-base text-center">DONATION RECEIPT</p>
+                  <p className="text-ivory-light font-mono text-sm sm:text-base text-center">FEE DISTRIBUTION</p>
                 </div>
 
-                {/* Receipt content */}
+                {/* Card content */}
                 <div className="p-4 sm:p-6 space-y-4">
                   <div>
-                    <p className="text-slate-light font-mono text-xs mb-1">FROM:</p>
-                    <p className="text-slate-dark font-mono text-sm">$CLARP Protocol Fees</p>
+                    <p className="text-slate-light font-mono text-xs mb-1">SOURCE:</p>
+                    <p className="text-slate-dark font-mono text-sm">1% creator fee on all Bags.fm trades</p>
                   </div>
 
                   <div className="border-t border-dashed border-slate-light/30" />
 
-                  <div>
-                    <p className="text-slate-light font-mono text-xs mb-1">TO:</p>
-                    <p className="text-slate-dark font-mono text-sm">Verified Charity Partner</p>
-                  </div>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-sm text-slate-dark">development & growth</span>
+                      <span className="font-mono text-lg font-bold text-danger-orange">50%</span>
+                    </div>
+                    <div className="h-2 bg-slate-light/20 overflow-hidden">
+                      <div className="h-full bg-danger-orange" style={{ width: '50%' }} />
+                    </div>
 
-                  <div className="border-t border-dashed border-slate-light/30" />
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-sm text-slate-dark">operations</span>
+                      <span className="font-mono text-lg font-bold text-slate-dark">30%</span>
+                    </div>
+                    <div className="h-2 bg-slate-light/20 overflow-hidden">
+                      <div className="h-full bg-slate-dark" style={{ width: '30%' }} />
+                    </div>
 
-                  <div>
-                    <p className="text-slate-light font-mono text-xs mb-1">AMOUNT:</p>
-                    <p className="text-larp-green font-mono text-xl sm:text-2xl font-bold">100% OF FEES</p>
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-sm text-slate-dark">daily burn</span>
+                      <span className="font-mono text-lg font-bold text-larp-green">20%</span>
+                    </div>
+                    <div className="h-2 bg-slate-light/20 overflow-hidden">
+                      <div className="h-full bg-larp-green" style={{ width: '20%' }} />
+                    </div>
                   </div>
 
                   <div className="border-t border-dashed border-slate-light/30" />
 
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-slate-light font-mono text-xs mb-1">STATUS:</p>
+                      <p className="text-slate-light font-mono text-xs mb-1">BURN STATUS:</p>
                       <span className="inline-block bg-larp-green text-black font-mono text-xs px-3 py-1 font-bold">
-                        VERIFIED
+                        ACTIVE
                       </span>
                     </div>
                     <span className="text-larp-green text-3xl">✓</span>
                   </div>
 
                   <p className="text-slate-light/60 font-mono text-[10px] text-center pt-2">
-                    on-chain proof available
+                    every burn tx verifiable on solscan
                   </p>
                 </div>
               </div>
             </div>
           </div>
-
-          {/* Donations list */}
-          {DONATIONS.length > 0 && (
-            <div className="mt-12 sm:mt-16">
-              <div className="flex items-center gap-3 mb-6">
-                <span className="text-larp-green text-lg">▸</span>
-                <h3 className="text-lg sm:text-xl font-mono text-ivory-light font-bold">
-                  verified donations ({DONATIONS.length})
-                </h3>
-              </div>
-              <div className="space-y-3">
-                {DONATIONS.map((donation, i) => (
-                  <a
-                    key={i}
-                    href={`https://solscan.io/tx/${donation.tx}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-between p-4 bg-ivory-light/5 border border-ivory-light/10 hover:border-larp-green/50 transition-colors group"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <span className="text-larp-green shrink-0">✓</span>
-                      <span className="font-mono text-sm text-ivory-light/80 truncate">
-                        {donation.tx.slice(0, 8)}...{donation.tx.slice(-8)}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-3 shrink-0">
-                      {donation.amount && (
-                        <span className="font-mono text-sm text-larp-green">{donation.amount}</span>
-                      )}
-                      <span className="text-xs text-ivory-light/40 font-mono">{donation.date}</span>
-                      <span className="text-ivory-light/40 group-hover:text-larp-green transition-colors">→</span>
-                    </div>
-                  </a>
-                ))}
-              </div>
-              <p className="text-xs text-ivory-light/30 font-mono mt-4 text-center">
-                click any transaction to verify on solscan
-              </p>
-            </div>
-          )}
         </div>
       </section>
 
@@ -656,7 +662,7 @@ export default function Home() {
             </button>
           </div>
           <p className="text-xs text-ivory-light/50 mt-6 font-mono">
-            {ctaClicks.doIt + ctaClicks.pretend >= 5 ? 'you\'ve clicked ' + (ctaClicks.doIt + ctaClicks.pretend) + ' times. you\'re early.' : 'polymarket odds + on-chain analysis. first of its kind.'}
+            {ctaClicks.doIt + ctaClicks.pretend >= 5 ? 'you\'ve clicked ' + (ctaClicks.doIt + ctaClicks.pretend) + ' times. you\'re early.' : 'scan projects. scan people. trust with receipts.'}
           </p>
         </div>
       </section>
@@ -668,40 +674,6 @@ export default function Home() {
 
       {/* activity notifications */}
       <ActivityNotifications />
-
-      {/* whitepaper modal - easter egg */}
-      {showWhitepaperModal && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-          style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
-          onClick={() => setShowWhitepaperModal(false)}
-          data-modal-open="true"
-        >
-          <div className="absolute inset-0 bg-slate-dark/95 backdrop-blur-sm" />
-          <div
-            className="relative bg-ivory-light border-2 sm:border-4 border-slate-dark p-6 sm:p-12 w-full max-w-[min(90vw,500px)] sm:max-w-[600px] flex flex-col items-center justify-center"
-            style={{
-              boxShadow: '4px 4px 0 #0a0a09',
-              aspectRatio: '1 / 1.414',
-              maxHeight: 'calc(100vh - 4rem)'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* close button - inside on mobile, outside on desktop */}
-            <button
-              className="absolute top-2 right-2 sm:-top-4 sm:-right-4 w-8 h-8 sm:w-10 sm:h-10 bg-larp-red text-black font-mono font-bold text-lg sm:text-xl flex items-center justify-center border-2 border-black hover:bg-danger-orange active:translate-x-0.5 active:translate-y-0.5 transition-all"
-              style={{ boxShadow: '2px 2px 0 black' }}
-              onClick={() => setShowWhitepaperModal(false)}
-            >
-              ✗
-            </button>
-
-            <div className="text-center flex flex-col items-center justify-center h-full">
-              {/* blank whitepaper - that's the joke */}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* loading modal - cycles through messages then fails */}
       {showLoadingModal && (

@@ -1,43 +1,43 @@
 'use client';
 
 import { useState } from 'react';
+import { Send } from 'lucide-react';
+import PixelGithub from '@/components/PixelGithub';
+
+function XIcon({ size = 16, className = '' }: { size?: number; className?: string }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={className}
+    >
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  );
+}
 
 const LINK_MESSAGES = [
   'this feature is coming. check the roadmap.',
-  'polymarket integration in progress.',
-  'building the rug detector. patience.',
-  'autonomous trust pilot loading...',
-  'first mover advantage: secured.',
+  'building. check the roadmap.',
   'CLARP spots LARP. soon you will too.',
-  'Q1 shipping. check the roadmap.',
-  'connecting to polymarket...',
   'scanning for rugs...',
+  'token gate shipping soon.',
+  'staking program in development.',
+  'trust intelligence loading...',
   'rebrand detection: coming soon',
 ];
 
 export default function Footer() {
   const [clickedLink, setClickedLink] = useState<string | null>(null);
   const [message, setMessage] = useState('');
-  const [copyrightClicks, setCopyrightClicks] = useState(0);
-
   const handleLinkClick = (e: React.MouseEvent, linkName: string) => {
     e.preventDefault();
     const msg = LINK_MESSAGES[Math.floor(Math.random() * LINK_MESSAGES.length)];
     setMessage(msg);
     setClickedLink(linkName);
     setTimeout(() => setClickedLink(null), 2000);
-  };
-
-  const handleCopyrightClick = () => {
-    setCopyrightClicks(prev => prev + 1);
-  };
-
-  const getCopyrightText = () => {
-    if (copyrightClicks >= 10) return '© 2025 clarp. you clicked the copyright 10 times. seek help.';
-    if (copyrightClicks >= 5) return '© 2025 clarp. stop clicking this.';
-    if (copyrightClicks >= 3) return '© 2025 clarp. why are you clicking the copyright?';
-    if (copyrightClicks >= 1) return '© 2025 clarp. yes, you clicked the copyright.';
-    return '© 2025 clarp. all rights reserved.';
   };
 
   return (
@@ -50,18 +50,9 @@ export default function Footer() {
               <span className="text-danger-orange">$</span>clarp
             </div>
             <p className="text-sm sm:text-base text-ivory-light/60 mb-4 sm:mb-6 max-w-sm">
-              first autonomous trust pilot. polymarket + on-chain analysis.
+              trust intelligence for crypto. scan projects. scan people.
             </p>
             <div className="flex gap-3 sm:gap-4">
-              <a
-                href="https://x.com/i/communities/2013904367188132011"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-slate-medium flex items-center justify-center text-ivory-light/60 hover:text-danger-orange hover:bg-slate-light/20 transition-colors border border-slate-light/20"
-                title="x community"
-              >
-                <span className="text-lg">𝕏</span>
-              </a>
               <a
                 href="https://t.me/CLARPTG"
                 target="_blank"
@@ -69,7 +60,16 @@ export default function Footer() {
                 className="w-10 h-10 bg-slate-medium flex items-center justify-center text-ivory-light/60 hover:text-danger-orange hover:bg-slate-light/20 transition-colors border border-slate-light/20"
                 title="telegram"
               >
-                <span className="text-lg">✈</span>
+                <Send size={16} />
+              </a>
+              <a
+                href="https://x.com/i/communities/2013904367188132011"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 bg-slate-medium flex items-center justify-center text-ivory-light/60 hover:text-danger-orange hover:bg-slate-light/20 transition-colors border border-slate-light/20"
+                title="x community"
+              >
+                <XIcon size={15} />
               </a>
               <a
                 href="https://github.com/lukehalley/Clarp"
@@ -78,16 +78,16 @@ export default function Footer() {
                 className="w-10 h-10 bg-slate-medium flex items-center justify-center text-ivory-light/60 hover:text-danger-orange hover:bg-slate-light/20 transition-colors border border-slate-light/20"
                 title="github"
               >
-                <span className="text-lg">◈</span>
+                <PixelGithub size={16} className="text-current" />
               </a>
               <a
-                href="https://dexscreener.com/solana/6c71mun334bafcuvn3cwajfqnk6skztzk9vfzrthstwj"
+                href="https://dexscreener.com/solana/GtwMkjRY8Vi5oGaLaEsd1xnsr3AkZ6ZYBqsG5ipTBAGS"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 bg-slate-medium flex items-center justify-center text-ivory-light/60 hover:text-danger-orange hover:bg-slate-light/20 transition-colors border border-slate-light/20"
                 title="dexscreener"
               >
-                <img src="/dexscreener-icon.svg" alt="dexscreener" className="w-5 h-5" />
+                <img src="/dexscreener-icon.svg" alt="dexscreener" className="w-4 h-4 invert opacity-60" />
               </a>
             </div>
           </div>
@@ -97,10 +97,10 @@ export default function Footer() {
             <h4 className="font-mono text-xs sm:text-sm text-danger-orange mb-3 sm:mb-4 h-5">coming soon</h4>
             <ul className="space-y-2 sm:space-y-3">
               {[
-                { name: 'markets dashboard', note: 'q1' },
-                { name: 'x bot (@CLARP)', note: 'q1' },
-                { name: 'rebrand detector', note: 'q1/q2' },
-                { name: 'snitch mode', note: 'q2' },
+                { name: 'token-gated access', note: 'building' },
+                { name: 'daily CLARP burn', note: 'building' },
+                { name: 'staking program', note: 'planned' },
+                { name: 'rebrand detector', note: 'planned' },
               ].map(item => (
                 <li key={item.name} className="min-h-[24px] flex items-center">
                   <button
@@ -118,36 +118,24 @@ export default function Footer() {
           </div>
 
           <div className="h-full">
-            <h4 className="font-mono text-xs sm:text-sm text-danger-orange mb-3 sm:mb-4 h-5">honesty</h4>
+            <h4 className="font-mono text-xs sm:text-sm text-danger-orange mb-3 sm:mb-4 h-5">links</h4>
             <ul className="space-y-2 sm:space-y-3">
               {[
-                { label: 'docs', note: 'you\'re looking at it', href: null },
-                { label: 'whitepaper', note: 'blank', href: null },
-                { label: 'github', note: 'actually exists', href: 'https://github.com/lukehalley/Clarp' },
-                { label: 'audit', note: '"gpt said it\'s fine"', href: null },
+                { label: 'terminal', note: 'live', href: '/terminal' },
+                { label: 'github', note: 'open source', href: 'https://github.com/lukehalley/Clarp' },
+                { label: 'dexscreener', note: '$CLARP', href: 'https://dexscreener.com/solana/GtwMkjRY8Vi5oGaLaEsd1xnsr3AkZ6ZYBqsG5ipTBAGS' },
+                { label: 'bags.fm', note: 'trade', href: 'https://bags.fm/token/GtwMkjRY8Vi5oGaLaEsd1xnsr3AkZ6ZYBqsG5ipTBAGS' },
               ].map(item => (
                 <li key={item.label} className="min-h-[24px] flex items-center">
-                  {item.href ? (
-                    <a
-                      href={item.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-left transition-colors flex items-center gap-2 text-ivory-light/60 hover:text-danger-orange"
-                    >
-                      {item.label}
-                      <span className="text-[10px] text-larp-green shrink-0">({item.note})</span>
-                    </a>
-                  ) : (
-                    <button
-                      onClick={(e) => handleLinkClick(e, item.label)}
-                      className={`text-sm text-left transition-colors flex items-center gap-2 ${
-                        clickedLink === item.label ? 'text-larp-red' : 'text-ivory-light/60 hover:text-ivory-light'
-                      }`}
-                    >
-                      {clickedLink === item.label ? '✗ ' : ''}{item.label}
-                      <span className="text-[10px] text-slate-light shrink-0">({item.note})</span>
-                    </button>
-                  )}
+                  <a
+                    href={item.href}
+                    target={item.href.startsWith('http') ? '_blank' : undefined}
+                    rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                    className="text-sm text-left transition-colors flex items-center gap-2 text-ivory-light/60 hover:text-danger-orange"
+                  >
+                    {item.label}
+                    <span className="text-[10px] text-larp-green shrink-0">({item.note})</span>
+                  </a>
                 </li>
               ))}
             </ul>
@@ -165,32 +153,24 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Bottom */}
-        <div className="pt-6 sm:pt-8 border-t border-slate-light/20">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4">
-            <p
-              className="text-[10px] sm:text-xs text-ivory-light/40 text-center md:text-left cursor-pointer hover:text-ivory-light/60 transition-colors"
-              onClick={handleCopyrightClick}
-            >
-              {getCopyrightText()}
-            </p>
-          </div>
+        {/* Terminal CTA */}
+        <div className="py-6 sm:py-8 border-t border-slate-light/20 text-center">
+          <p className="text-sm sm:text-base text-ivory-light/60 mb-4 font-mono">
+            scan projects. scan people. trust with receipts.
+          </p>
+          <a
+            href="/terminal"
+            className="inline-block px-6 py-3 bg-danger-orange text-black font-mono font-bold text-sm border-2 border-danger-orange hover:bg-transparent hover:text-danger-orange transition-colors"
+          >
+            launch terminal
+          </a>
         </div>
 
-        {/* Easter egg - hidden on mobile */}
-        <div className="mt-8 sm:mt-12 text-center hidden sm:block">
-          <pre className="inline-block text-[6px] sm:text-[8px] text-ivory-light/20 font-mono leading-tight hover:text-ivory-light/40 transition-colors cursor-help">
-{`
-    ╭───────────────────────────────────────╮
-    │  you scrolled all the way down?       │
-    │  just like checking "ai agent" repos  │
-    │  and finding nothing but readmes.     │
-    │                                       │
-    │  anyway                               │
-    │                                       │
-    ╰───────────────────────────────────────╯
-`}
-          </pre>
+        {/* Copyright */}
+        <div className="pt-4 border-t border-slate-light/10">
+          <p className="text-[10px] sm:text-xs text-ivory-light/40 text-center">
+            © 2025 clarp. all rights reserved.
+          </p>
         </div>
       </div>
     </footer>

@@ -48,11 +48,11 @@ export default function Navbar() {
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-4">
             <a
-              href="/clarp-agent"
-              onClick={(e) => handleNavClick(e, '/clarp-agent')}
-              className="text-sm text-danger-orange hover:text-larp-red transition-colors font-mono font-bold preserve-case cursor-pointer"
+              href="/roadmap"
+              onClick={(e) => handleNavClick(e, '/roadmap')}
+              className="text-sm text-slate-dark hover:text-danger-orange transition-colors font-mono font-bold cursor-pointer"
             >
-              C[LARP] AGENT
+              roadmap
             </a>
             <div className="flex items-center gap-2 ml-2">
               <a
@@ -84,6 +84,16 @@ export default function Navbar() {
                 title="view source (it's real)"
               >
                 <PixelGithub size={16} className="group-hover:animate-[glitch_0.1s_ease-in-out_2]" />
+              </a>
+              <a
+                href="https://dexscreener.com/solana/GtwMkjRY8Vi5oGaLaEsd1xnsr3AkZ6ZYBqsG5ipTBAGS"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 flex items-center justify-center border-2 border-slate-dark bg-white hover:bg-slate-dark text-slate-dark transition-all group"
+                style={{ boxShadow: '2px 2px 0 #0a0a09' }}
+                title="dexscreener"
+              >
+                <img src="/dexscreener-icon.svg" alt="dexscreener" className="w-4 h-4 group-hover:invert" />
               </a>
             </div>
             <button
@@ -117,11 +127,11 @@ export default function Navbar() {
           <div className="md:hidden border-t border-slate-dark/20 bg-ivory-light">
             <div className="px-4 py-4 space-y-3">
               <a
-                href="/clarp-agent"
-                onClick={(e) => handleNavClick(e, '/clarp-agent')}
-                className="block py-2 text-danger-orange hover:text-larp-red transition-colors font-mono font-bold preserve-case cursor-pointer"
+                href="/roadmap"
+                onClick={(e) => handleNavClick(e, '/roadmap')}
+                className="block py-2 text-slate-dark hover:text-danger-orange transition-colors font-mono font-bold cursor-pointer"
               >
-                C[LARP] AGENT
+                roadmap
               </a>
               <div className="flex gap-3 pt-3 border-t border-slate-dark/10">
                 <a
@@ -157,17 +167,26 @@ export default function Navbar() {
                   <PixelGithub size={16} />
                   source
                 </a>
+                <a
+                  href="https://dexscreener.com/solana/GtwMkjRY8Vi5oGaLaEsd1xnsr3AkZ6ZYBqsG5ipTBAGS"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 flex items-center justify-center gap-2 py-3 border-2 border-slate-dark bg-white text-slate-dark font-mono text-sm"
+                  style={{ boxShadow: '2px 2px 0 #0a0a09' }}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <img src="/dexscreener-icon.svg" alt="" className="w-4 h-4" />
+                  chart
+                </a>
               </div>
-              <button
+              <a
+                href="/terminal"
                 onClick={(e) => handleNavClick(e, '/terminal')}
-                className="group relative block w-full text-center mt-2 px-5 py-3 bg-black text-ivory-light font-mono font-bold text-sm border-2 border-danger-orange transition-all duration-150 overflow-hidden cursor-pointer active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_#FF6B35]"
+                className="block w-full text-center mt-2 px-5 py-3 bg-black text-ivory-light font-mono font-bold text-sm border-2 border-danger-orange transition-all duration-150 cursor-pointer active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_#FF6B35]"
                 style={{ boxShadow: '3px 3px 0 #FF6B35' }}
               >
-                <span className="relative z-10 flex items-center justify-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-danger-orange animate-pulse" />
-                  launch terminal
-                </span>
-              </button>
+                launch terminal
+              </a>
             </div>
           </div>
         )}

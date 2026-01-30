@@ -2,7 +2,7 @@
 
 # $CLARP
 
-**first autonomous trust pilot**
+**trust intelligence for crypto projects and people**
 
 <br>
 
@@ -13,58 +13,80 @@
 
 <br>
 
-[Website](https://clarp.lukehalley.com) · [Terminal](https://clarp.lukehalley.com/terminal) · [Dexscreener](https://dexscreener.com/solana/6c71mun334bafcuvn3cwajfqnk6skztzk9vfzrthstwj)
+[Website](https://clarp.lukehalley.com) · [Terminal](https://clarp.lukehalley.com/terminal) · [Dexscreener](https://dexscreener.com/solana/GtwMkjRY8Vi5oGaLaEsd1xnsr3AkZ6ZYBqsG5ipTBAGS)
 
 ---
 
 <br>
 
-## wtf is this
-
-they raised $400m and shipped a landing page. we shipped a rug detector.
-
-$CLARP spots LARPs. polymarket odds + on-chain receipts. know who to trust before you ape.
-
-<br>
-
 ## the product
 
-### CLARP Terminal
+scan any crypto project or person. get a trust score with receipts.
 
-| feature | what it does |
-|---------|--------------|
-| project scanner | risk scores for any crypto project |
-| x intel | reputation reports for any twitter/x account |
-| evidence-first | every flag links to proof |
-| on-chain verification | all claims are verifiable |
+paste a **token address**, **X handle**, **GitHub URL**, **website**, or **search query**. CLARP gathers OSINT from 9 free sources, runs AI analysis via Grok, and produces an evidence-backed trust report.
 
-```bash
-$ clarp scan @crypto_kol_47
+<br>
 
-CLARP SCORE: 23/100  ████░░░░░░░░  HIGH RISK
+### what it scans
 
-▸ serial shill: 14 unrelated tokens in 30 days
-▸ backlash density: 47 callout posts detected
-▸ hype merchant: 89% posts contain "100x" language
+| entity | what you get |
+|--------|-------------|
+| **projects** | security intel, market data, GitHub activity, website quality, tokenomics, liquidity, audit status, tech stack, roadmap, shipping history |
+| **people** | team discovery, promotion history, scam allegations, rug history, backlash density, hype language detection, contradictions, credibility signals |
 
-evidence: 127 posts analyzed
+<br>
+
+### how it works
+
+```
+any input → entity resolution → OSINT gathering (free) → AI analysis (Grok) → trust report
+```
+
+| step | what happens |
+|------|-------------|
+| 1. resolve | detect input type, normalize to entity |
+| 2. osint | query 9 free APIs in parallel (DexScreener, RugCheck, GitHub, WHOIS, Wayback, market data, socials) |
+| 3. analyze | Grok AI with live X search for profile/post analysis |
+| 4. score | trust score 0-100 with tier (verified / trusted / neutral / caution / avoid) |
+
+<br>
+
+### trust scoring
+
+```
+85-100  VERIFIED   strong evidence of legitimacy
+70-84   TRUSTED    positive signals outweigh risks
+50-69   NEUTRAL    insufficient data or mixed signals
+30-49   CAUTION    notable risk flags present
+ 0-29   AVOID      strong evidence of scam/rug
 ```
 
 <br>
 
-## the plot twist
+## access
+
+terminal requires **100K $CLARP** in your wallet. no subscriptions, no monthly fees. connect wallet, we check balance, you're in.
+
+scanning costs money to run. instead of ads, we gate with the token.
+
+<br>
+
+## tokenomics
+
+every trade on Bags.fm generates a 1% creator fee. distributed automatically:
 
 ```
-╔═══════════════════════════════════════════════════════════════╗
-║                                                               ║
-║   100% of protocol fees go to charity.                        ║
-║                                                               ║
-║   rug detection that funds AI safety research.                ║
-║   full circle.                                                ║
-║                                                               ║
-║   every transaction. public proof. no trust required.         ║
-║                                                               ║
-╚═══════════════════════════════════════════════════════════════╝
+50%  development & growth
+30%  operations (API costs, infra)
+20%  burn (buy CLARP on Bags → burn address)
+```
+
+the burn is real. 20% of all fees buy $CLARP and remove it from supply. every tx on Solscan. verify it yourself.
+
+```
+hold CLARP → use terminal → trading = fees →
+fees fund ops + burns → supply shrinks →
+product improves → more users → more fees → repeat
 ```
 
 <br>
@@ -79,40 +101,27 @@ evidence: 127 posts analyzed
 | chain | **Solana only** |
 | auth | Phantom wallet (Supabase Web3 Auth) |
 | database | Supabase (Postgres) |
-| AI | Anthropic SDK, xAI Grok |
-
-> **Note:** This app is Solana-only. Authentication uses Phantom wallet via Supabase's native Web3 sign-in. No other chains or wallets are supported.
+| AI | xAI Grok (primary), Anthropic Claude (secondary) |
+| OSINT | DexScreener, RugCheck, GitHub API, WHOIS, Wayback Machine, Jupiter, Birdeye, CoinGecko, Telegram, Discord |
 
 <br>
 
 ## getting started
 
 ```bash
-# install dependencies
 npm install
-
-# run development server
 npm run dev
-
-# run tests
-npm test
-
-# build for production
-npm run build
 ```
 
 <br>
 
-## roadmap
+## docs
 
-| milestone | status |
-|-----------|--------|
-| landing page | ✓ shipped |
-| CLARP Terminal v1 | ✓ shipped |
-| project risk scanner | ✓ shipped |
-| X profile intel | in progress |
-| polymarket integration | planned |
-| watchlist alerts | planned |
+| doc | what it covers |
+|-----|---------------|
+| [BUSINESS.md](./BUSINESS.md) | core business document - scanning pipeline, architecture, data sources, costs |
+| [docs/database.md](./docs/database.md) | database schema and caching strategy |
+| [docs/adr/](./docs/adr/) | architecture decision records |
 
 <br>
 
@@ -134,10 +143,10 @@ contributions welcome. open an issue or submit a PR.
 
 <br>
 
-**$CLARP** — *CLARP spots LARP.*
+**$CLARP** — *scan projects. scan people. trust with receipts.*
 
 <br>
 
-<sub>© 2025 clarp. utility with a conscience.</sub>
+<sub>2025 clarp. utility with a conscience.</sub>
 
 </div>

@@ -2,33 +2,33 @@
 
 const ROADMAP_PHASES = [
   {
-    phase: 'q1 2025',
-    title: 'C[LARP] ALPHA',
-    items: ['polymarket API integration', 'project mapping system', 'CLARP analysis overlay'],
+    phase: 'shipped',
+    title: 'CLARP Terminal',
+    items: ['trust score engine (0-100)', 'OSINT pipeline (9 free sources)', 'Grok AI analysis + X search', 'project & people scanning', 'wallet authentication'],
+    status: 'complete',
+    stamp: 'SHIPPED',
+    crossedDates: [],
+  },
+  {
+    phase: 'building',
+    title: 'Token Gate + Tokenomics',
+    items: ['100K CLARP token gate', 'automated fee distribution (50/30/20)', 'daily CLARP burn (20% of fees)'],
     status: 'current',
     stamp: 'BUILDING',
     crossedDates: [],
   },
   {
     phase: 'q1 2025',
-    title: 'C[LARP] AGENT',
-    items: ['autonomous X bot (@CLARP)', 'github repo scanner', 'LARP score (0-100)'],
+    title: 'Staking Program',
+    items: ['stake $CLARP, earn fee share', 'tier-based access (7/30/90 day locks)', 'on-chain Anchor program'],
     status: 'upcoming',
     stamp: 'PLANNED',
     crossedDates: [],
   },
   {
     phase: 'q1/q2 2025',
-    title: 'rebrand detection',
-    items: ['wallet history tracking', 'logo similarity detection', 'KOL accountability tracker'],
-    status: 'upcoming',
-    stamp: 'PLANNED',
-    crossedDates: [],
-  },
-  {
-    phase: 'q2 2025',
-    title: 'snitch mode',
-    items: ['anonymous reporting with bounties', 'hall of shame v2', 'community verification'],
+    title: 'Rebrand Detection',
+    items: ['serial rugger database', 'team wallet tracking across projects', 'KOL accountability tracker'],
     status: 'upcoming',
     stamp: 'PLANNED',
     crossedDates: [],
@@ -114,7 +114,7 @@ export default function Roadmap() {
             internal roadmap memo
           </h2>
           <p className="text-sm sm:text-base text-slate-light max-w-xl mx-auto">
-            first autonomous trust pilot. polymarket + on-chain analysis.
+            trust intelligence for crypto. scan projects. scan people.
           </p>
         </div>
 
@@ -167,9 +167,9 @@ export default function Roadmap() {
           {/* Opening paragraph */}
           <div className="relative mb-8">
             <p className="font-mono text-sm text-slate-dark leading-relaxed">
-              This document outlines our <span className="font-bold">C[LARP]</span> development roadmap for <span className="font-bold">Q1-Q2 2025</span>.
-              First autonomous trust pilot for crypto. Polymarket odds + on-chain analysis.
-              No one else is building this.
+              This document outlines our <span className="font-bold">CLARP</span> development roadmap for <span className="font-bold">2025</span>.
+              Trust intelligence for crypto projects and people. OSINT + AI analysis.
+              Scan anything. Get a trust score with receipts.
             </p>
           </div>
 
@@ -182,8 +182,7 @@ export default function Roadmap() {
                 style={{
                   borderColor:
                     phase.status === 'complete' ? '#27AE60' :
-                    phase.status === 'current' ? '#FF6B35' :
-                    phase.status === 'never' ? '#E74C3C' : '#F1C40F',
+                    phase.status === 'current' ? '#FF6B35' : '#F1C40F',
                 }}
               >
                 {/* Phase header */}
@@ -210,6 +209,7 @@ export default function Roadmap() {
                     <Stamp
                       text={phase.stamp}
                       variant={
+                        phase.status === 'complete' ? 'approved' :
                         phase.status === 'current' ? 'pending' : 'pending'
                       }
                       rotation={[-8, -4, 6, -10][i]}
@@ -226,8 +226,8 @@ export default function Roadmap() {
                 <ul className="space-y-1 mb-2">
                   {phase.items.map((item, j) => (
                     <li key={j} className="font-mono text-xs text-slate-dark/80 flex items-start gap-2">
-                      <span className="text-slate-dark/40">
-                        {phase.status === 'current' ? '▸' : '☐'}
+                      <span className={phase.status === 'complete' ? 'text-larp-green' : 'text-slate-dark/40'}>
+                        {phase.status === 'complete' ? '✓' : phase.status === 'current' ? '▸' : '☐'}
                       </span>
                       <span>
                         {item}
