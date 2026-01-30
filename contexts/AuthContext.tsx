@@ -7,6 +7,7 @@ import {
   useEffect,
   useCallback,
   useMemo,
+  useRef,
   ReactNode,
 } from 'react';
 import { createClient, SupabaseClient, User, Session } from '@supabase/supabase-js';
@@ -79,6 +80,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return publicKey.toBase58();
   }, [publicKey]);
 
+  // Use a ref for the connecting guard so signIn callback stays stable
+  const isConnectingRef = useRef(false);
+
   // Sign in with Supabase Web3
   const signIn = useCallback(async () => {
     if (!supabase) {
@@ -89,8 +93,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       throw new Error('Wallet not connected');
     }
 
-    if (isConnecting) return;
+    if (isConnectingRef.current) return;
 
+    isConnectingRef.current = true;
     setIsConnecting(true);
 
     try {
@@ -116,9 +121,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       console.error('[Auth] Sign in failed:', error);
       throw error;
     } finally {
+      isConnectingRef.current = false;
       setIsConnecting(false);
     }
-  }, [supabase, connected, publicKey, signMessage, isConnecting]);
+  }, [supabase, connected, publicKey, signMessage]);
 
   // Sign out
   const signOut = useCallback(async () => {

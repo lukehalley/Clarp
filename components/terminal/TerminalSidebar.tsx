@@ -18,8 +18,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Search,
-  ArrowLeft,
   Coins,
+  Wallet,
 } from 'lucide-react';
 
 function GithubIcon({ size = 16, className = '' }: { size?: number; className?: string }) {
@@ -66,7 +66,7 @@ const DETAIL_TABS: DetailTab[] = [
 ];
 
 export default function TerminalSidebar() {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
   const pathname = usePathname();
   const router = useRouter();
   const { activeDetailTab, setActiveDetailTab, isDetailPage } = useTerminalNav();
@@ -99,7 +99,7 @@ export default function TerminalSidebar() {
       `}
     >
       {/* Logo / Brand */}
-      <div className="shrink-0 border-b border-ivory-light/10 px-3 h-12 flex items-center overflow-hidden">
+      <div className="shrink-0 border-b border-ivory-light/10 px-3 h-12 flex items-center justify-center overflow-hidden">
         {expanded ? (
           <Link
             href="/terminal/projects"
@@ -114,7 +114,7 @@ export default function TerminalSidebar() {
             className="flex items-center justify-center w-8 h-8 font-mono font-bold text-danger-orange text-sm"
             title="CLARP TERMINAL"
           >
-            C
+            CT
           </Link>
         )}
       </div>
@@ -228,28 +228,26 @@ export default function TerminalSidebar() {
           {expanded ? (
             <ConnectWallet compact />
           ) : (
-            <div className="relative group">
-              <ConnectWallet compact />
+            <div className="relative group flex justify-center">
+              <button
+                onClick={() => setExpanded(true)}
+                className="w-8 h-8 flex items-center justify-center text-ivory-light/40 hover:text-larp-green transition-colors"
+                title="Connect Wallet"
+              >
+                <Wallet size={18} />
+              </button>
+              <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 bg-[#1a1a19] border border-ivory-light/10 text-ivory-light text-xs font-mono whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-150 z-50">
+                Wallet
+              </div>
             </div>
           )}
         </div>
 
-        {/* Back to home + collapse toggle */}
-        <div className="flex items-center border-t border-ivory-light/5">
-          <button
-            onClick={() => router.push('/')}
-            className={`
-              flex items-center gap-2 h-10 font-mono text-[10px] text-ivory-light/30 hover:text-ivory-light/50 transition-colors cursor-pointer overflow-hidden
-              ${expanded ? 'px-4 flex-1' : 'px-4 flex-1 justify-center'}
-            `}
-            title="Back to home"
-          >
-            <ArrowLeft size={14} className="shrink-0" />
-            {expanded && <span className="whitespace-nowrap">Home</span>}
-          </button>
+        {/* Collapse toggle */}
+        <div className="flex items-center justify-center border-t border-ivory-light/5">
           <button
             onClick={() => setExpanded(!expanded)}
-            className="flex items-center justify-center w-10 h-10 text-ivory-light/30 hover:text-ivory-light/50 transition-colors cursor-pointer border-l border-ivory-light/5"
+            className="flex items-center justify-center w-full h-10 text-ivory-light/30 hover:text-ivory-light/50 transition-colors cursor-pointer"
             title={expanded ? 'Collapse' : 'Expand'}
           >
             {expanded ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}

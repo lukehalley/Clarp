@@ -2,6 +2,9 @@
 const nextConfig = {
   reactStrictMode: true,
   distDir: process.env.NODE_ENV === 'production' ? '.next' : '.next-dev',
+  devIndicators: {
+    position: 'bottom-right',
+  },
   images: {
     remotePatterns: [
       {

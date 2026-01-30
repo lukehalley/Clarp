@@ -4,9 +4,6 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import {
   Filter,
-  CheckCircle,
-  AlertTriangle,
-  Shield,
   ArrowUpDown,
   RotateCcw,
 } from 'lucide-react';
@@ -47,11 +44,11 @@ const SORT_OPTIONS: { id: SortOption; label: string }[] = [
   { id: 'name-asc', label: 'Name: A to Z' },
 ];
 
-const CATEGORY_FILTERS: { id: CategoryFilter; label: string; icon: React.ReactNode }[] = [
-  { id: 'all', label: 'All', icon: <Filter size={14} /> },
-  { id: 'verified', label: 'Verified', icon: <CheckCircle size={14} /> },
-  { id: 'high-risk', label: 'High Risk', icon: <AlertTriangle size={14} /> },
-  { id: 'low-risk', label: 'Trusted', icon: <Shield size={14} /> },
+const CATEGORY_FILTERS: { id: CategoryFilter; label: string }[] = [
+  { id: 'all', label: 'All' },
+  { id: 'verified', label: 'Verified' },
+  { id: 'high-risk', label: 'High Risk' },
+  { id: 'low-risk', label: 'Trusted' },
 ];
 
 function sortOptionToParams(sortBy: SortOption): { orderBy: string; order: string } {
@@ -70,14 +67,12 @@ function sortOptionToParams(sortBy: SortOption): { orderBy: string; order: strin
 function buildUrl(entitySlug: string, filters: {
   category?: CategoryFilter;
   sort?: SortOption;
-  verified?: boolean;
   page?: number;
 }): string {
   const params = new URLSearchParams();
 
   if (filters.category && filters.category !== 'all') params.set('category', filters.category);
   if (filters.sort && filters.sort !== 'score-high') params.set('sort', filters.sort);
-  if (filters.verified) params.set('verified', 'true');
   if (filters.page && filters.page > 1) params.set('page', String(filters.page));
 
   const qs = params.toString();
@@ -93,8 +88,6 @@ function ToolBar({
   setCategory,
   sortBy,
   setSortBy,
-  verifiedOnly,
-  setVerifiedOnly,
   hasActiveFilters,
   onReset,
 }: {
@@ -102,80 +95,72 @@ function ToolBar({
   setCategory: (c: CategoryFilter) => void;
   sortBy: SortOption;
   setSortBy: (s: SortOption) => void;
-  verifiedOnly: boolean;
-  setVerifiedOnly: (v: boolean) => void;
   hasActiveFilters: boolean;
   onReset: () => void;
 }) {
+  const activeCategoryLabel = CATEGORY_FILTERS.find(f => f.id === category)?.label || 'All';
+  const activeSortLabel = SORT_OPTIONS.find(s => s.id === sortBy)?.label || 'Trust: High to Low';
+
   return (
-    <div className="flex items-center gap-2 py-3 border-b border-ivory-light/10 overflow-x-auto scrollbar-hide">
-      {/* Search */}
+    <div className="flex items-stretch gap-2 h-12">
+      {/* Search — takes remaining space */}
       <div className="flex-1 min-w-[180px]">
         <SearchInput compact />
       </div>
 
-      {/* Divider */}
-      <div className="w-px h-6 bg-ivory-light/10 shrink-0 hidden sm:block" />
-
-      {/* Category filters */}
-      <div className="flex items-center gap-1 shrink-0">
-        {CATEGORY_FILTERS.map((filter) => (
-          <button
-            key={filter.id}
-            onClick={() => setCategory(filter.id)}
-            className={`flex items-center gap-1 px-2 py-1.5 font-mono text-[11px] transition-colors border whitespace-nowrap ${
-              category === filter.id
-                ? 'bg-danger-orange text-black font-bold border-danger-orange'
-                : 'bg-transparent border-ivory-light/20 text-ivory-light/60 hover:text-ivory-light hover:border-ivory-light/40'
-            }`}
+      {/* Right side: Filter | Sort | Reset */}
+      <div className="shrink-0 hidden sm:flex items-center gap-0">
+        {/* Category dropdown */}
+        <div className="flex items-center gap-1.5">
+          <Filter size={12} className="text-ivory-light/40" />
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value as CategoryFilter)}
+            className="bg-transparent text-ivory-light/60 font-mono text-[11px] focus:outline-none cursor-pointer appearance-none pr-3"
+            style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'10\' height=\'10\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%239ca3af\' stroke-width=\'2\'%3E%3Cpath d=\'M6 9l6 6 6-6\'/%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0 center' }}
           >
-            {filter.icon}
-            <span className="hidden sm:inline">{filter.label}</span>
-          </button>
-        ))}
+            {CATEGORY_FILTERS.map((filter) => (
+              <option key={filter.id} value={filter.id} className="bg-slate-dark">
+                {filter.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Separator */}
+        <div className="w-px h-4 bg-ivory-light/15 mx-3" />
+
+        {/* Sort dropdown */}
+        <div className="flex items-center gap-1.5">
+          <ArrowUpDown size={12} className="text-ivory-light/40" />
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as SortOption)}
+            className="bg-transparent text-ivory-light/60 font-mono text-[11px] focus:outline-none cursor-pointer appearance-none pr-3"
+            style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'10\' height=\'10\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%239ca3af\' stroke-width=\'2\'%3E%3Cpath d=\'M6 9l6 6 6-6\'/%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0 center' }}
+          >
+            {SORT_OPTIONS.map((option) => (
+              <option key={option.id} value={option.id} className="bg-slate-dark">
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Reset */}
+        {hasActiveFilters && (
+          <>
+            <div className="w-px h-4 bg-ivory-light/15 mx-3" />
+            <button
+              onClick={onReset}
+              className="text-ivory-light/40 hover:text-ivory-light/60 transition-colors"
+              title="Reset filters"
+            >
+              <RotateCcw size={12} />
+            </button>
+          </>
+        )}
       </div>
-
-      {/* Divider */}
-      <div className="w-px h-6 bg-ivory-light/10 shrink-0 hidden sm:block" />
-
-      {/* Sort */}
-      <div className="flex items-center gap-1.5 shrink-0">
-        <ArrowUpDown size={12} className="text-ivory-light/40" />
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value as SortOption)}
-          className="px-1.5 py-1.5 bg-transparent border border-ivory-light/20 text-ivory-light/60 font-mono text-[11px] focus:border-danger-orange/50 focus:outline-none cursor-pointer"
-        >
-          {SORT_OPTIONS.map((option) => (
-            <option key={option.id} value={option.id} className="bg-slate-dark">
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Verified toggle */}
-      <button
-        onClick={() => setVerifiedOnly(!verifiedOnly)}
-        className={`flex items-center gap-1 px-2 py-1.5 font-mono text-[11px] transition-colors border shrink-0 ${
-          verifiedOnly
-            ? 'bg-larp-green/20 border-larp-green/50 text-larp-green'
-            : 'bg-transparent border-ivory-light/20 text-ivory-light/40 hover:text-ivory-light/60'
-        }`}
-      >
-        <CheckCircle size={11} />
-        <span className="hidden sm:inline">Verified</span>
-      </button>
-
-      {/* Reset */}
-      {hasActiveFilters && (
-        <button
-          onClick={onReset}
-          className="flex items-center gap-1 px-2 py-1.5 font-mono text-[11px] text-ivory-light/40 hover:text-ivory-light/60 transition-colors shrink-0"
-        >
-          <RotateCcw size={11} />
-        </button>
-      )}
     </div>
   );
 }
@@ -192,18 +177,12 @@ function LoadingState() {
   );
 }
 
-function EmptyState({ onRequestScan }: { onRequestScan: () => void }) {
+function EmptyState() {
   return (
     <div className="py-16 text-center border-2 border-ivory-light/10 bg-ivory-light/[0.02]">
-      <p className="font-mono text-sm text-ivory-light/40 mb-4">
-        No projects match your filters
+      <p className="font-mono text-sm text-ivory-light/40">
+        No results match your filters
       </p>
-      <button
-        onClick={onRequestScan}
-        className="font-mono text-sm text-danger-orange hover:text-danger-orange/80 transition-colors"
-      >
-        Search and scan a project
-      </button>
     </div>
   );
 }
@@ -212,12 +191,44 @@ function EmptyState({ onRequestScan }: { onRequestScan: () => void }) {
 // PAGE
 // ============================================================================
 
-const ITEMS_PER_PAGE = 10;
+// Estimated card height (px): card padding + content + border + gap between cards
+const CARD_HEIGHT_ESTIMATE = 86;
+// Toolbar + padding overhead in the scrollable area (px)
+const TOOLBAR_OVERHEAD = 60;
+const MIN_ITEMS = 4;
+const MAX_ITEMS = 30;
+
+function useItemsPerPage(containerRef: React.RefObject<HTMLDivElement | null>) {
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const calculate = () => {
+      const available = el.clientHeight - TOOLBAR_OVERHEAD;
+      const count = Math.floor(available / CARD_HEIGHT_ESTIMATE);
+      setItemsPerPage(Math.max(MIN_ITEMS, Math.min(MAX_ITEMS, count)));
+    };
+
+    calculate();
+
+    const observer = new ResizeObserver(calculate);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [containerRef]);
+
+  return itemsPerPage;
+}
 
 export default function TerminalEntityPage() {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
+
+  // Ref for measuring available content height
+  const contentRef = useRef<HTMLDivElement | null>(null);
+  const itemsPerPage = useItemsPerPage(contentRef);
 
   // Derive entity type from URL slug
   const entitySlug = params.entityType as string;
@@ -233,8 +244,6 @@ export default function TerminalEntityPage() {
   const sortBy: SortOption = (sortParam && VALID_SORTS.includes(sortParam as SortOption))
     ? sortParam as SortOption
     : 'score-high';
-
-  const verifiedOnly = searchParams.get('verified') === 'true';
 
   const pageParam = searchParams.get('page');
   const currentPage = pageParam ? Math.max(1, parseInt(pageParam, 10) || 1) : 1;
@@ -252,7 +261,7 @@ export default function TerminalEntityPage() {
   // AbortController ref for cancelling stale requests
   const abortRef = useRef<AbortController | null>(null);
 
-  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
 
   // Redirect invalid slugs to /terminal/projects
   useEffect(() => {
@@ -271,12 +280,11 @@ export default function TerminalEntityPage() {
         entityType: entityFilter,
         orderBy,
         order,
-        limit: String(ITEMS_PER_PAGE),
-        offset: String((currentPage - 1) * ITEMS_PER_PAGE),
+        limit: String(itemsPerPage),
+        offset: String((currentPage - 1) * itemsPerPage),
       });
 
       if (category !== 'all') apiParams.set('category', category);
-      if (verifiedOnly) apiParams.set('verifiedOnly', 'true');
 
       const res = await fetch(`/api/projects?${apiParams.toString()}`, { signal });
       if (!res.ok) throw new Error('Failed to fetch projects');
@@ -293,7 +301,7 @@ export default function TerminalEntityPage() {
       setIsFetching(false);
       setIsInitialLoad(false);
     }
-  }, [entityFilter, category, sortBy, verifiedOnly, currentPage]);
+  }, [entityFilter, category, sortBy, currentPage, itemsPerPage]);
 
   // Fetch when any filter/sort/page changes
   useEffect(() => {
@@ -308,7 +316,6 @@ export default function TerminalEntityPage() {
   const updateUrl = useCallback((slug: string, filters: {
     category?: CategoryFilter;
     sort?: SortOption;
-    verified?: boolean;
     page?: number;
   }) => {
     router.replace(buildUrl(slug, filters), { scroll: false });
@@ -316,23 +323,15 @@ export default function TerminalEntityPage() {
 
   // Filter change handlers — update URL (state is derived from URL)
   const handleCategory = (c: CategoryFilter) => {
-    updateUrl(ENTITY_TO_SLUG[entityFilter], { category: c, sort: sortBy, verified: verifiedOnly });
+    updateUrl(ENTITY_TO_SLUG[entityFilter], { category: c, sort: sortBy });
   };
 
   const handleSortBy = (s: SortOption) => {
-    updateUrl(ENTITY_TO_SLUG[entityFilter], { category, sort: s, verified: verifiedOnly });
-  };
-
-  const handleVerifiedOnly = (v: boolean) => {
-    updateUrl(ENTITY_TO_SLUG[entityFilter], { category, sort: sortBy, verified: v });
+    updateUrl(ENTITY_TO_SLUG[entityFilter], { category, sort: s });
   };
 
   const handlePageChange = (page: number) => {
-    updateUrl(ENTITY_TO_SLUG[entityFilter], { category, sort: sortBy, verified: verifiedOnly, page });
-  };
-
-  const handleRequestScan = () => {
-    router.push('/terminal/scan');
+    updateUrl(ENTITY_TO_SLUG[entityFilter], { category, sort: sortBy, page });
   };
 
   const resetFilters = () => {
@@ -341,114 +340,90 @@ export default function TerminalEntityPage() {
 
   const hasActiveFilters =
     category !== 'all' ||
-    sortBy !== 'score-high' ||
-    verifiedOnly;
-
-  // Get label for results count
-  const getResultsLabel = () => {
-    if (entityFilter === 'person') return totalCount === 1 ? 'person' : 'people';
-    if (entityFilter === 'organization') return totalCount === 1 ? 'org' : 'orgs';
-    return totalCount === 1 ? 'project' : 'projects';
-  };
+    sortBy !== 'score-high';
 
   return (
     <WalletGate showPreview={true}>
-      <div className="px-4 sm:px-6 py-4">
-        {isInitialLoad ? (
-          <LoadingState />
-        ) : (
-          <>
-          {/* Search + Filters + Sort — single horizontal bar */}
-          <ToolBar
-            category={category}
-            setCategory={handleCategory}
-            sortBy={sortBy}
-            setSortBy={handleSortBy}
-            verifiedOnly={verifiedOnly}
-            setVerifiedOnly={handleVerifiedOnly}
-            hasActiveFilters={hasActiveFilters}
-            onReset={resetFilters}
-          />
+      <div className="absolute inset-0 flex flex-col">
+        <div ref={contentRef} className="flex-1 flex flex-col overflow-hidden px-4 sm:px-6">
+          {isInitialLoad ? (
+            <LoadingState />
+          ) : (
+            <>
+              {/* Search + Filters + Sort — single horizontal bar */}
+              <div className="shrink-0">
+                <ToolBar
+                  category={category}
+                  setCategory={handleCategory}
+                  sortBy={sortBy}
+                  setSortBy={handleSortBy}
+                  hasActiveFilters={hasActiveFilters}
+                  onReset={resetFilters}
+                />
+              </div>
 
-          {/* Results count */}
-          <div className="flex items-center justify-between py-4">
-            <span className="font-mono text-xs text-ivory-light/40">
-              {totalCount} {getResultsLabel()}
-            </span>
-          </div>
-
-          {error ? (
-          <div className="py-16 text-center">
-            <p className="font-mono text-sm text-larp-red/80">{error}</p>
-            <button
-              onClick={() => fetchProjects()}
-              className="mt-4 font-mono text-xs text-ivory-light/40 hover:text-ivory-light/60 transition-colors"
-            >
-              Try again
-            </button>
-          </div>
-        ) : projects.length === 0 ? (
-          <EmptyState onRequestScan={handleRequestScan} />
-        ) : (
-          <div className={`transition-opacity duration-150 ${isFetching ? 'opacity-50 pointer-events-none' : ''}`}>
-            <div className="space-y-4">
-              {projects.map((project) => (
-                <IntelCard key={project.id} project={project} />
-              ))}
-            </div>
-
-            {/* Pagination Controls */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 mt-6 pt-4 border-t border-ivory-light/10">
-                <button
-                  onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
-                  className="px-3 py-1.5 font-mono text-xs border border-ivory-light/20 text-ivory-light/60 hover:text-ivory-light hover:border-ivory-light/40 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                >
-                  ← Prev
-                </button>
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              {error ? (
+                <div className="flex-1 flex items-center justify-center">
+                  <div className="text-center">
+                    <p className="font-mono text-sm text-larp-red/80">{error}</p>
                     <button
-                      key={page}
-                      onClick={() => handlePageChange(page)}
-                      className={`w-8 h-8 font-mono text-xs transition-colors ${
-                        currentPage === page
-                          ? 'bg-danger-orange text-black font-bold'
-                          : 'border border-ivory-light/20 text-ivory-light/60 hover:text-ivory-light hover:border-ivory-light/40'
-                      }`}
+                      onClick={() => fetchProjects()}
+                      className="mt-4 font-mono text-xs text-ivory-light/40 hover:text-ivory-light/60 transition-colors"
                     >
-                      {page}
+                      Try again
                     </button>
+                  </div>
+                </div>
+              ) : projects.length === 0 ? (
+                <div className="flex-1 flex items-center justify-center">
+                  <EmptyState />
+                </div>
+              ) : (
+                <div className={`flex-1 flex flex-col justify-evenly py-2 transition-opacity duration-150 ${isFetching ? 'opacity-50 pointer-events-none' : ''}`}>
+                  {projects.map((project) => (
+                    <IntelCard key={project.id} project={project} />
                   ))}
                 </div>
-                <button
-                  onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-                  disabled={currentPage === totalPages}
-                  className="px-3 py-1.5 font-mono text-xs border border-ivory-light/20 text-ivory-light/60 hover:text-ivory-light hover:border-ivory-light/40 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                >
-                  Next →
-                </button>
-              </div>
-            )}
-          </div>
-        )}
+              )}
+            </>
+          )}
+        </div>
 
-        {/* Bottom hint */}
-        {totalCount > 0 && (
-          <div className="mt-8 pt-6 border-t border-ivory-light/5 text-center">
-            <p className="font-mono text-xs text-ivory-light/30">
-              Can&apos;t find what you&apos;re looking for?{' '}
+        {/* Pagination — pinned to bottom */}
+        {!isInitialLoad && totalPages > 1 && (
+          <div className="shrink-0 border-t border-ivory-light/10 bg-slate-dark px-4 sm:px-6 py-3 z-10">
+            <div className="flex items-center justify-center gap-2">
               <button
-                onClick={handleRequestScan}
-                className="text-danger-orange hover:text-danger-orange/80 transition-colors"
+                onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1.5 font-mono text-xs border border-ivory-light/20 text-ivory-light/60 hover:text-ivory-light hover:border-ivory-light/40 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
-                Search and scan
+                ← Prev
               </button>
-            </p>
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => handlePageChange(page)}
+                    className={`w-8 h-8 font-mono text-xs transition-colors ${
+                      currentPage === page
+                        ? 'bg-danger-orange text-black font-bold'
+                        : 'border border-ivory-light/20 text-ivory-light/60 hover:text-ivory-light hover:border-ivory-light/40'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1.5 font-mono text-xs border border-ivory-light/20 text-ivory-light/60 hover:text-ivory-light hover:border-ivory-light/40 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                Next →
+              </button>
+            </div>
           </div>
-        )}
-          </>
         )}
       </div>
     </WalletGate>

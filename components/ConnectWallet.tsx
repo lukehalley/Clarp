@@ -27,7 +27,7 @@ function truncateAddress(address: string | null, startChars = 4, endChars = 4): 
 export default function ConnectWallet({ className = '', compact = false }: ConnectWalletProps) {
   const { connected, publicKey, disconnect } = useWallet();
   const { setVisible } = useWalletModal();
-  const { wallet, isConnecting, isAuthenticated, signIn, signOut } = useAuth();
+  const { wallet, isConnecting, isAuthenticated, isLoading: authLoading, signIn, signOut } = useAuth();
   const { tier, balanceFormatted, isLoading: tierLoading } = useUserTier();
   const { refetch: refetchBalance } = useTokenBalance();
 
@@ -64,9 +64,17 @@ export default function ConnectWallet({ className = '', compact = false }: Conne
     };
   }, [dropdownOpen]);
 
-  // Auto sign-in when wallet connects (but not if user manually disconnected or rejected sign-in)
+  // Only auto sign-in when user explicitly clicks connect, not on autoConnect page reload
+  const userInitiatedConnectRef = useRef(false);
+
+  // When wallet connects after user-initiated action, trigger sign-in once
   useEffect(() => {
-    if (connected && publicKey && !isAuthenticated && !isConnecting && mounted && !userDisconnected && !signInRejected) {
+    if (
+      connected && publicKey && !isAuthenticated && !isConnecting &&
+      !authLoading && mounted && !signInRejected &&
+      userInitiatedConnectRef.current
+    ) {
+      userInitiatedConnectRef.current = false;
       signIn().catch((err) => {
         console.error('[ConnectWallet] Auto sign-in failed:', err);
         setSignInRejected(true);
@@ -74,7 +82,7 @@ export default function ConnectWallet({ className = '', compact = false }: Conne
         setTimeout(() => setError(null), 5000);
       });
     }
-  }, [connected, publicKey, isAuthenticated, isConnecting, mounted, signIn, userDisconnected, signInRejected]);
+  }, [connected, publicKey, isAuthenticated, isConnecting, authLoading, mounted, signIn, signInRejected]);
 
   // Handle connect - opens wallet modal
   const handleConnect = () => {
@@ -83,6 +91,7 @@ export default function ConnectWallet({ className = '', compact = false }: Conne
     localStorage.removeItem('wallet-user-disconnected');
     setUserDisconnected(false);
     setSignInRejected(false);
+    userInitiatedConnectRef.current = true;
     setVisible(true);
   };
 
@@ -139,14 +148,15 @@ export default function ConnectWallet({ className = '', compact = false }: Conne
       <div className={`relative ${className}`}>
         <div
           className={`
-            flex items-center justify-center gap-2
-            bg-larp-green border-2 border-black
-            font-mono font-bold text-black
-            ${compact ? 'h-10 px-4 text-xs' : 'px-4 py-2.5 text-sm'}
+            flex items-center gap-2 font-mono
+            ${compact
+              ? 'w-full h-10 px-3 text-xs text-ivory-light/30'
+              : 'justify-center bg-larp-green border-2 border-black font-bold text-black px-4 py-2.5 text-sm'
+            }
           `}
-          style={{ boxShadow: '3px 3px 0 black' }}
+          style={compact ? undefined : { boxShadow: '3px 3px 0 black' }}
         >
-          <Wallet size={compact ? 16 : 16} />
+          <Wallet size={16} className="shrink-0" />
           <span className={compact ? 'hidden sm:inline' : ''}>connect wallet</span>
         </div>
       </div>
@@ -161,23 +171,23 @@ export default function ConnectWallet({ className = '', compact = false }: Conne
           onClick={handleConnect}
           disabled={isConnecting}
           className={`
-            flex items-center justify-center gap-2
-            bg-larp-green border-2 border-black
-            font-mono font-bold text-black
-            transition-all hover:translate-x-0.5 hover:translate-y-0.5
-            disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-x-0 disabled:hover:translate-y-0
-            ${compact ? 'h-10 px-4 text-xs' : 'px-4 py-2.5 text-sm'}
+            flex items-center gap-2 font-mono transition-colors
+            disabled:opacity-50 disabled:cursor-not-allowed
+            ${compact
+              ? 'w-full h-10 px-3 text-xs text-ivory-light/50 hover:text-larp-green hover:bg-larp-green/5 cursor-pointer'
+              : 'px-4 py-2.5 text-sm bg-larp-green border-2 border-black font-bold text-black hover:translate-x-0.5 hover:translate-y-0.5'
+            }
           `}
-          style={{ boxShadow: isConnecting ? 'none' : '3px 3px 0 black' }}
+          style={compact ? undefined : { boxShadow: isConnecting ? 'none' : '3px 3px 0 black' }}
         >
           {isConnecting ? (
             <>
-              <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+              <div className={`w-4 h-4 border-2 rounded-full animate-spin ${compact ? 'border-ivory-light/30 border-t-larp-green' : 'border-black border-t-transparent'}`} />
               <span className={compact ? 'hidden sm:inline' : ''}>connecting...</span>
             </>
           ) : (
             <>
-              <Wallet size={compact ? 16 : 16} />
+              <Wallet size={compact ? 16 : 16} className="shrink-0" />
               <span className={compact ? 'hidden sm:inline' : ''}>connect wallet</span>
             </>
           )}
@@ -199,20 +209,22 @@ export default function ConnectWallet({ className = '', compact = false }: Conne
       <button
         onClick={() => setDropdownOpen(!dropdownOpen)}
         className={`
-          flex items-center gap-2
-          bg-larp-green/20 border-2 border-larp-green/50
-          text-larp-green font-mono
-          transition-all hover:bg-larp-green/30 hover:border-larp-green
-          ${compact ? 'h-10 px-4 text-xs' : 'px-4 py-2.5 text-sm'}
+          flex items-center gap-2 font-mono transition-colors
+          ${compact
+            ? 'w-full h-10 px-3 text-xs text-ivory-light/50 hover:text-larp-green hover:bg-larp-green/5 cursor-pointer'
+            : 'px-4 py-2.5 text-sm bg-larp-green/20 border-2 border-larp-green/50 text-larp-green hover:bg-larp-green/30 hover:border-larp-green'
+          }
         `}
       >
-        <div className="w-2 h-2 bg-larp-green rounded-full animate-pulse" />
-        <span>{truncateAddress(wallet)}</span>
+        <div className="w-1.5 h-1.5 bg-larp-green rounded-full animate-pulse shrink-0" />
+        <span className="truncate">{truncateAddress(wallet)}</span>
       </button>
 
       {/* Dropdown menu */}
       {dropdownOpen && (
-        <div className="absolute right-0 top-full mt-2 w-64 bg-slate-dark border border-ivory-light/20 z-50 shadow-lg">
+        <div className={`absolute w-64 bg-slate-dark border border-ivory-light/20 z-50 shadow-lg ${
+          compact ? 'bottom-full mb-2 left-0' : 'right-0 top-full mt-2'
+        }`}>
           {/* Wallet address */}
           <div className="p-3 border-b border-ivory-light/10">
             <p className="font-mono text-[10px] text-ivory-light/40 mb-1">CONNECTED WALLET</p>

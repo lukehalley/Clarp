@@ -180,14 +180,14 @@ export default function SearchInput({ compact, initialValue = '', onSearch }: Se
   const detectedType = getDetectedType(query);
 
   return (
-    <div className={`relative ${compact ? 'h-10' : ''}`}>
+    <div className={`relative ${compact ? 'h-full' : ''}`}>
       <form onSubmit={handleSubmit} className={compact ? 'h-full' : ''}>
         <div
-          className={`flex items-center gap-2 bg-slate-dark/50 border-2 transition-colors ${
+          className={`flex items-center gap-2 border-b transition-colors ${
             isFocused
               ? 'border-danger-orange'
-              : 'border-ivory-light/20 hover:border-ivory-light/30'
-          } ${compact ? 'h-full px-3' : 'px-4 py-3'}`}
+              : 'border-ivory-light/20 hover:border-ivory-light/40'
+          } ${compact ? 'h-full px-1' : 'px-1 py-3'}`}
         >
           <Search size={compact ? 16 : 18} className="text-ivory-light/40 shrink-0" />
 
