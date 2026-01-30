@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Check, Loader2, X } from 'lucide-react';
 import WalletGate from '@/components/auth/WalletGate';
+import { SCAN_STAGES } from '@/types/xintel';
 
 // ============================================================================
 // TYPES
@@ -138,82 +139,68 @@ function ScanPageInner() {
   const [error, setError] = useState<string | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
   const [resolvedHandle, setResolvedHandle] = useState<string | null>(null);
+  const [elapsed, setElapsed] = useState(0);
+  const scanStartRef = useRef<number | null>(null);
 
-  // Detect if input is a token address
-  const isTokenAddress = query && /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(query.trim());
-  const isEVMAddress = query && /^0x[a-fA-F0-9]{40}$/.test(query.trim());
-  const isAddress = isTokenAddress || isEVMAddress;
+  // Elapsed time counter
+  useEffect(() => {
+    if (phase !== 'scanning') return;
+    if (!scanStartRef.current) scanStartRef.current = Date.now();
+    const interval = setInterval(() => {
+      setElapsed(Math.floor((Date.now() - scanStartRef.current!) / 1000));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [phase]);
 
-  // Initialize steps based on query type - OSINT first, then AI
-  const initSteps = (): ScanStep[] => [
-    {
-      id: 'resolve',
-      label: isAddress ? 'resolving token' : 'identifying entity',
-      status: 'pending'
-    },
-    { id: 'osint', label: 'gathering osint data', status: 'pending' },
-    { id: 'social', label: 'discovering social links', status: 'pending' },
-    { id: 'analyze', label: 'ai analysis', status: 'pending' },
-    { id: 'report', label: 'building trust report', status: 'pending' },
-  ];
+  // Build steps from SCAN_STAGES config (all pending initially)
+  const initSteps = (): ScanStep[] =>
+    SCAN_STAGES.map((stage) => ({
+      id: stage.status,
+      label: stage.label,
+      status: 'pending' as const,
+    }));
 
-  // Update a specific step
-  const updateStep = (stepId: string, updates: Partial<ScanStep>) => {
-    setSteps((prev) =>
-      prev.map((s) => (s.id === stepId ? { ...s, ...updates } : s))
-    );
-  };
+  // Build a status→order lookup from SCAN_STAGES
+  const stageOrderMap = useRef(
+    Object.fromEntries(SCAN_STAGES.map((s) => [s.status, s.order])) as Record<string, number>
+  );
 
-  // Map API status to our steps - reflects OSINT → AI flow
-  const mapStatusToStep = (status: string, _progress: number, message?: string) => {
-    switch (status) {
-      case 'queued':
-        updateStep('resolve', { status: 'active', detail: 'waiting in queue...' });
-        break;
-      case 'resolving':
-        updateStep('resolve', { status: 'active', detail: message || 'detecting input type...' });
-        break;
-      case 'fetching':
-        // OSINT phase - gathering free data
-        updateStep('resolve', { status: 'complete', detail: 'entity resolved' });
-        updateStep('osint', { status: 'active', detail: message || 'querying RugCheck, DexScreener...' });
-        break;
-      case 'extracting':
-        updateStep('resolve', { status: 'complete', detail: 'entity resolved' });
-        updateStep('osint', { status: 'complete', detail: 'security + market data collected' });
-        updateStep('social', { status: 'active', detail: message || 'crawling website, finding socials...' });
-        break;
-      case 'analyzing':
-        updateStep('resolve', { status: 'complete', detail: 'entity resolved' });
-        updateStep('osint', { status: 'complete', detail: 'security + market data collected' });
-        updateStep('social', { status: 'complete', detail: 'social links discovered' });
-        updateStep('analyze', { status: 'active', detail: message || 'AI analyzing X activity...' });
-        break;
-      case 'scoring':
-        updateStep('resolve', { status: 'complete', detail: 'entity resolved' });
-        updateStep('osint', { status: 'complete', detail: 'security + market data collected' });
-        updateStep('social', { status: 'complete', detail: 'social links discovered' });
-        updateStep('analyze', { status: 'complete', detail: 'analysis complete' });
-        updateStep('report', { status: 'active', detail: message || 'calculating trust score...' });
-        break;
-      case 'enriching':
-        updateStep('resolve', { status: 'complete', detail: 'entity resolved' });
-        updateStep('osint', { status: 'complete', detail: 'security + market data collected' });
-        updateStep('social', { status: 'complete', detail: 'social links discovered' });
-        updateStep('analyze', { status: 'complete', detail: 'analysis complete' });
-        updateStep('report', { status: 'active', detail: message || 'enriching with additional data...' });
-        break;
-      case 'complete':
-      case 'cached':
-        // All steps complete
-        updateStep('resolve', { status: 'complete', detail: 'entity resolved' });
-        updateStep('osint', { status: 'complete', detail: 'security + market data collected' });
-        updateStep('social', { status: 'complete', detail: 'social links discovered' });
-        updateStep('analyze', { status: 'complete', detail: 'analysis complete' });
-        updateStep('report', { status: 'complete', detail: 'report generated' });
-        break;
+  // Update steps based on real backend status + statusMessage
+  const updateStagesFromBackend = useCallback((status: string, _progress: number, message?: string) => {
+    const currentOrder = stageOrderMap.current[status];
+
+    // Terminal states: mark everything complete
+    if (status === 'complete' || status === 'cached') {
+      setSteps((prev) =>
+        prev.map((s) => ({ ...s, status: 'complete' as const, detail: s.detail || 'done' }))
+      );
+      return;
     }
-  };
+
+    // Failed: keep current state, don't change completed steps
+    if (status === 'failed') return;
+
+    // Unknown status (not in our stage map) — ignore
+    if (currentOrder === undefined) return;
+
+    setSteps((prev) =>
+      prev.map((s) => {
+        const stepOrder = stageOrderMap.current[s.id];
+        if (stepOrder === undefined) return s;
+
+        if (stepOrder < currentOrder) {
+          // Past stages → complete
+          return { ...s, status: 'complete' as const, detail: s.detail || 'done' };
+        } else if (s.id === status) {
+          // Current stage → active with backend message
+          return { ...s, status: 'active' as const, detail: message || s.detail };
+        } else {
+          // Future stages → stay pending
+          return s;
+        }
+      })
+    );
+  }, []);
 
   // Start scan
   const startScan = async () => {
@@ -222,10 +209,12 @@ function ScanPageInner() {
     setPhase('scanning');
     setSteps(initSteps());
     setError(null);
+    scanStartRef.current = Date.now();
+    setElapsed(0);
 
-    // Start first step
+    // Show first stage as active immediately
     setTimeout(() => {
-      updateStep('resolve', { status: 'active', detail: `resolving "${query.slice(0, 20)}${query.length > 20 ? '...' : ''}"` });
+      updateStagesFromBackend('queued', 0, 'initializing...');
     }, 10);
 
     try {
@@ -242,15 +231,11 @@ function ScanPageInner() {
         throw new Error(data.error || 'Failed to start scan');
       }
 
-      // Update resolve step with detected type
-      updateStep('resolve', { status: 'complete', detail: `detected: ${data.inputType || 'unknown'}` });
+      // Move past queued stage
+      updateStagesFromBackend('fetching', 10, `detected: ${data.inputType || 'unknown'}`);
 
       // If we got immediate OSINT data, show progress and redirect early
       if (data.osintData) {
-        updateStep('osint', { status: 'complete', detail: data.osintData.securityIntel ? 'RugCheck + market data' : 'market data collected' });
-        if (data.osintData.xHandle) {
-          updateStep('social', { status: 'complete', detail: `found @${data.osintData.xHandle}` });
-        }
 
         // If we have OSINT data, redirect immediately - don't wait for AI analysis
         // The project page will show OSINT data and poll for AI analysis completion
@@ -291,7 +276,14 @@ function ScanPageInner() {
       console.error('[ScanPage] Error:', err);
       setError(err instanceof Error ? err.message : 'Failed to start scan');
       setPhase('failed');
-      updateStep('resolve', { status: 'failed', detail: 'resolution failed' });
+      // Mark the first pending/active step as failed
+      setSteps((prev) => {
+        const firstActive = prev.findIndex((s) => s.status === 'active' || s.status === 'pending');
+        if (firstActive >= 0) {
+          return prev.map((s, i) => i === firstActive ? { ...s, status: 'failed' as const, detail: 'failed' } : s);
+        }
+        return prev;
+      });
     }
   };
 
@@ -305,7 +297,7 @@ function ScanPageInner() {
         if (!res.ok) return;
 
         const data = await res.json();
-        mapStatusToStep(data.status, data.progress, data.statusMessage);
+        updateStagesFromBackend(data.status, data.progress, data.statusMessage);
 
         if (data.status === 'complete') {
           setPhase('complete');
@@ -323,7 +315,7 @@ function ScanPageInner() {
 
     const interval = setInterval(poll, 800);
     return () => clearInterval(interval);
-  }, [jobId, phase, router, resolvedHandle, query]);
+  }, [jobId, phase, router, resolvedHandle, query, updateStagesFromBackend]);
 
   // Check for existing scan, cached project, or rate limits before starting
   const checkExistingScan = async () => {
@@ -340,9 +332,11 @@ function ScanPageInner() {
           console.log('[ScanPage] Found active scan, resuming:', data.jobId);
           setPhase('scanning');
           setSteps(initSteps());
+          scanStartRef.current = data.startedAt ? new Date(data.startedAt).getTime() : Date.now();
           setJobId(data.jobId);
           setResolvedHandle(data.handle);
-          mapStatusToStep(data.status, data.progress, data.statusMessage);
+          // Defer stage update so steps state is set first
+          setTimeout(() => updateStagesFromBackend(data.status, data.progress, data.statusMessage), 0);
           return true;
         }
       }
@@ -384,7 +378,7 @@ function ScanPageInner() {
       // Show scanning UI immediately for better perceived performance
       setPhase('scanning');
       setSteps(initSteps());
-      updateStep('resolve', { status: 'active', detail: 'initializing...' });
+      scanStartRef.current = Date.now();
 
       // Then check for existing scan/project in background
       checkExistingScan().then(hasExisting => {
@@ -579,9 +573,14 @@ function ScanPageInner() {
               ai-powered analysis
             </p>
             {phase === 'scanning' && (
-              <div className="flex items-center gap-1.5">
-                <div className="w-1 h-1 bg-danger-orange animate-pulse" />
-                <span className="font-mono text-[9px] text-ivory-light/30">processing</span>
+              <div className="flex items-center gap-3">
+                <span className="font-mono text-[9px] text-ivory-light/20 tabular-nums">
+                  {elapsed}s
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-1 h-1 bg-danger-orange animate-pulse" />
+                  <span className="font-mono text-[9px] text-ivory-light/30">processing</span>
+                </div>
               </div>
             )}
           </div>

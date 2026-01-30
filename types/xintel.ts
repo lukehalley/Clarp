@@ -32,17 +32,35 @@ export interface ScanJob {
 }
 
 export const SCAN_STATUS_LABELS: Record<ScanStatus, string> = {
-  queued: 'Queued',
-  fetching: 'Fetching Posts',
-  extracting: 'Extracting Entities',
-  researching: 'Researching Project',
-  analyzing: 'Analyzing Behavior',
-  scoring: 'Building Report',
+  queued: 'Initializing Scan',
+  fetching: 'Fetching Profile & Posts',
+  extracting: 'Extracting Crypto Intel',
+  researching: 'Researching Background',
+  analyzing: 'AI Behavioral Analysis',
+  scoring: 'Building Trust Report',
   enriching: 'Enriching Token Data',
   complete: 'Complete',
   failed: 'Failed',
   cached: 'Cached',
 };
+
+// User-visible scan stages (derived from ScanStatus)
+export interface ScanStageConfig {
+  status: ScanStatus;
+  label: string;
+  order: number;
+  optional?: boolean; // e.g. 'researching' only appears when Perplexity is active
+}
+
+export const SCAN_STAGES: ScanStageConfig[] = [
+  { status: 'queued',      label: 'initializing scan',        order: 0 },
+  { status: 'fetching',    label: 'fetching profile & posts', order: 1 },
+  { status: 'extracting',  label: 'extracting crypto intel',  order: 2 },
+  { status: 'researching', label: 'researching background',   order: 3, optional: true },
+  { status: 'analyzing',   label: 'ai behavioral analysis',   order: 4 },
+  { status: 'scoring',     label: 'building trust report',    order: 5 },
+  { status: 'enriching',   label: 'enriching token data',     order: 6 },
+];
 
 export const SCAN_STATUS_PROGRESS: Record<ScanStatus, number> = {
   queued: 0,
