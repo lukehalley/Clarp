@@ -131,7 +131,7 @@ export default function IntelCard({ project }: IntelCardProps) {
       `}>
         {/* Avatar / Entity icon fallback — flush left, square */}
         <div className={`
-          shrink-0 w-16 sm:w-[72px] relative overflow-hidden
+          shrink-0 w-12 sm:w-[72px] relative overflow-hidden
           ${entityStyle.color}
         `}>
           {project.avatarUrl ? (
@@ -149,10 +149,10 @@ export default function IntelCard({ project }: IntelCardProps) {
         </div>
 
         {/* Content — left side */}
-        <div className="flex-1 min-w-0 flex items-center gap-3 sm:gap-4 px-3 sm:px-5 py-3 sm:py-4">
+        <div className="flex-1 min-w-0 flex items-center gap-2 sm:gap-4 px-2 sm:px-5 py-2 sm:py-4">
           <div className="flex-1 min-w-0">
             {/* Row 1: Name */}
-            <h3 className="font-mono font-bold text-ivory-light text-sm truncate">
+            <h3 className="font-mono font-bold text-ivory-light text-xs sm:text-sm truncate">
               {project.name}
             </h3>
 

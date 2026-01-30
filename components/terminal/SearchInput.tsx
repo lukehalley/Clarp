@@ -239,7 +239,7 @@ export default function SearchInput({ compact, initialValue = '', onSearch }: Se
       {isFocused && (recentSearches.length > 0 || query) && (
         <div
           ref={dropdownRef}
-          className="absolute top-full left-0 right-0 mt-1 bg-slate-dark border border-ivory-light/20 z-50 max-h-[50vh] sm:max-h-64 overflow-y-auto shadow-xl"
+          className="absolute top-full left-0 right-0 mt-1 bg-slate-dark border border-ivory-light/20 z-50 max-h-[35vh] sm:max-h-64 overflow-y-auto shadow-xl"
         >
           {/* Recent searches */}
           {recentSearches.length > 0 && !query && (

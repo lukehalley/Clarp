@@ -156,7 +156,7 @@ export default function ConnectWallet({ className = '', compact = false, showLab
             style={{ boxShadow: '3px 3px 0 black' }}
           >
             <Wallet size={16} className="shrink-0" />
-            <span>connect wallet</span>
+            <span className="hidden sm:inline">connect wallet</span>
           </div>
         </div>
       );
@@ -168,18 +168,18 @@ export default function ConnectWallet({ className = '', compact = false, showLab
           <button
             onClick={handleConnect}
             disabled={isConnecting}
-            className="flex items-center gap-2 font-mono transition-colors disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2.5 text-sm bg-larp-green border-2 border-black font-bold text-black hover:translate-x-0.5 hover:translate-y-0.5"
+            className="flex items-center gap-2 font-mono transition-colors disabled:opacity-50 disabled:cursor-not-allowed px-3 sm:px-4 py-2.5 text-sm bg-larp-green border-2 border-black font-bold text-black hover:translate-x-0.5 hover:translate-y-0.5"
             style={{ boxShadow: isConnecting ? 'none' : '3px 3px 0 black' }}
           >
             {isConnecting ? (
               <>
                 <div className="w-4 h-4 border-2 rounded-full animate-spin border-black border-t-transparent" />
-                <span>connecting...</span>
+                <span className="hidden sm:inline">connecting...</span>
               </>
             ) : (
               <>
                 <Wallet size={16} className="shrink-0" />
-                <span>connect wallet</span>
+                <span className="hidden sm:inline">connect wallet</span>
               </>
             )}
           </button>

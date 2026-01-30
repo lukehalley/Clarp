@@ -89,7 +89,7 @@ export default function ScanProgressIndicator({
   return (
     <div
       className={`
-        fixed bottom-6 right-6 z-50
+        fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 left-4 sm:left-auto
         transition-all duration-300 ease-out
         ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
       `}
@@ -100,13 +100,10 @@ export default function ScanProgressIndicator({
       <div
         className={`
           relative overflow-hidden
-          bg-slate-dark border
+          bg-slate-dark border min-w-0 sm:min-w-[280px]
           ${isComplete ? 'border-larp-green/40' : 'border-danger-orange/30'}
           shadow-2xl shadow-black/50
         `}
-        style={{
-          minWidth: '280px',
-        }}
       >
         {/* Animated top border - scanning line */}
         {!isComplete && (
@@ -176,7 +173,7 @@ export default function ScanProgressIndicator({
                       }}
                     />
                   ))}
-                  <span className="text-[10px] text-ivory-light font-mono ml-2">
+                  <span className="text-[11px] text-ivory-light font-mono ml-2">
                     PROCESSING
                   </span>
                 </div>

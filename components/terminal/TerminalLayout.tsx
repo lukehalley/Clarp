@@ -33,10 +33,10 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
 
         {/* Mobile-only header (hidden on desktop — sidebar handles branding/wallet) */}
         <header className="lg:hidden shrink-0 border-b border-ivory-light/10 bg-slate-dark/95 backdrop-blur-sm sticky top-0 z-40">
-          <div className="px-4 h-12 flex items-center justify-between gap-4">
+          <div className="px-3 sm:px-4 h-12 flex items-center justify-between gap-2 sm:gap-4">
             <Link
               href="/terminal/projects"
-              className="flex items-center gap-2 text-ivory-light font-mono font-bold text-sm"
+              className="flex items-center gap-1.5 sm:gap-2 text-ivory-light font-mono font-bold text-xs sm:text-sm shrink-0"
             >
               <span className="text-danger-orange">CLARP</span>
               <span className="text-ivory-light">TERMINAL</span>
@@ -51,7 +51,7 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
           <TerminalSidebar />
 
           {/* Main Content — full width */}
-          <main className="flex-1 overflow-y-auto pb-14 lg:pb-0 relative">
+          <main className="flex-1 overflow-y-auto pb-16 lg:pb-0 relative">
             {children}
           </main>
         </div>

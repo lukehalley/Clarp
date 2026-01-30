@@ -153,7 +153,7 @@ export default function TerminalLoader({ onComplete }: TerminalLoaderProps) {
         />
 
         {/* Main content */}
-        <div className="relative z-0 p-8 sm:p-16 md:p-24 h-full flex flex-col justify-center items-center">
+        <div className="relative z-0 p-4 sm:p-16 md:p-24 h-full flex flex-col justify-center items-center">
           {/* ASCII Logo */}
           <pre className="text-danger-orange text-[10px] sm:text-sm md:text-base lg:text-lg font-mono leading-none mb-8 sm:mb-12 md:mb-16 opacity-80">
 {` ██████╗██╗      █████╗ ██████╗ ██████╗

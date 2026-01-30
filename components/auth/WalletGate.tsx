@@ -91,11 +91,11 @@ export default function WalletGate({
 
       {/* Gate Overlay */}
       <div className="absolute inset-0 z-20 bg-slate-dark/90 backdrop-blur-sm flex items-center justify-center p-4">
-        <div className="max-w-md w-full">
+        <div className="max-w-sm sm:max-w-md w-full">
           {/* Main Gate Card */}
           <div className="bg-slate-medium border-2 border-ivory-light/20 overflow-hidden">
             {/* Header */}
-            <div className="p-6 text-center border-b-2 border-ivory-light/10">
+            <div className="p-4 sm:p-6 text-center border-b-2 border-ivory-light/10">
               <div className="w-16 h-16 bg-danger-orange/10 border-2 border-danger-orange/50 flex items-center justify-center mx-auto mb-4">
                 <Lock className="w-8 h-8 text-danger-orange" />
               </div>
@@ -110,7 +110,7 @@ export default function WalletGate({
             </div>
 
             {/* Content */}
-            <div className="p-6 space-y-4">
+            <div className="p-4 sm:p-6 space-y-4">
               {/* Connected but insufficient balance */}
               {hasInsufficientBalance && (
                 <>

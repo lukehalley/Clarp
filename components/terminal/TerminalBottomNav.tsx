@@ -68,7 +68,7 @@ export default function TerminalBottomNav() {
   if (isDetailPage) {
     return (
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-dark border-t border-ivory-light/10">
-        <div className="flex items-center justify-around h-14">
+        <div className="flex items-center justify-around h-16">
           {DETAIL_NAV.map((tab) => {
             const isActive = activeDetailTab === tab.id;
             return (
@@ -76,7 +76,7 @@ export default function TerminalBottomNav() {
                 key={tab.id}
                 onClick={() => setActiveDetailTab(tab.id)}
                 className={`
-                  flex flex-col items-center justify-center gap-0.5 flex-1 h-full font-mono transition-colors cursor-pointer
+                  flex flex-col items-center justify-center gap-0.5 flex-1 h-full min-w-[44px] font-mono transition-colors cursor-pointer
                   ${isActive
                     ? 'text-danger-orange'
                     : 'text-ivory-light active:text-ivory-light'
@@ -84,7 +84,7 @@ export default function TerminalBottomNav() {
                 `}
               >
                 {tab.icon}
-                <span className="text-[9px]">{tab.label}</span>
+                <span className="text-[10px]">{tab.label}</span>
               </button>
             );
           })}
@@ -95,7 +95,7 @@ export default function TerminalBottomNav() {
 
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-dark border-t border-ivory-light/10">
-      <div className="flex items-center justify-around h-14">
+      <div className="flex items-center justify-around h-16">
         {MAIN_NAV.map((item) => {
           const isActive = activeNavId === item.id;
           return (
@@ -103,7 +103,7 @@ export default function TerminalBottomNav() {
               key={item.id}
               onClick={() => item.href && router.push(item.href)}
               className={`
-                flex flex-col items-center justify-center gap-0.5 flex-1 h-full font-mono transition-colors cursor-pointer
+                flex flex-col items-center justify-center gap-0.5 flex-1 h-full min-w-[44px] font-mono transition-colors cursor-pointer
                 ${isActive
                   ? 'text-danger-orange'
                   : 'text-ivory-light active:text-ivory-light'
@@ -111,7 +111,7 @@ export default function TerminalBottomNav() {
               `}
             >
               {item.icon}
-              <span className="text-[9px]">{item.label}</span>
+              <span className="text-[10px]">{item.label}</span>
             </button>
           );
         })}

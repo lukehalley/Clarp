@@ -108,7 +108,7 @@ function ToolBar({
         <SearchInput compact />
       </div>
 
-      {/* Right side: Filter | Sort | Reset */}
+      {/* Right side: Filter | Sort | Reset — visible on sm+ */}
       <div className="shrink-0 hidden sm:flex items-center gap-0">
         {/* Category dropdown */}
         <div className="flex items-center gap-1.5">
