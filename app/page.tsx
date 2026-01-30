@@ -475,9 +475,7 @@ export default function Home() {
               </a>
             </div>
             <div className="flex justify-center order-first lg:order-last">
-              <div className="scale-75 sm:scale-100">
-                <ClarpLoader size={200} variant="light" />
-              </div>
+              <ClarpLoader size={200} variant="light" />
             </div>
           </div>
         </div>
