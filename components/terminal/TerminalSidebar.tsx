@@ -19,7 +19,6 @@ import {
   ChevronRight,
   Search,
   Coins,
-  Wallet,
 } from 'lucide-react';
 
 function GithubIcon({ size = 16, className = '' }: { size?: number; className?: string }) {
@@ -222,37 +221,20 @@ export default function TerminalSidebar() {
       </nav>
 
       {/* Bottom section: Wallet + Collapse toggle */}
-      <div className="shrink-0 border-t border-ivory-light/10 overflow-hidden">
-        {/* Wallet */}
-        <div className={`px-2 py-2 ${expanded ? '' : 'flex justify-center'}`}>
-          {expanded ? (
-            <ConnectWallet compact />
-          ) : (
-            <div className="relative group flex justify-center">
-              <button
-                onClick={() => setExpanded(true)}
-                className="w-8 h-8 flex items-center justify-center text-ivory-light/40 hover:text-larp-green transition-colors"
-                title="Connect Wallet"
-              >
-                <Wallet size={18} />
-              </button>
-              <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 bg-[#1a1a19] border border-ivory-light/10 text-ivory-light text-xs font-mono whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-150 z-50">
-                Wallet
-              </div>
-            </div>
-          )}
+      <div className="shrink-0 border-t border-ivory-light/10 overflow-hidden flex items-center h-10">
+        {/* Wallet — always rendered with compact mode */}
+        <div className="flex-1 overflow-hidden">
+          <ConnectWallet compact showLabel={expanded} />
         </div>
 
         {/* Collapse toggle */}
-        <div className="flex items-center justify-center border-t border-ivory-light/5">
-          <button
-            onClick={() => setExpanded(!expanded)}
-            className="flex items-center justify-center w-full h-10 text-ivory-light/30 hover:text-ivory-light/50 transition-colors cursor-pointer"
-            title={expanded ? 'Collapse' : 'Expand'}
-          >
-            {expanded ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
-          </button>
-        </div>
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="shrink-0 flex items-center justify-center w-10 h-10 border-l border-ivory-light/10 text-ivory-light/30 hover:text-ivory-light/50 transition-colors cursor-pointer"
+          title={expanded ? 'Collapse' : 'Expand'}
+        >
+          {expanded ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
+        </button>
       </div>
     </aside>
   );
