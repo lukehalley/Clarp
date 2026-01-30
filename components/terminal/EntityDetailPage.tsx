@@ -1974,12 +1974,8 @@ export default function EntityDetailPage({ project, isLoading, expectedEntityTyp
         {/* ============================================================ */}
         <div className="sticky top-0 z-10 bg-slate-dark/95 backdrop-blur-sm border-b border-ivory-light/10">
           {/* Compact header row — visible when scrolled */}
-          <div
-            className={`transition-all duration-200 overflow-hidden ${
-              isHeaderCompact ? 'max-h-12 opacity-100' : 'max-h-0 opacity-0'
-            }`}
-          >
-            <div className="flex items-center justify-between px-4 sm:px-6 py-2 gap-3">
+          {isHeaderCompact && (
+            <div className="flex items-center justify-between px-4 sm:px-6 py-2 gap-3 border-b border-ivory-light/5">
               <div className="flex items-center gap-3 min-w-0">
                 <span className="text-sm text-ivory-light font-bold truncate">{project.name}</span>
                 {project.ticker && (
@@ -2003,7 +1999,7 @@ export default function EntityDetailPage({ project, isLoading, expectedEntityTyp
                 <Share2 size={11} />
               </button>
             </div>
-          </div>
+          )}
           {/* Section nav */}
           <div className="px-4 sm:px-6">
             <SectionNav activeGroup={activeSectionGroup} onGroupClick={handleGroupClick} />
