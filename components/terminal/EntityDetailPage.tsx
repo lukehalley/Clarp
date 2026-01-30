@@ -238,10 +238,53 @@ function CardHeader({
   );
 }
 
-function CardBody({ children, className = '', scrollable = false }: { children: React.ReactNode; className?: string; scrollable?: boolean }) {
+function CardBody({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`p-4 flex-1 ${scrollable ? 'overflow-y-auto max-h-[320px]' : ''} ${className}`}>
+    <div className={`p-4 flex-1 ${className}`}>
       {children}
+    </div>
+  );
+}
+
+/** Expandable list: shows first `previewCount` items with a toggle to reveal all */
+function ExpandableList<T>({
+  items,
+  previewCount = 4,
+  renderItem,
+  gap = 'space-y-2',
+}: {
+  items: T[];
+  previewCount?: number;
+  renderItem: (item: T, index: number) => React.ReactNode;
+  gap?: string;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const hasMore = items.length > previewCount;
+  const visible = expanded ? items : items.slice(0, previewCount);
+
+  return (
+    <div>
+      <div className={gap}>
+        {visible.map((item, idx) => renderItem(item, idx))}
+      </div>
+      {hasMore && (
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="mt-2 flex items-center gap-1 text-[11px] font-mono text-danger-orange hover:text-danger-orange/80 transition-colors cursor-pointer w-full justify-center py-1.5 border border-ivory-light/5 hover:border-ivory-light/10"
+        >
+          {expanded ? (
+            <>
+              <ChevronUp size={12} />
+              Show less
+            </>
+          ) : (
+            <>
+              <ChevronDown size={12} />
+              Show all ({items.length})
+            </>
+          )}
+        </button>
+      )}
     </div>
   );
 }
@@ -300,6 +343,27 @@ function DataRow({
   return content;
 }
 
+/** Data row that hides when value is empty and showEmpty is false */
+function DataRowOptional({
+  label,
+  value,
+  hasValue,
+  showEmpty,
+  link,
+  mono = true,
+}: {
+  label: string;
+  value: React.ReactNode;
+  hasValue: boolean;
+  showEmpty: boolean;
+  link?: string;
+  mono?: boolean;
+}) {
+  if (!hasValue && !showEmpty) return null;
+  if (!hasValue) return <PlaceholderRow label={label} />;
+  return <DataRow label={label} value={value} link={link} mono={mono} />;
+}
+
 /** Placeholder data row for empty states — shows label with dash value */
 function PlaceholderRow({ label }: { label: string }) {
   return (
@@ -307,6 +371,36 @@ function PlaceholderRow({ label }: { label: string }) {
       <span className="text-xs text-ivory-light/25">{label}</span>
       <span className="font-mono text-xs text-ivory-light/15">&mdash;</span>
     </div>
+  );
+}
+
+/** Toggle checkbox to show/hide unmatched (empty) fields */
+function ShowEmptyToggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <label className="flex items-center gap-1.5 cursor-pointer select-none group">
+      <span className="text-[10px] font-mono text-ivory-light/30 group-hover:text-ivory-light/50 transition-colors">
+        All fields
+      </span>
+      <button
+        role="checkbox"
+        aria-checked={checked}
+        onClick={() => onChange(!checked)}
+        className={`
+          relative w-6 h-3.5 rounded-full border transition-colors cursor-pointer
+          ${checked
+            ? 'bg-danger-orange/20 border-danger-orange/40'
+            : 'bg-ivory-light/5 border-ivory-light/10 hover:border-ivory-light/20'
+          }
+        `}
+      >
+        <span
+          className={`
+            absolute top-0.5 left-0.5 w-2 h-2 rounded-full transition-all
+            ${checked ? 'translate-x-2.5 bg-danger-orange' : 'bg-ivory-light/30'}
+          `}
+        />
+      </button>
+    </label>
   );
 }
 
@@ -403,19 +497,23 @@ function GroupHeading({ id, label, icon: Icon }: { id: string; label: string; ic
 
 // -- ABOUT --
 function AboutSection({ project }: { project: Project }) {
+  const [showEmpty, setShowEmpty] = useState(false);
   const content = project.theStory || project.description || project.aiSummary;
+  const hasData = !!content;
   return (
     <Card>
-      <CardHeader title="About" icon={Eye} accentColor="#f97316" />
+      <CardHeader title="About" icon={Eye} accentColor="#f97316" action={<ShowEmptyToggle checked={showEmpty} onChange={setShowEmpty} />} />
       <CardBody>
-        {content ? (
+        {hasData ? (
           <p className="text-sm text-ivory-light/70 leading-relaxed">{content}</p>
-        ) : (
+        ) : showEmpty ? (
           <div className="space-y-0">
             <PlaceholderRow label="Narrative" />
             <PlaceholderRow label="Description" />
             <PlaceholderRow label="AI Summary" />
           </div>
+        ) : (
+          <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>
         )}
       </CardBody>
     </Card>
@@ -424,25 +522,31 @@ function AboutSection({ project }: { project: Project }) {
 
 // -- KEY FINDINGS --
 function KeyFindingsSection({ findings }: { findings?: string[] | null }) {
+  const [showEmpty, setShowEmpty] = useState(false);
+  const hasData = !!(findings && findings.length > 0);
   return (
     <Card>
-      <CardHeader title="Key Findings" icon={Eye} accentColor="#f97316" />
-      <CardBody scrollable>
-        {findings && findings.length > 0 ? (
-          <ul className="space-y-2">
-            {findings.map((finding, idx) => (
-              <li key={idx} className="flex items-start gap-2 text-sm text-ivory-light/70">
+      <CardHeader title="Key Findings" icon={Eye} accentColor="#f97316" action={<ShowEmptyToggle checked={showEmpty} onChange={setShowEmpty} />} />
+      <CardBody>
+        {hasData ? (
+          <ExpandableList
+            items={findings!}
+            previewCount={4}
+            renderItem={(finding, idx) => (
+              <li key={idx} className="flex items-start gap-2 text-sm text-ivory-light/70 list-none">
                 <span className="text-danger-orange mt-0.5 shrink-0">&#8226;</span>
                 <span>{finding}</span>
               </li>
-            ))}
-          </ul>
-        ) : (
+            )}
+          />
+        ) : showEmpty ? (
           <div className="space-y-0">
             <PlaceholderRow label="Finding 1" />
             <PlaceholderRow label="Finding 2" />
             <PlaceholderRow label="Finding 3" />
           </div>
+        ) : (
+          <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>
         )}
       </CardBody>
     </Card>
@@ -451,22 +555,26 @@ function KeyFindingsSection({ findings }: { findings?: string[] | null }) {
 
 // -- TAGS --
 function TagsSection({ tags }: { tags?: string[] | null }) {
+  const [showEmpty, setShowEmpty] = useState(false);
+  const hasData = !!(tags && tags.length > 0);
   return (
     <Card>
-      <CardHeader title="Tags" icon={Target} accentColor="#6b7280" />
+      <CardHeader title="Tags" icon={Target} accentColor="#6b7280" action={<ShowEmptyToggle checked={showEmpty} onChange={setShowEmpty} />} />
       <CardBody>
-        {tags && tags.length > 0 ? (
+        {hasData ? (
           <div className="flex flex-wrap gap-1.5">
-            {tags.map((tag) => (
+            {tags!.map((tag) => (
               <Badge key={tag}>{tag}</Badge>
             ))}
           </div>
-        ) : (
+        ) : showEmpty ? (
           <div className="space-y-0">
             <PlaceholderRow label="Category" />
             <PlaceholderRow label="Sector" />
             <PlaceholderRow label="Chain" />
           </div>
+        ) : (
+          <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>
         )}
       </CardBody>
     </Card>
@@ -475,35 +583,27 @@ function TagsSection({ tags }: { tags?: string[] | null }) {
 
 // -- SOCIAL METRICS (NEW) --
 function SocialMetricsSection({ metrics }: { metrics?: Project['socialMetrics'] }) {
+  const [showEmpty, setShowEmpty] = useState(false);
   return (
     <Card>
-      <CardHeader title="Social Metrics" icon={Activity} accentColor="#3b82f6" />
+      <CardHeader title="Social Metrics" icon={Activity} accentColor="#3b82f6" action={<ShowEmptyToggle checked={showEmpty} onChange={setShowEmpty} />} />
       <CardBody>
         <div className="space-y-0">
-          <DataRow
-            label="Followers"
-            value={metrics?.followers !== undefined ? formatNumber(metrics.followers) : '\u2014'}
-          />
-          <DataRow
-            label="Engagement Rate"
-            value={metrics?.engagement !== undefined ? `${metrics.engagement.toFixed(2)}%` : '\u2014'}
-          />
-          <DataRow
-            label="Posts / Week"
-            value={metrics?.postsPerWeek !== undefined ? metrics.postsPerWeek.toFixed(1) : '\u2014'}
-          />
+          <DataRowOptional label="Followers" value={formatNumber(metrics?.followers)} hasValue={metrics?.followers !== undefined} showEmpty={showEmpty} />
+          <DataRowOptional label="Engagement Rate" value={metrics?.engagement !== undefined ? `${metrics.engagement.toFixed(2)}%` : ''} hasValue={metrics?.engagement !== undefined} showEmpty={showEmpty} />
+          <DataRowOptional label="Posts / Week" value={metrics?.postsPerWeek !== undefined ? metrics.postsPerWeek.toFixed(1) : ''} hasValue={metrics?.postsPerWeek !== undefined} showEmpty={showEmpty} />
         </div>
+        {!showEmpty && !metrics && <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>}
       </CardBody>
     </Card>
   );
 }
 
 // -- TRUST SIGNALS --
-function TrustSignalsSection({ project }: { project: Project }) {
+function PositiveSignalsSection({ project }: { project: Project }) {
+  const [showEmpty, setShowEmpty] = useState(false);
   const pos = project.positiveIndicators;
-  const neg = project.negativeIndicators;
 
-  // Positive signal entries — always show all fields
   const positiveFields: Array<{ label: string; active: boolean; detail?: string | null }> = [
     { label: 'Team Doxxed', active: !!pos?.isDoxxed, detail: pos?.doxxedDetails },
     { label: 'Active GitHub', active: !!pos?.hasActiveGithub, detail: pos?.githubActivity },
@@ -514,39 +614,28 @@ function TrustSignalsSection({ project }: { project: Project }) {
     { label: `Account Age: ${pos?.accountAgeDays ? Math.floor(pos.accountAgeDays / 365) + '+ yrs' : '\u2014'}`, active: pos ? pos.accountAgeDays > 365 : false },
   ];
 
-  // Negative signal entries — always show all fields
-  const negativeFields: Array<{ label: string; active: boolean; detail?: string | null; severity: 'high' | 'medium' | 'low' }> = [
-    { label: 'Scam Allegations', active: !!neg?.hasScamAllegations, detail: neg?.scamDetails, severity: 'high' },
-    { label: 'Rug History', active: !!neg?.hasRugHistory, detail: neg?.rugDetails, severity: 'high' },
-    { label: 'Anonymous Team', active: !!neg?.isAnonymousTeam, severity: 'medium' },
-    { label: 'Suspicious Followers', active: !!neg?.hasSuspiciousFollowers, detail: neg?.suspiciousDetails, severity: 'medium' },
-    { label: 'Previous Rebrand', active: !!neg?.hasPreviousRebrand, detail: neg?.rebrandDetails, severity: 'low' },
-    { label: 'Hype Language', active: !!neg?.hasHypeLanguage, severity: 'low' },
-    { label: 'Aggressive Promotion', active: !!neg?.hasAggressivePromotion, detail: neg?.promotionDetails, severity: 'low' },
-    { label: 'No Public Audit', active: !!neg?.noPublicAudit, severity: 'medium' },
-    { label: 'Low Liquidity', active: !!neg?.lowLiquidity, severity: 'medium' },
-    { label: 'Unverified Legal Entity', active: !!neg?.unverifiedLegalEntity, severity: 'low' },
-  ];
-
-  const activePositive = positiveFields.filter(f => f.active).length;
-  const activeNegative = negativeFields.filter(f => f.active).length;
+  const activeCount = positiveFields.filter(f => f.active).length;
+  const visibleFields = showEmpty ? positiveFields : positiveFields.filter(f => f.active);
 
   return (
     <Card>
       <CardHeader
-        title="Trust Signals"
-        icon={Shield}
-        accentColor={activeNegative > 0 && negativeFields.some(s => s.active && s.severity === 'high') ? '#dc2626' : activePositive > activeNegative ? '#22c55e' : '#f97316'}
+        title="Positive Signals"
+        icon={ThumbsUp}
+        accentColor="#22c55e"
+        action={<ShowEmptyToggle checked={showEmpty} onChange={setShowEmpty} />}
       />
-      <CardBody scrollable className="space-y-4">
-        {/* Positive */}
-        <div>
-          <div className="flex items-center gap-1 text-xs text-larp-green mb-2">
-            <ThumbsUp size={12} />
-            <span className="font-medium">Positive ({activePositive})</span>
-          </div>
-          <div className="space-y-1">
-            {positiveFields.map((signal, idx) => (
+      <CardBody>
+        <div className="flex items-center gap-1 text-xs text-larp-green mb-2">
+          <CheckCircle2 size={12} />
+          <span className="font-medium">{activeCount} of {positiveFields.length} confirmed</span>
+        </div>
+        {visibleFields.length > 0 ? (
+          <ExpandableList
+            items={visibleFields}
+            previewCount={5}
+            gap="space-y-1"
+            renderItem={(signal, idx) => (
               <div key={idx} className={`flex items-start gap-2 p-2 border ${
                 signal.active
                   ? 'bg-larp-green/5 border-larp-green/10'
@@ -566,18 +655,56 @@ function TrustSignalsSection({ project }: { project: Project }) {
                   )}
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
+            )}
+          />
+        ) : (
+          <p className="text-xs text-ivory-light/20 font-mono italic">No signals confirmed</p>
+        )}
+      </CardBody>
+    </Card>
+  );
+}
 
-        {/* Negative */}
-        <div>
-          <div className="flex items-center gap-1 text-xs text-larp-red mb-2">
-            <ThumbsDown size={12} />
-            <span className="font-medium">Risk Signals ({activeNegative})</span>
-          </div>
-          <div className="space-y-1">
-            {negativeFields.map((signal, idx) => (
+function NegativeSignalsSection({ project }: { project: Project }) {
+  const [showEmpty, setShowEmpty] = useState(false);
+  const neg = project.negativeIndicators;
+
+  const negativeFields: Array<{ label: string; active: boolean; detail?: string | null; severity: 'high' | 'medium' | 'low' }> = [
+    { label: 'Scam Allegations', active: !!neg?.hasScamAllegations, detail: neg?.scamDetails, severity: 'high' },
+    { label: 'Rug History', active: !!neg?.hasRugHistory, detail: neg?.rugDetails, severity: 'high' },
+    { label: 'Anonymous Team', active: !!neg?.isAnonymousTeam, severity: 'medium' },
+    { label: 'Suspicious Followers', active: !!neg?.hasSuspiciousFollowers, detail: neg?.suspiciousDetails, severity: 'medium' },
+    { label: 'Previous Rebrand', active: !!neg?.hasPreviousRebrand, detail: neg?.rebrandDetails, severity: 'low' },
+    { label: 'Hype Language', active: !!neg?.hasHypeLanguage, severity: 'low' },
+    { label: 'Aggressive Promotion', active: !!neg?.hasAggressivePromotion, detail: neg?.promotionDetails, severity: 'low' },
+    { label: 'No Public Audit', active: !!neg?.noPublicAudit, severity: 'medium' },
+    { label: 'Low Liquidity', active: !!neg?.lowLiquidity, severity: 'medium' },
+    { label: 'Unverified Legal Entity', active: !!neg?.unverifiedLegalEntity, severity: 'low' },
+  ];
+
+  const activeCount = negativeFields.filter(f => f.active).length;
+  const hasHighSeverity = negativeFields.some(s => s.active && s.severity === 'high');
+  const visibleFields = showEmpty ? negativeFields : negativeFields.filter(f => f.active);
+
+  return (
+    <Card>
+      <CardHeader
+        title="Risk Signals"
+        icon={ThumbsDown}
+        accentColor={hasHighSeverity ? '#dc2626' : activeCount > 0 ? '#f97316' : '#22c55e'}
+        action={<ShowEmptyToggle checked={showEmpty} onChange={setShowEmpty} />}
+      />
+      <CardBody>
+        <div className="flex items-center gap-1 text-xs text-larp-red mb-2">
+          <AlertTriangle size={12} />
+          <span className="font-medium">{activeCount} risk{activeCount !== 1 ? 's' : ''} detected</span>
+        </div>
+        {visibleFields.length > 0 ? (
+          <ExpandableList
+            items={visibleFields}
+            previewCount={5}
+            gap="space-y-1"
+            renderItem={(signal, idx) => (
               <div
                 key={idx}
                 className={`flex items-start gap-2 p-2 border ${
@@ -613,9 +740,11 @@ function TrustSignalsSection({ project }: { project: Project }) {
                   )}
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
+            )}
+          />
+        ) : (
+          <p className="text-xs text-ivory-light/20 font-mono italic">No risks detected</p>
+        )}
       </CardBody>
     </Card>
   );
@@ -630,16 +759,18 @@ function ControversiesSection({ controversies }: { controversies?: string[] | nu
         icon={AlertOctagon}
         accentColor={controversies && controversies.length > 0 ? '#dc2626' : '#22c55e'}
       />
-      <CardBody scrollable>
+      <CardBody>
         {controversies && controversies.length > 0 ? (
-          <div className="space-y-2">
-            {controversies.map((item, idx) => (
+          <ExpandableList
+            items={controversies}
+            previewCount={4}
+            renderItem={(item, idx) => (
               <div key={idx} className="flex items-start gap-2 p-3 bg-larp-red/5 border border-larp-red/10">
                 <AlertTriangle size={12} className="text-larp-red mt-0.5 shrink-0" />
                 <span className="text-xs text-ivory-light/70">{item}</span>
               </div>
-            ))}
-          </div>
+            )}
+          />
         ) : (
           <div className="p-4 bg-larp-green/5 border border-larp-green/20 text-center">
             <CheckCircle2 size={20} className="mx-auto mb-1 text-larp-green" />
@@ -653,108 +784,112 @@ function ControversiesSection({ controversies }: { controversies?: string[] | nu
 
 // -- SECURITY INTEL --
 function SecurityIntelSection({ security }: { security?: SecurityIntel | null }) {
+  const [showEmpty, setShowEmpty] = useState(false);
   return (
     <Card>
       <CardHeader
         title="Security Intel"
         icon={security && !security.mintAuthorityEnabled && !security.freezeAuthorityEnabled && security.lpLocked ? ShieldCheck : ShieldAlert}
         accentColor={security && !security.mintAuthorityEnabled && !security.freezeAuthorityEnabled && security.lpLocked && (!security.risks || security.risks.length === 0) ? '#22c55e' : '#f97316'}
+        action={<ShowEmptyToggle checked={showEmpty} onChange={setShowEmpty} />}
       />
-      <CardBody scrollable className="space-y-4">
-        {/* Authority Grid — always show */}
-        <div className="grid grid-cols-2 gap-2">
-          <div className={`flex items-center gap-2 p-3 border ${
-            security
-              ? !security.mintAuthorityEnabled ? 'border-larp-green/20 bg-larp-green/5' : 'border-larp-red/20 bg-larp-red/5'
-              : 'border-ivory-light/5 bg-ivory-light/[0.01]'
-          }`}>
-            {security ? (
-              !security.mintAuthorityEnabled
-                ? <Lock size={14} className="text-larp-green shrink-0" />
-                : <Unlock size={14} className="text-larp-red shrink-0" />
-            ) : (
-              <Lock size={14} className="text-ivory-light/15 shrink-0" />
-            )}
-            <div className="min-w-0">
-              <div className="text-[10px] text-ivory-light/40 uppercase">Mint</div>
-              <div className={`text-xs font-mono truncate ${
-                security
-                  ? security.mintAuthorityEnabled ? 'text-larp-red' : 'text-larp-green'
-                  : 'text-ivory-light/15'
-              }`}>
-                {security ? (security.mintAuthorityEnabled ? 'ENABLED' : 'DISABLED') : '\u2014'}
+      <CardBody className="space-y-4">
+        {/* Authority Grid — show when data exists or showEmpty */}
+        {(security || showEmpty) && (
+          <div className="grid grid-cols-2 gap-2">
+            <div className={`flex items-center gap-2 p-3 border ${
+              security
+                ? !security.mintAuthorityEnabled ? 'border-larp-green/20 bg-larp-green/5' : 'border-larp-red/20 bg-larp-red/5'
+                : 'border-ivory-light/5 bg-ivory-light/[0.01]'
+            }`}>
+              {security ? (
+                !security.mintAuthorityEnabled
+                  ? <Lock size={14} className="text-larp-green shrink-0" />
+                  : <Unlock size={14} className="text-larp-red shrink-0" />
+              ) : (
+                <Lock size={14} className="text-ivory-light/15 shrink-0" />
+              )}
+              <div className="min-w-0">
+                <div className="text-[10px] text-ivory-light/40 uppercase">Mint</div>
+                <div className={`text-xs font-mono truncate ${
+                  security
+                    ? security.mintAuthorityEnabled ? 'text-larp-red' : 'text-larp-green'
+                    : 'text-ivory-light/15'
+                }`}>
+                  {security ? (security.mintAuthorityEnabled ? 'ENABLED' : 'DISABLED') : '\u2014'}
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className={`flex items-center gap-2 p-3 border ${
-            security
-              ? !security.freezeAuthorityEnabled ? 'border-larp-green/20 bg-larp-green/5' : 'border-larp-red/20 bg-larp-red/5'
-              : 'border-ivory-light/5 bg-ivory-light/[0.01]'
-          }`}>
-            {security ? (
-              !security.freezeAuthorityEnabled
-                ? <ShieldCheck size={14} className="text-larp-green shrink-0" />
-                : <Snowflake size={14} className="text-larp-red shrink-0" />
-            ) : (
-              <ShieldCheck size={14} className="text-ivory-light/15 shrink-0" />
-            )}
-            <div className="min-w-0">
-              <div className="text-[10px] text-ivory-light/40 uppercase">Freeze</div>
-              <div className={`text-xs font-mono truncate ${
-                security
-                  ? security.freezeAuthorityEnabled ? 'text-larp-red' : 'text-larp-green'
-                  : 'text-ivory-light/15'
-              }`}>
-                {security ? (security.freezeAuthorityEnabled ? 'ENABLED' : 'DISABLED') : '\u2014'}
+            <div className={`flex items-center gap-2 p-3 border ${
+              security
+                ? !security.freezeAuthorityEnabled ? 'border-larp-green/20 bg-larp-green/5' : 'border-larp-red/20 bg-larp-red/5'
+                : 'border-ivory-light/5 bg-ivory-light/[0.01]'
+            }`}>
+              {security ? (
+                !security.freezeAuthorityEnabled
+                  ? <ShieldCheck size={14} className="text-larp-green shrink-0" />
+                  : <Snowflake size={14} className="text-larp-red shrink-0" />
+              ) : (
+                <ShieldCheck size={14} className="text-ivory-light/15 shrink-0" />
+              )}
+              <div className="min-w-0">
+                <div className="text-[10px] text-ivory-light/40 uppercase">Freeze</div>
+                <div className={`text-xs font-mono truncate ${
+                  security
+                    ? security.freezeAuthorityEnabled ? 'text-larp-red' : 'text-larp-green'
+                    : 'text-ivory-light/15'
+                }`}>
+                  {security ? (security.freezeAuthorityEnabled ? 'ENABLED' : 'DISABLED') : '\u2014'}
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className={`flex items-center gap-2 p-3 border ${
-            security
-              ? security.lpLocked ? 'border-larp-green/20 bg-larp-green/5' : 'border-larp-yellow/20 bg-larp-yellow/5'
-              : 'border-ivory-light/5 bg-ivory-light/[0.01]'
-          }`}>
-            {security ? (
-              security.lpLocked
-                ? <Lock size={14} className="text-larp-green shrink-0" />
-                : <Unlock size={14} className="text-larp-yellow shrink-0" />
-            ) : (
-              <Lock size={14} className="text-ivory-light/15 shrink-0" />
-            )}
-            <div className="min-w-0">
-              <div className="text-[10px] text-ivory-light/40 uppercase">LP Status</div>
-              <div className={`text-xs font-mono truncate ${
-                security
-                  ? security.lpLocked ? 'text-larp-green' : 'text-larp-yellow'
-                  : 'text-ivory-light/15'
-              }`}>
-                {security ? (security.lpLocked ? `LOCKED${security.lpLockedPercent ? ` ${security.lpLockedPercent}%` : ''}` : 'UNLOCKED') : '\u2014'}
+            <div className={`flex items-center gap-2 p-3 border ${
+              security
+                ? security.lpLocked ? 'border-larp-green/20 bg-larp-green/5' : 'border-larp-yellow/20 bg-larp-yellow/5'
+                : 'border-ivory-light/5 bg-ivory-light/[0.01]'
+            }`}>
+              {security ? (
+                security.lpLocked
+                  ? <Lock size={14} className="text-larp-green shrink-0" />
+                  : <Unlock size={14} className="text-larp-yellow shrink-0" />
+              ) : (
+                <Lock size={14} className="text-ivory-light/15 shrink-0" />
+              )}
+              <div className="min-w-0">
+                <div className="text-[10px] text-ivory-light/40 uppercase">LP Status</div>
+                <div className={`text-xs font-mono truncate ${
+                  security
+                    ? security.lpLocked ? 'text-larp-green' : 'text-larp-yellow'
+                    : 'text-ivory-light/15'
+                }`}>
+                  {security ? (security.lpLocked ? `LOCKED${security.lpLockedPercent ? ` ${security.lpLockedPercent}%` : ''}` : 'UNLOCKED') : '\u2014'}
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="flex items-center gap-2 p-3 border border-ivory-light/5 bg-ivory-light/[0.01]">
-            <Users size={14} className={security?.holdersCount ? 'text-ivory-light/50' : 'text-ivory-light/15'} />
-            <div className="min-w-0">
-              <div className="text-[10px] text-ivory-light/40 uppercase">Holders</div>
-              <div className={`text-xs font-mono truncate ${security?.holdersCount ? 'text-ivory-light' : 'text-ivory-light/15'}`}>
-                {security?.holdersCount ? formatNumber(security.holdersCount) : '\u2014'}
+            <div className="flex items-center gap-2 p-3 border border-ivory-light/5 bg-ivory-light/[0.01]">
+              <Users size={14} className={security?.holdersCount ? 'text-ivory-light/50' : 'text-ivory-light/15'} />
+              <div className="min-w-0">
+                <div className="text-[10px] text-ivory-light/40 uppercase">Holders</div>
+                <div className={`text-xs font-mono truncate ${security?.holdersCount ? 'text-ivory-light' : 'text-ivory-light/15'}`}>
+                  {security?.holdersCount ? formatNumber(security.holdersCount) : '\u2014'}
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Additional fields */}
         <div className="space-y-0">
-          <DataRow label="Top 10 Holders %" value={formatPercent(security?.top10HoldersPercent)} />
-          <DataRow label="Domain Age" value={security?.domainAgeDays !== undefined ? (
-            <span style={{ color: security.domainAgeDays > 365 ? '#22c55e' : security.domainAgeDays < 30 ? '#dc2626' : undefined }}>
-              {security.domainAgeDays} days
+          <DataRowOptional label="Top 10 Holders %" value={formatPercent(security?.top10HoldersPercent)} hasValue={security?.top10HoldersPercent !== undefined && security?.top10HoldersPercent !== null} showEmpty={showEmpty} />
+          <DataRowOptional label="Domain Age" value={security?.domainAgeDays !== undefined ? (
+            <span style={{ color: security!.domainAgeDays > 365 ? '#22c55e' : security!.domainAgeDays < 30 ? '#dc2626' : undefined }}>
+              {security!.domainAgeDays} days
             </span>
-          ) : '\u2014'} />
-          <DataRow label="Registrar" value={security?.domainRegistrar || '\u2014'} />
+          ) : ''} hasValue={security?.domainAgeDays !== undefined} showEmpty={showEmpty} />
+          <DataRowOptional label="Registrar" value={security?.domainRegistrar || ''} hasValue={!!security?.domainRegistrar} showEmpty={showEmpty} />
         </div>
 
         {/* Risk Flags */}
@@ -773,13 +908,17 @@ function SecurityIntelSection({ security }: { security?: SecurityIntel | null })
               ))}
             </ul>
           </div>
-        ) : (
+        ) : showEmpty ? (
           <div className="p-3 border border-ivory-light/5">
             <div className="flex items-center gap-2 text-xs text-ivory-light/25 font-medium">
               <AlertOctagon size={12} />
               Risk Flags: {security ? 'None detected' : '\u2014'}
             </div>
           </div>
+        ) : null}
+
+        {!security && !showEmpty && (
+          <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>
         )}
       </CardBody>
     </Card>
@@ -788,11 +927,12 @@ function SecurityIntelSection({ security }: { security?: SecurityIntel | null })
 
 // -- AUDIT --
 function AuditSection({ audit }: { audit?: AuditInfo | null }) {
+  const [showEmpty, setShowEmpty] = useState(false);
   const auditColor = audit?.auditStatus === 'completed' ? '#22c55e' :
                      audit?.auditStatus === 'pending' ? '#f59e0b' : '#6b7280';
   return (
     <Card>
-      <CardHeader title="Security Audit" icon={FileSearch} accentColor={auditColor} />
+      <CardHeader title="Security Audit" icon={FileSearch} accentColor={auditColor} action={<ShowEmptyToggle checked={showEmpty} onChange={setShowEmpty} />} />
       <CardBody>
         <div className="space-y-0">
           <DataRow
@@ -807,13 +947,13 @@ function AuditSection({ audit }: { audit?: AuditInfo | null }) {
               )
             }
           />
-          <DataRow label="Auditor" value={audit?.auditor || '\u2014'} />
-          <DataRow label="Date" value={audit?.auditDate || '\u2014'} />
+          <DataRowOptional label="Auditor" value={audit?.auditor || ''} hasValue={!!audit?.auditor} showEmpty={showEmpty} />
+          <DataRowOptional label="Date" value={audit?.auditDate || ''} hasValue={!!audit?.auditDate} showEmpty={showEmpty} />
           {audit?.auditUrl ? (
             <DataRow label="Report" value="View Report" link={audit.auditUrl} />
-          ) : (
+          ) : showEmpty ? (
             <PlaceholderRow label="Report" />
-          )}
+          ) : null}
         </div>
       </CardBody>
     </Card>
@@ -822,6 +962,7 @@ function AuditSection({ audit }: { audit?: AuditInfo | null }) {
 
 // -- MARKET DATA --
 function MarketSection({ project }: { project: Project }) {
+  const [showEmpty, setShowEmpty] = useState(false);
   const market = project.marketData;
   const priceUp = (market?.priceChange24h ?? 0) >= 0;
 
@@ -832,39 +973,45 @@ function MarketSection({ project }: { project: Project }) {
         icon={BarChart3}
         accentColor={market ? (priceUp ? '#22c55e' : '#dc2626') : '#6b7280'}
         action={
-          project.tokenAddress && (
-            <a
-              href={`https://dexscreener.com/solana/${project.tokenAddress}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[10px] text-ivory-light/30 hover:text-danger-orange transition-colors flex items-center gap-1"
-            >
-              DexScreener <ExternalLink size={10} />
-            </a>
-          )
+          <div className="flex items-center gap-3">
+            {project.tokenAddress && (
+              <a
+                href={`https://dexscreener.com/solana/${project.tokenAddress}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[10px] text-ivory-light/30 hover:text-danger-orange transition-colors flex items-center gap-1"
+              >
+                DexScreener <ExternalLink size={10} />
+              </a>
+            )}
+            <ShowEmptyToggle checked={showEmpty} onChange={setShowEmpty} />
+          </div>
         }
       />
       <CardBody>
         {/* Price Hero */}
-        <div className="mb-4 pb-4 border-b border-ivory-light/5">
-          <div className="flex items-baseline gap-3">
-            <span className={`text-2xl font-mono font-bold ${market ? 'text-ivory-light' : 'text-ivory-light/15'}`}>
-              {market ? formatPrice(market.price) : '$\u2014'}
-            </span>
-            {market && market.priceChange24h !== undefined && (
-              <span className={`flex items-center gap-0.5 text-sm font-mono ${priceUp ? 'text-larp-green' : 'text-larp-red'}`}>
-                {priceUp ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
-                {priceUp ? '+' : ''}{market.priceChange24h.toFixed(2)}%
+        {(market || showEmpty) && (
+          <div className="mb-4 pb-4 border-b border-ivory-light/5">
+            <div className="flex items-baseline gap-3">
+              <span className={`text-2xl font-mono font-bold ${market ? 'text-ivory-light' : 'text-ivory-light/15'}`}>
+                {market ? formatPrice(market.price) : '$\u2014'}
               </span>
-            )}
+              {market && market.priceChange24h !== undefined && (
+                <span className={`flex items-center gap-0.5 text-sm font-mono ${priceUp ? 'text-larp-green' : 'text-larp-red'}`}>
+                  {priceUp ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+                  {priceUp ? '+' : ''}{market.priceChange24h.toFixed(2)}%
+                </span>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="space-y-0">
-          <DataRow label="Market Cap" value={market?.marketCap ? formatCurrency(market.marketCap) : '\u2014'} />
-          <DataRow label="24h Volume" value={market?.volume24h ? formatCurrency(market.volume24h) : '\u2014'} />
-          <DataRow label="Liquidity" value={market?.liquidity ? formatCurrency(market.liquidity) : '\u2014'} />
+          <DataRowOptional label="Market Cap" value={formatCurrency(market?.marketCap)} hasValue={!!market?.marketCap} showEmpty={showEmpty} />
+          <DataRowOptional label="24h Volume" value={formatCurrency(market?.volume24h)} hasValue={!!market?.volume24h} showEmpty={showEmpty} />
+          <DataRowOptional label="Liquidity" value={formatCurrency(market?.liquidity)} hasValue={!!market?.liquidity} showEmpty={showEmpty} />
         </div>
+        {!market && !showEmpty && <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>}
       </CardBody>
     </Card>
   );
@@ -872,18 +1019,20 @@ function MarketSection({ project }: { project: Project }) {
 
 // -- LIQUIDITY --
 function LiquiditySection({ liquidity }: { liquidity?: LiquidityInfo | null }) {
+  const [showEmpty, setShowEmpty] = useState(false);
   return (
     <Card>
       <CardHeader
         title="Liquidity"
         icon={DollarSign}
         accentColor={liquidity ? (liquidity.liquidityLocked ? '#22c55e' : '#f97316') : '#6b7280'}
+        action={<ShowEmptyToggle checked={showEmpty} onChange={setShowEmpty} />}
       />
       <CardBody>
         <div className="space-y-0">
-          <DataRow label="Primary DEX" value={liquidity?.primaryDex || '\u2014'} />
-          <DataRow label="Pool Type" value={liquidity?.poolType || '\u2014'} />
-          <DataRow
+          <DataRowOptional label="Primary DEX" value={liquidity?.primaryDex || ''} hasValue={!!liquidity?.primaryDex} showEmpty={showEmpty} />
+          <DataRowOptional label="Pool Type" value={liquidity?.poolType || ''} hasValue={!!liquidity?.poolType} showEmpty={showEmpty} />
+          <DataRowOptional
             label="Liquidity USD"
             value={
               liquidity?.liquidityUsd ? (
@@ -893,10 +1042,12 @@ function LiquiditySection({ liquidity }: { liquidity?: LiquidityInfo | null }) {
                 }}>
                   {formatCurrency(liquidity.liquidityUsd)}
                 </span>
-              ) : '\u2014'
+              ) : ''
             }
+            hasValue={!!liquidity?.liquidityUsd}
+            showEmpty={showEmpty}
           />
-          <DataRow
+          <DataRowOptional
             label="Lock Status"
             value={
               liquidity ? (
@@ -909,11 +1060,14 @@ function LiquiditySection({ liquidity }: { liquidity?: LiquidityInfo | null }) {
                     <Unlock size={12} /> Unlocked
                   </span>
                 )
-              ) : '\u2014'
+              ) : ''
             }
+            hasValue={!!liquidity}
+            showEmpty={showEmpty}
           />
-          <DataRow label="Lock Duration" value={liquidity?.lockDuration || '\u2014'} />
+          <DataRowOptional label="Lock Duration" value={liquidity?.lockDuration || ''} hasValue={!!liquidity?.lockDuration} showEmpty={showEmpty} />
         </div>
+        {!liquidity && !showEmpty && <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>}
       </CardBody>
     </Card>
   );
@@ -921,14 +1075,15 @@ function LiquiditySection({ liquidity }: { liquidity?: LiquidityInfo | null }) {
 
 // -- TOKENOMICS --
 function TokenomicsSection({ tokenomics }: { tokenomics?: Tokenomics | null }) {
+  const [showEmpty, setShowEmpty] = useState(false);
   return (
     <Card>
-      <CardHeader title="Tokenomics" icon={Coins} accentColor={tokenomics ? '#f59e0b' : '#6b7280'} />
+      <CardHeader title="Tokenomics" icon={Coins} accentColor={tokenomics ? '#f59e0b' : '#6b7280'} action={<ShowEmptyToggle checked={showEmpty} onChange={setShowEmpty} />} />
       <CardBody>
         <div className="space-y-0">
-          <DataRow label="Total Supply" value={tokenomics?.totalSupply ? formatSupply(tokenomics.totalSupply) : '\u2014'} />
-          <DataRow label="Circulating" value={tokenomics?.circulatingSupply ? formatSupply(tokenomics.circulatingSupply) : '\u2014'} />
-          <DataRow
+          <DataRowOptional label="Total Supply" value={formatSupply(tokenomics?.totalSupply)} hasValue={!!tokenomics?.totalSupply} showEmpty={showEmpty} />
+          <DataRowOptional label="Circulating" value={formatSupply(tokenomics?.circulatingSupply)} hasValue={!!tokenomics?.circulatingSupply} showEmpty={showEmpty} />
+          <DataRowOptional
             label="Deflationary"
             value={
               tokenomics ? (
@@ -937,11 +1092,13 @@ function TokenomicsSection({ tokenomics }: { tokenomics?: Tokenomics | null }) {
                     <Flame size={12} /> Yes
                   </span>
                 ) : 'No'
-              ) : '\u2014'
+              ) : ''
             }
+            hasValue={!!tokenomics}
+            showEmpty={showEmpty}
           />
-          <DataRow label="Vesting" value={tokenomics?.vestingSchedule || '\u2014'} mono={false} />
-          <DataRow label="Burn Rate" value={tokenomics?.burnRate || '\u2014'} />
+          <DataRowOptional label="Vesting" value={tokenomics?.vestingSchedule || ''} hasValue={!!tokenomics?.vestingSchedule} showEmpty={showEmpty} mono={false} />
+          <DataRowOptional label="Burn Rate" value={tokenomics?.burnRate || ''} hasValue={!!tokenomics?.burnRate} showEmpty={showEmpty} />
         </div>
         {tokenomics?.burnMechanism ? (
           <div className="mt-4 p-3 bg-danger-orange/5 border-l-2 border-danger-orange/30">
@@ -950,14 +1107,15 @@ function TokenomicsSection({ tokenomics }: { tokenomics?: Tokenomics | null }) {
             </div>
             <p className="text-xs text-ivory-light/60">{tokenomics.burnMechanism}</p>
           </div>
-        ) : (
+        ) : showEmpty ? (
           <div className="mt-4 p-3 border-l-2 border-ivory-light/5">
             <div className="flex items-center gap-1 text-xs text-ivory-light/20 mb-1">
               <Flame size={10} /> Burn Mechanism
             </div>
             <p className="text-xs text-ivory-light/15">&mdash;</p>
           </div>
-        )}
+        ) : null}
+        {!tokenomics && !showEmpty && <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>}
       </CardBody>
     </Card>
   );
@@ -965,17 +1123,20 @@ function TokenomicsSection({ tokenomics }: { tokenomics?: Tokenomics | null }) {
 
 // -- TECH STACK --
 function TechStackSection({ techStack }: { techStack?: TechStack | null }) {
+  const [showEmpty, setShowEmpty] = useState(false);
   return (
     <Card>
-      <CardHeader title="Tech Stack" icon={Cpu} accentColor={techStack?.zkTech ? '#a855f7' : techStack ? '#6366f1' : '#6b7280'} />
+      <CardHeader title="Tech Stack" icon={Cpu} accentColor={techStack?.zkTech ? '#a855f7' : techStack ? '#6366f1' : '#6b7280'} action={<ShowEmptyToggle checked={showEmpty} onChange={setShowEmpty} />} />
       <CardBody>
         <div className="space-y-0">
-          <DataRow label="Blockchain" value={techStack?.blockchain || '\u2014'} />
-          <DataRow
+          <DataRowOptional label="Blockchain" value={techStack?.blockchain || ''} hasValue={!!techStack?.blockchain} showEmpty={showEmpty} />
+          <DataRowOptional
             label="ZK Technology"
-            value={techStack?.zkTech ? <span className="text-purple-400">{techStack.zkTech}</span> : '\u2014'}
+            value={techStack?.zkTech ? <span className="text-purple-400">{techStack.zkTech}</span> : ''}
+            hasValue={!!techStack?.zkTech}
+            showEmpty={showEmpty}
           />
-          <DataRow
+          <DataRowOptional
             label="Offline Capable"
             value={
               techStack ? (
@@ -988,24 +1149,29 @@ function TechStackSection({ techStack }: { techStack?: TechStack | null }) {
                     <WifiOff size={12} /> No
                   </span>
                 )
-              ) : '\u2014'
+              ) : ''
             }
+            hasValue={!!techStack}
+            showEmpty={showEmpty}
           />
         </div>
-        <div className="mt-4 pt-4 border-t border-ivory-light/5">
-          <div className="text-[10px] text-ivory-light/40 uppercase tracking-wider mb-2 flex items-center gap-1">
-            <HardDrive size={10} /> Hardware Products
-          </div>
-          {techStack?.hardwareProducts && techStack.hardwareProducts.length > 0 ? (
-            <div className="flex flex-wrap gap-1">
-              {techStack.hardwareProducts.map((product, idx) => (
-                <Badge key={idx}>{product}</Badge>
-              ))}
+        {(techStack?.hardwareProducts?.length || showEmpty) && (
+          <div className="mt-4 pt-4 border-t border-ivory-light/5">
+            <div className="text-[10px] text-ivory-light/40 uppercase tracking-wider mb-2 flex items-center gap-1">
+              <HardDrive size={10} /> Hardware Products
             </div>
-          ) : (
-            <span className="text-xs text-ivory-light/15 font-mono">&mdash;</span>
-          )}
-        </div>
+            {techStack?.hardwareProducts && techStack.hardwareProducts.length > 0 ? (
+              <div className="flex flex-wrap gap-1">
+                {techStack.hardwareProducts.map((product, idx) => (
+                  <Badge key={idx}>{product}</Badge>
+                ))}
+              </div>
+            ) : (
+              <span className="text-xs text-ivory-light/15 font-mono">&mdash;</span>
+            )}
+          </div>
+        )}
+        {!techStack && !showEmpty && <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>}
       </CardBody>
     </Card>
   );
@@ -1013,6 +1179,7 @@ function TechStackSection({ techStack }: { techStack?: TechStack | null }) {
 
 // -- WEBSITE INTEL --
 function WebsiteIntelSection({ intel, websiteUrl }: { intel?: Project['websiteIntel']; websiteUrl?: string }) {
+  const [showEmpty, setShowEmpty] = useState(false);
   const qualityColors: Record<string, string> = {
     professional: '#22c55e',
     basic: '#6b7280',
@@ -1029,6 +1196,8 @@ function WebsiteIntelSection({ intel, websiteUrl }: { intel?: Project['websiteIn
     { key: 'hasAuditInfo', label: 'Audit Info', value: intel?.hasAuditInfo },
   ];
 
+  const visibleCheckItems = showEmpty ? checkItems : checkItems.filter(i => i.value);
+
   return (
     <Card>
       <CardHeader
@@ -1036,84 +1205,97 @@ function WebsiteIntelSection({ intel, websiteUrl }: { intel?: Project['websiteIn
         icon={Globe}
         accentColor={intel ? (qualityColors[intel.websiteQuality] || '#6b7280') : '#6b7280'}
         action={
-          websiteUrl && (
-            <a
-              href={websiteUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[10px] text-ivory-light/30 hover:text-danger-orange transition-colors flex items-center gap-1"
-            >
-              Visit <ExternalLink size={10} />
-            </a>
-          )
+          <div className="flex items-center gap-3">
+            {websiteUrl && (
+              <a
+                href={websiteUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[10px] text-ivory-light/30 hover:text-danger-orange transition-colors flex items-center gap-1"
+              >
+                Visit <ExternalLink size={10} />
+              </a>
+            )}
+            <ShowEmptyToggle checked={showEmpty} onChange={setShowEmpty} />
+          </div>
         }
       />
       <CardBody>
         {/* Quality Score */}
-        <div className="flex items-center justify-between mb-4 p-3 bg-ivory-light/[0.02] border border-ivory-light/10">
-          <div>
-            <div className="text-[10px] text-ivory-light/40 uppercase">Quality</div>
-            <div className="text-sm font-mono font-medium capitalize"
-              style={{ color: intel ? (qualityColors[intel.websiteQuality] || '#6b7280') : undefined }}>
-              {intel?.websiteQuality || '\u2014'}
+        {(intel || showEmpty) && (
+          <div className="flex items-center justify-between mb-4 p-3 bg-ivory-light/[0.02] border border-ivory-light/10">
+            <div>
+              <div className="text-[10px] text-ivory-light/40 uppercase">Quality</div>
+              <div className="text-sm font-mono font-medium capitalize"
+                style={{ color: intel ? (qualityColors[intel.websiteQuality] || '#6b7280') : undefined }}>
+                {intel?.websiteQuality || '\u2014'}
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-[10px] text-ivory-light/40 uppercase">Score</div>
+              <div className="text-sm font-mono font-bold"
+                style={{ color: intel ? (qualityColors[intel.websiteQuality] || '#6b7280') : undefined }}>
+                {intel?.qualityScore !== undefined ? `${intel.qualityScore}/100` : '\u2014'}
+              </div>
             </div>
           </div>
-          <div className="text-right">
-            <div className="text-[10px] text-ivory-light/40 uppercase">Score</div>
-            <div className="text-sm font-mono font-bold"
-              style={{ color: intel ? (qualityColors[intel.websiteQuality] || '#6b7280') : undefined }}>
-              {intel?.qualityScore !== undefined ? `${intel.qualityScore}/100` : '\u2014'}
-            </div>
-          </div>
-        </div>
+        )}
 
         {/* Checklist */}
-        <div className="grid grid-cols-2 gap-1 mb-4">
-          {checkItems.map((item) => (
-            <div key={item.key} className="flex items-center gap-2 py-1.5">
-              {item.value ? (
-                <CheckCircle2 size={12} className="text-larp-green shrink-0" />
-              ) : (
-                <XCircle size={12} className="text-ivory-light/15 shrink-0" />
-              )}
-              <span className={`text-xs ${item.value ? 'text-ivory-light/70' : 'text-ivory-light/25'}`}>
-                {item.label}
-              </span>
-            </div>
-          ))}
-        </div>
+        {visibleCheckItems.length > 0 && (
+          <div className="grid grid-cols-2 gap-1 mb-4">
+            {visibleCheckItems.map((item) => (
+              <div key={item.key} className="flex items-center gap-2 py-1.5">
+                {item.value ? (
+                  <CheckCircle2 size={12} className="text-larp-green shrink-0" />
+                ) : (
+                  <XCircle size={12} className="text-ivory-light/15 shrink-0" />
+                )}
+                <span className={`text-xs ${item.value ? 'text-ivory-light/70' : 'text-ivory-light/25'}`}>
+                  {item.label}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Trust Indicators */}
-        <div className="mb-3">
-          <div className="text-[10px] text-larp-green/70 mb-2 flex items-center gap-1 uppercase tracking-wider">
-            <ThumbsUp size={10} /> Trust Indicators
-          </div>
-          {intel?.trustIndicators && intel.trustIndicators.length > 0 ? (
-            <div className="flex flex-wrap gap-1">
-              {intel.trustIndicators.map((indicator, idx) => (
-                <Badge key={idx} variant="success">{indicator}</Badge>
-              ))}
+        {(intel?.trustIndicators?.length || showEmpty) ? (
+          <div className="mb-3">
+            <div className="text-[10px] text-larp-green/70 mb-2 flex items-center gap-1 uppercase tracking-wider">
+              <ThumbsUp size={10} /> Trust Indicators
             </div>
-          ) : (
-            <span className="text-xs text-ivory-light/15 font-mono">&mdash;</span>
-          )}
-        </div>
+            {intel?.trustIndicators && intel.trustIndicators.length > 0 ? (
+              <div className="flex flex-wrap gap-1">
+                {intel.trustIndicators.map((indicator, idx) => (
+                  <Badge key={idx} variant="success">{indicator}</Badge>
+                ))}
+              </div>
+            ) : (
+              <span className="text-xs text-ivory-light/15 font-mono">&mdash;</span>
+            )}
+          </div>
+        ) : null}
 
         {/* Red Flags */}
-        <div>
-          <div className="text-[10px] text-larp-red/70 mb-2 flex items-center gap-1 uppercase tracking-wider">
-            <AlertTriangle size={10} /> Red Flags
-          </div>
-          {intel?.redFlags && intel.redFlags.length > 0 ? (
-            <div className="flex flex-wrap gap-1">
-              {intel.redFlags.map((flag, idx) => (
-                <Badge key={idx} variant="danger">{flag}</Badge>
-              ))}
+        {(intel?.redFlags?.length || showEmpty) ? (
+          <div>
+            <div className="text-[10px] text-larp-red/70 mb-2 flex items-center gap-1 uppercase tracking-wider">
+              <AlertTriangle size={10} /> Red Flags
             </div>
-          ) : (
-            <span className="text-xs text-ivory-light/15 font-mono">&mdash;</span>
-          )}
-        </div>
+            {intel?.redFlags && intel.redFlags.length > 0 ? (
+              <div className="flex flex-wrap gap-1">
+                {intel.redFlags.map((flag, idx) => (
+                  <Badge key={idx} variant="danger">{flag}</Badge>
+                ))}
+              </div>
+            ) : (
+              <span className="text-xs text-ivory-light/15 font-mono">&mdash;</span>
+            )}
+          </div>
+        ) : null}
+
+        {!intel && !showEmpty && <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>}
       </CardBody>
     </Card>
   );
@@ -1121,31 +1303,34 @@ function WebsiteIntelSection({ intel, websiteUrl }: { intel?: Project['websiteIn
 
 // -- LEGAL ENTITY --
 function LegalSection({ entity }: { entity?: LegalEntity | null }) {
+  const [showEmpty, setShowEmpty] = useState(false);
   return (
     <Card>
       <CardHeader
         title="Legal Entity"
         icon={Building2}
         accentColor={entity?.isRegistered ? '#22c55e' : '#6b7280'}
+        action={<ShowEmptyToggle checked={showEmpty} onChange={setShowEmpty} />}
       />
       <CardBody>
         <div className="space-y-0">
-          <DataRow label="Company" value={entity?.companyName || '\u2014'} />
-          <DataRow label="Jurisdiction" value={entity?.jurisdiction || '\u2014'} />
-          <DataRow
+          <DataRowOptional label="Company" value={entity?.companyName || ''} hasValue={!!entity?.companyName} showEmpty={showEmpty} />
+          <DataRowOptional label="Jurisdiction" value={entity?.jurisdiction || ''} hasValue={!!entity?.jurisdiction} showEmpty={showEmpty} />
+          <DataRowOptional
             label="Status"
             value={
               entity?.isRegistered ? (
                 <Badge variant="success">Verified</Badge>
               ) : entity ? (
                 <Badge variant="default">Unverified</Badge>
-              ) : (
-                '\u2014'
-              )
+              ) : ''
             }
+            hasValue={!!entity}
+            showEmpty={showEmpty}
           />
-          <DataRow label="Details" value={entity?.registrationDetails || '\u2014'} mono={false} />
+          <DataRowOptional label="Details" value={entity?.registrationDetails || ''} hasValue={!!entity?.registrationDetails} showEmpty={showEmpty} mono={false} />
         </div>
+        {!entity && !showEmpty && <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>}
       </CardBody>
     </Card>
   );
@@ -1153,6 +1338,7 @@ function LegalSection({ entity }: { entity?: LegalEntity | null }) {
 
 // -- AFFILIATIONS --
 function AffiliationsSection({ affiliations }: { affiliations?: Affiliation[] | null }) {
+  const [showEmpty, setShowEmpty] = useState(false);
   const typeColors: Record<string, string> = {
     council: 'text-blue-400',
     accelerator: 'text-larp-yellow',
@@ -1161,29 +1347,34 @@ function AffiliationsSection({ affiliations }: { affiliations?: Affiliation[] | 
     regulatory: 'text-cyan-400',
     other: 'text-ivory-light/50',
   };
+  const hasData = !!(affiliations && affiliations.length > 0);
 
   return (
     <Card>
-      <CardHeader title="Affiliations" icon={Award} accentColor={affiliations && affiliations.length > 0 ? '#8b5cf6' : '#6b7280'} />
-      <CardBody scrollable>
-        {affiliations && affiliations.length > 0 ? (
-          <div className="space-y-2">
-            {affiliations.map((aff, idx) => (
+      <CardHeader title="Affiliations" icon={Award} accentColor={hasData ? '#8b5cf6' : '#6b7280'} action={<ShowEmptyToggle checked={showEmpty} onChange={setShowEmpty} />} />
+      <CardBody>
+        {hasData ? (
+          <ExpandableList
+            items={affiliations!}
+            previewCount={4}
+            renderItem={(aff, idx) => (
               <div key={idx} className="flex items-center gap-3 p-2 bg-ivory-light/[0.02] border border-ivory-light/5">
                 <span className={`text-[10px] font-mono uppercase ${typeColors[aff.type] || typeColors.other}`}>
                   {aff.type}
                 </span>
                 <span className="text-sm text-ivory-light">{aff.name}</span>
               </div>
-            ))}
-          </div>
-        ) : (
+            )}
+          />
+        ) : showEmpty ? (
           <div className="space-y-0">
             <PlaceholderRow label="Councils" />
             <PlaceholderRow label="Accelerators" />
             <PlaceholderRow label="VCs" />
             <PlaceholderRow label="Exchanges" />
           </div>
+        ) : (
+          <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>
         )}
       </CardBody>
     </Card>
@@ -1192,6 +1383,7 @@ function AffiliationsSection({ affiliations }: { affiliations?: Affiliation[] | 
 
 // -- GITHUB INTEL --
 function GitHubSection({ project }: { project: Project }) {
+  const [showEmpty, setShowEmpty] = useState(false);
   const intel = project.githubIntel;
 
   return (
@@ -1201,58 +1393,66 @@ function GitHubSection({ project }: { project: Project }) {
         icon={GithubIcon}
         accentColor={intel ? '#22c55e' : '#6b7280'}
         action={
-          project.githubUrl && (
-            <a
-              href={project.githubUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[10px] text-ivory-light/30 hover:text-larp-green transition-colors flex items-center gap-1"
-            >
-              GitHub <ExternalLink size={10} />
-            </a>
-          )
+          <div className="flex items-center gap-3">
+            {project.githubUrl && (
+              <a
+                href={project.githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[10px] text-ivory-light/30 hover:text-larp-green transition-colors flex items-center gap-1"
+              >
+                GitHub <ExternalLink size={10} />
+              </a>
+            )}
+            <ShowEmptyToggle checked={showEmpty} onChange={setShowEmpty} />
+          </div>
         }
       />
       <CardBody>
         {/* Stats Row */}
-        <div className="flex items-center gap-4 mb-4 pb-4 border-b border-ivory-light/5 flex-wrap">
-          <span className="flex items-center gap-1 text-xs">
-            <Star size={12} className={intel ? 'text-larp-yellow' : 'text-ivory-light/15'} />
-            <span className={`font-mono ${intel ? 'text-ivory-light' : 'text-ivory-light/15'}`}>{intel ? formatNumber(intel.stars) : '\u2014'}</span>
-          </span>
-          <span className="flex items-center gap-1 text-xs">
-            <GitFork size={12} className={intel ? 'text-ivory-light/60' : 'text-ivory-light/15'} />
-            <span className={intel ? 'text-ivory-light/60' : 'text-ivory-light/15'}>{intel ? formatNumber(intel.forks) : '\u2014'}</span>
-          </span>
-          <span className="flex items-center gap-1 text-xs">
-            <Users size={12} className={intel ? 'text-ivory-light/60' : 'text-ivory-light/15'} />
-            <span className={intel ? 'text-ivory-light/60' : 'text-ivory-light/15'}>{intel?.contributorsCount ?? '\u2014'}</span>
-          </span>
-          <span className="flex items-center gap-1 text-xs">
-            <GitCommit size={12} className={intel ? 'text-larp-green' : 'text-ivory-light/15'} />
-            <span className={intel ? 'text-larp-green' : 'text-ivory-light/15'}>{intel?.commitsLast30d ?? '\u2014'}</span>
-            <span className="text-ivory-light/40">in 30d</span>
-          </span>
-        </div>
+        {(intel || showEmpty) && (
+          <div className="flex items-center gap-4 mb-4 pb-4 border-b border-ivory-light/5 flex-wrap">
+            <span className="flex items-center gap-1 text-xs">
+              <Star size={12} className={intel ? 'text-larp-yellow' : 'text-ivory-light/15'} />
+              <span className={`font-mono ${intel ? 'text-ivory-light' : 'text-ivory-light/15'}`}>{intel ? formatNumber(intel.stars) : '\u2014'}</span>
+            </span>
+            <span className="flex items-center gap-1 text-xs">
+              <GitFork size={12} className={intel ? 'text-ivory-light/60' : 'text-ivory-light/15'} />
+              <span className={intel ? 'text-ivory-light/60' : 'text-ivory-light/15'}>{intel ? formatNumber(intel.forks) : '\u2014'}</span>
+            </span>
+            <span className="flex items-center gap-1 text-xs">
+              <Users size={12} className={intel ? 'text-ivory-light/60' : 'text-ivory-light/15'} />
+              <span className={intel ? 'text-ivory-light/60' : 'text-ivory-light/15'}>{intel?.contributorsCount ?? '\u2014'}</span>
+            </span>
+            <span className="flex items-center gap-1 text-xs">
+              <GitCommit size={12} className={intel ? 'text-larp-green' : 'text-ivory-light/15'} />
+              <span className={intel ? 'text-larp-green' : 'text-ivory-light/15'}>{intel?.commitsLast30d ?? '\u2014'}</span>
+              <span className="text-ivory-light/40">in 30d</span>
+            </span>
+          </div>
+        )}
 
         <div className="space-y-0">
-          <DataRow label="Language" value={intel?.primaryLanguage || '\u2014'} />
-          <DataRow label="License" value={intel?.license || '\u2014'} />
-          <DataRow label="Last Commit" value={intel?.lastCommitDate ? formatDate(intel.lastCommitDate) : '\u2014'} />
-          <DataRow label="Open Issues" value={intel?.openIssues !== undefined ? String(intel.openIssues) : '\u2014'} />
-          <DataRow label="Watchers" value={intel?.watchers !== undefined ? formatNumber(intel.watchers) : '\u2014'} />
-          <DataRow label="Archived" value={intel ? (intel.isArchived ? 'Yes' : 'No') : '\u2014'} />
-          <DataRow
+          <DataRowOptional label="Language" value={intel?.primaryLanguage || ''} hasValue={!!intel?.primaryLanguage} showEmpty={showEmpty} />
+          <DataRowOptional label="License" value={intel?.license || ''} hasValue={!!intel?.license} showEmpty={showEmpty} />
+          <DataRowOptional label="Last Commit" value={intel?.lastCommitDate ? formatDate(intel.lastCommitDate) : ''} hasValue={!!intel?.lastCommitDate} showEmpty={showEmpty} />
+          <DataRowOptional label="Open Issues" value={intel?.openIssues !== undefined ? String(intel.openIssues) : ''} hasValue={intel?.openIssues !== undefined} showEmpty={showEmpty} />
+          <DataRowOptional label="Watchers" value={intel?.watchers !== undefined ? formatNumber(intel.watchers) : ''} hasValue={intel?.watchers !== undefined} showEmpty={showEmpty} />
+          <DataRowOptional label="Archived" value={intel ? (intel.isArchived ? 'Yes' : 'No') : ''} hasValue={!!intel} showEmpty={showEmpty} />
+          <DataRowOptional
             label="Health Score"
             value={
               intel ? (
                 <span style={{ color: intel.healthScore >= 70 ? '#22c55e' : intel.healthScore >= 50 ? '#f97316' : '#dc2626' }}>
                   {intel.healthScore}/100
                 </span>
-              ) : '\u2014'
+              ) : ''
             }
+            hasValue={!!intel}
+            showEmpty={showEmpty}
           />
         </div>
+        {!intel && !showEmpty && <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>}
       </CardBody>
     </Card>
   );
@@ -1260,15 +1460,19 @@ function GitHubSection({ project }: { project: Project }) {
 
 // -- TEAM --
 function TeamSection({ project }: { project: Project }) {
+  const [showEmpty, setShowEmpty] = useState(false);
   const team = project.team || [];
+  const hasData = team.length > 0;
 
   return (
     <Card>
-      <CardHeader title="Team" icon={Users} accentColor={team.length > 0 ? '#3b82f6' : '#6b7280'} />
-      <CardBody scrollable>
-        {team.length > 0 ? (
-          <div className="space-y-2">
-            {team.map((member, idx) => (
+      <CardHeader title="Team" icon={Users} accentColor={hasData ? '#3b82f6' : '#6b7280'} action={<ShowEmptyToggle checked={showEmpty} onChange={setShowEmpty} />} />
+      <CardBody>
+        {hasData ? (
+          <ExpandableList
+            items={team}
+            previewCount={4}
+            renderItem={(member, idx) => (
               <div key={idx} className="flex items-center gap-3 p-3 bg-ivory-light/[0.02] border border-ivory-light/5">
                 {member.avatarUrl ? (
                   <Image src={member.avatarUrl} alt={member.displayName || member.handle} width={36} height={36} className="rounded shrink-0" />
@@ -1304,15 +1508,17 @@ function TeamSection({ project }: { project: Project }) {
                   </a>
                 )}
               </div>
-            ))}
-          </div>
-        ) : (
+            )}
+          />
+        ) : showEmpty ? (
           <div className="space-y-0">
             <PlaceholderRow label="Founder" />
             <PlaceholderRow label="CTO" />
             <PlaceholderRow label="Team Members" />
             <PlaceholderRow label="Doxxed Status" />
           </div>
+        ) : (
+          <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>
         )}
       </CardBody>
     </Card>
@@ -1321,19 +1527,23 @@ function TeamSection({ project }: { project: Project }) {
 
 // -- ROADMAP --
 function RoadmapSection({ roadmap }: { roadmap?: RoadmapMilestone[] | null }) {
+  const [showEmpty, setShowEmpty] = useState(false);
   const statusIcons = {
     completed: <CheckCircle2 size={14} className="text-larp-green" />,
     'in-progress': <CircleDot size={14} className="text-larp-yellow" />,
     planned: <Circle size={14} className="text-ivory-light/30" />,
   };
+  const hasData = !!(roadmap && roadmap.length > 0);
 
   return (
     <Card>
-      <CardHeader title="Roadmap" icon={Target} accentColor={roadmap && roadmap.length > 0 ? '#06b6d4' : '#6b7280'} />
-      <CardBody scrollable>
-        {roadmap && roadmap.length > 0 ? (
-          <div className="space-y-2">
-            {roadmap.map((item, idx) => (
+      <CardHeader title="Roadmap" icon={Target} accentColor={hasData ? '#06b6d4' : '#6b7280'} action={<ShowEmptyToggle checked={showEmpty} onChange={setShowEmpty} />} />
+      <CardBody>
+        {hasData ? (
+          <ExpandableList
+            items={roadmap!}
+            previewCount={4}
+            renderItem={(item, idx) => (
               <div key={idx} className="flex items-start gap-3 p-3 bg-ivory-light/[0.02] border border-ivory-light/5">
                 <div className="mt-0.5 shrink-0">{statusIcons[item.status]}</div>
                 <div className="min-w-0">
@@ -1345,15 +1555,17 @@ function RoadmapSection({ roadmap }: { roadmap?: RoadmapMilestone[] | null }) {
                   )}
                 </div>
               </div>
-            ))}
-          </div>
-        ) : (
+            )}
+          />
+        ) : showEmpty ? (
           <div className="space-y-0">
             <PlaceholderRow label="Milestone 1" />
             <PlaceholderRow label="Milestone 2" />
             <PlaceholderRow label="Milestone 3" />
             <PlaceholderRow label="Target Dates" />
           </div>
+        ) : (
+          <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>
         )}
       </CardBody>
     </Card>
@@ -1362,41 +1574,46 @@ function RoadmapSection({ roadmap }: { roadmap?: RoadmapMilestone[] | null }) {
 
 // -- SHIPPING HISTORY --
 function ShippingHistorySection({ history }: { history?: ShippingMilestone[] | null }) {
+  const [showEmpty, setShowEmpty] = useState(false);
+  const hasData = !!(history && history.length > 0);
+
   return (
     <Card>
-      <CardHeader title="Shipping History" icon={Package} accentColor={history && history.length > 0 ? '#06b6d4' : '#6b7280'} />
-      <CardBody scrollable>
-        {history && history.length > 0 ? (
-          <div className="relative">
-            <div className="absolute left-[5px] top-3 bottom-3 w-px bg-ivory-light/10" />
-            <div className="space-y-4">
-              {history.map((item, idx) => (
-                <div key={idx} className="flex items-start gap-3 relative">
-                  <div className="w-[11px] h-[11px] rounded-full bg-cyan-500 border-2 border-slate-dark shrink-0 z-10" />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs font-mono text-cyan-400">{item.date}</span>
-                      {item.evidenceUrl && (
-                        <a href={item.evidenceUrl} target="_blank" rel="noopener noreferrer" className="text-ivory-light/30 hover:text-ivory-light/60 transition-colors">
-                          <ExternalLink size={10} />
-                        </a>
-                      )}
-                    </div>
-                    <div className="text-sm text-ivory-light">{item.milestone}</div>
-                    {item.details && (
-                      <p className="text-xs text-ivory-light/50 mt-1">{item.details}</p>
+      <CardHeader title="Shipping History" icon={Package} accentColor={hasData ? '#06b6d4' : '#6b7280'} action={<ShowEmptyToggle checked={showEmpty} onChange={setShowEmpty} />} />
+      <CardBody>
+        {hasData ? (
+          <ExpandableList
+            items={history!}
+            previewCount={4}
+            gap="space-y-4"
+            renderItem={(item, idx) => (
+              <div key={idx} className="flex items-start gap-3 relative">
+                <div className="w-[11px] h-[11px] rounded-full bg-cyan-500 border-2 border-slate-dark shrink-0 z-10" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs font-mono text-cyan-400">{item.date}</span>
+                    {item.evidenceUrl && (
+                      <a href={item.evidenceUrl} target="_blank" rel="noopener noreferrer" className="text-ivory-light/30 hover:text-ivory-light/60 transition-colors">
+                        <ExternalLink size={10} />
+                      </a>
                     )}
                   </div>
+                  <div className="text-sm text-ivory-light">{item.milestone}</div>
+                  {item.details && (
+                    <p className="text-xs text-ivory-light/50 mt-1">{item.details}</p>
+                  )}
                 </div>
-              ))}
-            </div>
-          </div>
-        ) : (
+              </div>
+            )}
+          />
+        ) : showEmpty ? (
           <div className="space-y-0">
             <PlaceholderRow label="Release 1" />
             <PlaceholderRow label="Release 2" />
             <PlaceholderRow label="Evidence URLs" />
           </div>
+        ) : (
+          <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>
         )}
       </CardBody>
     </Card>
@@ -1405,39 +1622,37 @@ function ShippingHistorySection({ history }: { history?: ShippingMilestone[] | n
 
 // -- SOURCE ATTRIBUTION (NEW) --
 function SourceAttributionSection({ attribution }: { attribution?: SourceAttribution | null }) {
+  const [showEmpty, setShowEmpty] = useState(false);
   const fieldEntries = attribution?.fieldSources ? Object.entries(attribution.fieldSources) : [];
   const conflicts = attribution?.conflicts || [];
+  const hasData = fieldEntries.length > 0;
 
   return (
     <Card>
-      <CardHeader title="Source Attribution" icon={Database} accentColor={attribution ? '#8b5cf6' : '#6b7280'} />
-      <CardBody scrollable>
-        {fieldEntries.length > 0 ? (
+      <CardHeader title="Source Attribution" icon={Database} accentColor={attribution ? '#8b5cf6' : '#6b7280'} action={<ShowEmptyToggle checked={showEmpty} onChange={setShowEmpty} />} />
+      <CardBody>
+        {hasData ? (
           <div className="space-y-4">
-            {/* Field Sources Table */}
             <div>
               <div className="grid grid-cols-[1fr_auto_auto] gap-x-3 gap-y-1 text-[10px] text-ivory-light/40 uppercase tracking-wider pb-2 border-b border-ivory-light/10 mb-2">
                 <span>Field</span>
                 <span>Source</span>
                 <span>Confidence</span>
               </div>
-              <div className="space-y-0.5">
-                {fieldEntries.slice(0, 20).map(([field, info]) => (
+              <ExpandableList
+                items={fieldEntries}
+                previewCount={8}
+                gap="space-y-0.5"
+                renderItem={([field, info], idx) => (
                   <div key={field} className="grid grid-cols-[1fr_auto_auto] gap-x-3 items-center py-1.5 border-b border-ivory-light/5">
                     <span className="text-xs text-ivory-light/60 truncate">{field}</span>
                     <SourceBadge source={info.source} />
                     <ConfidenceDot confidence={info.confidence} />
                   </div>
-                ))}
-                {fieldEntries.length > 20 && (
-                  <div className="text-[10px] text-ivory-light/30 text-center py-2">
-                    +{fieldEntries.length - 20} more fields
-                  </div>
                 )}
-              </div>
+              />
             </div>
 
-            {/* Conflicts */}
             {conflicts.length > 0 && (
               <div>
                 <div className="flex items-center gap-1 text-xs text-larp-yellow mb-2">
@@ -1465,12 +1680,14 @@ function SourceAttributionSection({ attribution }: { attribution?: SourceAttribu
               </div>
             )}
           </div>
-        ) : (
+        ) : showEmpty ? (
           <div className="space-y-0">
             <PlaceholderRow label="Field Sources" />
             <PlaceholderRow label="Source Conflicts" />
             <PlaceholderRow label="Confidence Levels" />
           </div>
+        ) : (
+          <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>
         )}
       </CardBody>
     </Card>
@@ -1479,13 +1696,19 @@ function SourceAttributionSection({ attribution }: { attribution?: SourceAttribu
 
 // -- PERPLEXITY CITATIONS (NEW) --
 function PerplexityCitationsSection({ citations }: { citations?: Array<{ url: string; title?: string }> | null }) {
+  const [showEmpty, setShowEmpty] = useState(false);
+  const hasData = !!(citations && citations.length > 0);
+
   return (
     <Card>
-      <CardHeader title="Research Citations" icon={Link2} accentColor={citations && citations.length > 0 ? '#22c55e' : '#6b7280'} />
-      <CardBody scrollable>
-        {citations && citations.length > 0 ? (
-          <div className="space-y-1.5">
-            {citations.map((cite, idx) => (
+      <CardHeader title="Research Citations" icon={Link2} accentColor={hasData ? '#22c55e' : '#6b7280'} action={<ShowEmptyToggle checked={showEmpty} onChange={setShowEmpty} />} />
+      <CardBody>
+        {hasData ? (
+          <ExpandableList
+            items={citations!}
+            previewCount={5}
+            gap="space-y-1.5"
+            renderItem={(cite, idx) => (
               <a
                 key={idx}
                 href={cite.url}
@@ -1504,14 +1727,16 @@ function PerplexityCitationsSection({ citations }: { citations?: Array<{ url: st
                 </div>
                 <ExternalLink size={10} className="text-ivory-light/20 group-hover:text-ivory-light/50 shrink-0 mt-1" />
               </a>
-            ))}
-          </div>
-        ) : (
+            )}
+          />
+        ) : showEmpty ? (
           <div className="space-y-0">
             <PlaceholderRow label="Citation 1" />
             <PlaceholderRow label="Citation 2" />
             <PlaceholderRow label="Citation 3" />
           </div>
+        ) : (
+          <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>
         )}
       </CardBody>
     </Card>
@@ -1633,51 +1858,6 @@ export default function EntityDetailPage({ project, isLoading, expectedEntityTyp
   return (
     <div className="h-full flex flex-col bg-slate-dark">
       {/* ================================================================ */}
-      {/* COMPACT STICKY HEADER (visible on scroll) */}
-      {/* ================================================================ */}
-      <div
-        className={`shrink-0 bg-slate-dark/95 backdrop-blur-sm border-b border-ivory-light/5 z-20 transition-all duration-200 ${
-          isHeaderCompact ? 'opacity-100 h-auto' : 'opacity-0 h-0 overflow-hidden pointer-events-none'
-        }`}
-      >
-        <div className="flex items-center justify-between px-4 sm:px-6 py-2 gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <div
-              className={`w-7 h-7 overflow-hidden shrink-0 ${
-                project.entityType === 'person' ? 'rounded-full' : 'rounded'
-              } border border-ivory-light/10`}
-            >
-              {project.avatarUrl ? (
-                <Image src={project.avatarUrl} alt={project.name} width={28} height={28} className="w-full h-full object-cover" />
-              ) : (
-                <ContractAvatar address={project.tokenAddress || project.id || project.name} size={28} bgColor="transparent" />
-              )}
-            </div>
-            <span className="text-sm text-ivory-light font-bold truncate">{project.name}</span>
-            {project.ticker && (
-              <span className="font-mono text-xs text-danger-orange shrink-0">${project.ticker}</span>
-            )}
-            <div
-              className="flex items-center gap-1 px-1.5 py-0.5 border shrink-0"
-              style={{
-                borderColor: getTrustColor(score) + '40',
-                backgroundColor: getTrustColor(score) + '10',
-              }}
-            >
-              <span className="font-mono text-xs font-bold" style={{ color: getTrustColor(score) }}>{score}</span>
-              <span className="text-[9px] font-mono uppercase" style={{ color: getTrustColor(score) }}>{getTrustLabel(score)}</span>
-            </div>
-          </div>
-          <button
-            onClick={handleShare}
-            className="flex items-center gap-1 px-2 py-1 text-xs text-ivory-light/50 border border-ivory-light/10 hover:border-ivory-light/20 hover:text-ivory-light transition-colors cursor-pointer shrink-0"
-          >
-            <Share2 size={11} />
-          </button>
-        </div>
-      </div>
-
-      {/* ================================================================ */}
       {/* SCROLLABLE CONTENT */}
       {/* ================================================================ */}
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
@@ -1790,10 +1970,44 @@ export default function EntityDetailPage({ project, isLoading, expectedEntityTyp
         </div>
 
         {/* ============================================================ */}
-        {/* STICKY SECTION NAV */}
+        {/* STICKY TOP BAR (compact header + section nav) */}
         {/* ============================================================ */}
-        <div className="sticky top-0 z-10 bg-slate-dark/95 backdrop-blur-sm border-b border-ivory-light/10 px-4 sm:px-6">
-          <SectionNav activeGroup={activeSectionGroup} onGroupClick={handleGroupClick} />
+        <div className="sticky top-0 z-10 bg-slate-dark/95 backdrop-blur-sm border-b border-ivory-light/10">
+          {/* Compact header row — visible when scrolled */}
+          <div
+            className={`transition-all duration-200 overflow-hidden ${
+              isHeaderCompact ? 'max-h-12 opacity-100' : 'max-h-0 opacity-0'
+            }`}
+          >
+            <div className="flex items-center justify-between px-4 sm:px-6 py-2 gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="text-sm text-ivory-light font-bold truncate">{project.name}</span>
+                {project.ticker && (
+                  <span className="font-mono text-xs text-danger-orange shrink-0">${project.ticker}</span>
+                )}
+                <div
+                  className="flex items-center gap-1 px-1.5 py-0.5 border shrink-0"
+                  style={{
+                    borderColor: getTrustColor(score) + '40',
+                    backgroundColor: getTrustColor(score) + '10',
+                  }}
+                >
+                  <span className="font-mono text-xs font-bold" style={{ color: getTrustColor(score) }}>{score}</span>
+                  <span className="text-[9px] font-mono uppercase" style={{ color: getTrustColor(score) }}>{getTrustLabel(score)}</span>
+                </div>
+              </div>
+              <button
+                onClick={handleShare}
+                className="flex items-center gap-1 px-2 py-1 text-xs text-ivory-light/50 border border-ivory-light/10 hover:border-ivory-light/20 hover:text-ivory-light transition-colors cursor-pointer shrink-0"
+              >
+                <Share2 size={11} />
+              </button>
+            </div>
+          </div>
+          {/* Section nav */}
+          <div className="px-4 sm:px-6">
+            <SectionNav activeGroup={activeSectionGroup} onGroupClick={handleGroupClick} />
+          </div>
         </div>
 
         {/* ============================================================ */}
@@ -1814,8 +2028,9 @@ export default function EntityDetailPage({ project, isLoading, expectedEntityTyp
 
           {/* ── TRUST ── */}
           <GroupHeading id="trust" label="Trust" icon={Shield} />
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <TrustSignalsSection project={project} />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <PositiveSignalsSection project={project} />
+            <NegativeSignalsSection project={project} />
             <ControversiesSection controversies={project.controversies} />
           </div>
 
