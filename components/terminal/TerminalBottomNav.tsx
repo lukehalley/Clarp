@@ -79,7 +79,7 @@ export default function TerminalBottomNav() {
                   flex flex-col items-center justify-center gap-0.5 flex-1 h-full font-mono transition-colors cursor-pointer
                   ${isActive
                     ? 'text-danger-orange'
-                    : 'text-ivory-light/40 active:text-ivory-light/60'
+                    : 'text-ivory-light active:text-ivory-light'
                   }
                 `}
               >
@@ -106,7 +106,7 @@ export default function TerminalBottomNav() {
                 flex flex-col items-center justify-center gap-0.5 flex-1 h-full font-mono transition-colors cursor-pointer
                 ${isActive
                   ? 'text-danger-orange'
-                  : 'text-ivory-light/40 active:text-ivory-light/60'
+                  : 'text-ivory-light active:text-ivory-light'
                 }
               `}
             >

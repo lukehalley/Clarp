@@ -112,11 +112,11 @@ function ToolBar({
       <div className="shrink-0 hidden sm:flex items-center gap-0">
         {/* Category dropdown */}
         <div className="flex items-center gap-1.5">
-          <Filter size={12} className="text-ivory-light/40" />
+          <Filter size={12} className="text-ivory-light" />
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value as CategoryFilter)}
-            className="bg-transparent text-ivory-light/60 font-mono text-[11px] focus:outline-none cursor-pointer appearance-none pr-3"
+            className="bg-transparent text-ivory-light font-mono text-[11px] focus:outline-none cursor-pointer appearance-none pr-3"
             style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'10\' height=\'10\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%239ca3af\' stroke-width=\'2\'%3E%3Cpath d=\'M6 9l6 6 6-6\'/%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0 center' }}
           >
             {CATEGORY_FILTERS.map((filter) => (
@@ -128,15 +128,15 @@ function ToolBar({
         </div>
 
         {/* Separator */}
-        <div className="w-px h-4 bg-ivory-light/15 mx-3" />
+        <div className="w-px h-4 bg-ivory-light/20 mx-3" />
 
         {/* Sort dropdown */}
         <div className="flex items-center gap-1.5">
-          <ArrowUpDown size={12} className="text-ivory-light/40" />
+          <ArrowUpDown size={12} className="text-ivory-light" />
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortOption)}
-            className="bg-transparent text-ivory-light/60 font-mono text-[11px] focus:outline-none cursor-pointer appearance-none pr-3"
+            className="bg-transparent text-ivory-light font-mono text-[11px] focus:outline-none cursor-pointer appearance-none pr-3"
             style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'10\' height=\'10\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%239ca3af\' stroke-width=\'2\'%3E%3Cpath d=\'M6 9l6 6 6-6\'/%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0 center' }}
           >
             {SORT_OPTIONS.map((option) => (
@@ -153,7 +153,7 @@ function ToolBar({
             <div className="w-px h-4 bg-ivory-light/15 mx-3" />
             <button
               onClick={onReset}
-              className="text-ivory-light/40 hover:text-ivory-light/60 transition-colors"
+              className="text-ivory-light hover:text-ivory-light transition-colors"
               title="Reset filters"
             >
               <RotateCcw size={12} />
@@ -171,7 +171,7 @@ function ToolBar({
 
 function LoadingState() {
   return (
-    <div className="min-h-[60vh] flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center">
       <ClarpLoader size={80} variant="light" label="loading projects..." />
     </div>
   );
@@ -180,7 +180,7 @@ function LoadingState() {
 function EmptyState() {
   return (
     <div className="py-16 text-center border-2 border-ivory-light/10 bg-ivory-light/[0.02]">
-      <p className="font-mono text-sm text-ivory-light/40">
+      <p className="font-mono text-sm text-ivory-light">
         No results match your filters
       </p>
     </div>
@@ -368,7 +368,7 @@ export default function TerminalEntityPage() {
                     <p className="font-mono text-sm text-larp-red/80">{error}</p>
                     <button
                       onClick={() => fetchProjects()}
-                      className="mt-4 font-mono text-xs text-ivory-light/40 hover:text-ivory-light/60 transition-colors"
+                      className="mt-4 font-mono text-xs text-ivory-light hover:text-ivory-light transition-colors"
                     >
                       Try again
                     </button>
@@ -396,7 +396,7 @@ export default function TerminalEntityPage() {
               <button
                 onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                 disabled={currentPage === 1}
-                className="px-3 py-1.5 font-mono text-xs border border-ivory-light/20 text-ivory-light/60 hover:text-ivory-light hover:border-ivory-light/40 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="px-3 py-1.5 font-mono text-xs border border-ivory-light/20 text-ivory-light hover:text-ivory-light hover:border-ivory-light/40 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
                 ← Prev
               </button>
@@ -408,7 +408,7 @@ export default function TerminalEntityPage() {
                     className={`w-8 h-8 font-mono text-xs transition-colors ${
                       currentPage === page
                         ? 'bg-danger-orange text-black font-bold'
-                        : 'border border-ivory-light/20 text-ivory-light/60 hover:text-ivory-light hover:border-ivory-light/40'
+                        : 'border border-ivory-light/20 text-ivory-light hover:text-ivory-light hover:border-ivory-light/40'
                     }`}
                   >
                     {page}
@@ -418,7 +418,7 @@ export default function TerminalEntityPage() {
               <button
                 onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
                 disabled={currentPage === totalPages}
-                className="px-3 py-1.5 font-mono text-xs border border-ivory-light/20 text-ivory-light/60 hover:text-ivory-light hover:border-ivory-light/40 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="px-3 py-1.5 font-mono text-xs border border-ivory-light/20 text-ivory-light hover:text-ivory-light hover:border-ivory-light/40 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
                 Next →
               </button>

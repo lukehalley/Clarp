@@ -158,7 +158,7 @@ export default function ScanProgressIndicator({
                 </span>
               </div>
 
-              <p className="text-[11px] text-ivory-light/50 mt-1 font-mono">
+              <p className="text-[11px] text-ivory-light mt-1 font-mono">
                 {isComplete
                   ? 'Refreshing project data...'
                   : 'Processing intel in background...'}
@@ -176,7 +176,7 @@ export default function ScanProgressIndicator({
                       }}
                     />
                   ))}
-                  <span className="text-[10px] text-ivory-light/30 font-mono ml-2">
+                  <span className="text-[10px] text-ivory-light font-mono ml-2">
                     PROCESSING
                   </span>
                 </div>
@@ -187,7 +187,7 @@ export default function ScanProgressIndicator({
             {isComplete && (
               <button
                 onClick={handleDismiss}
-                className="shrink-0 p-1 text-ivory-light/30 hover:text-ivory-light/60 transition-colors"
+                className="shrink-0 p-1 text-ivory-light hover:text-ivory-light transition-colors"
               >
                 <X size={14} />
               </button>

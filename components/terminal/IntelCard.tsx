@@ -161,7 +161,7 @@ export default function IntelCard({ project }: IntelCardProps) {
               {project.ticker ? (
                 <span className="text-danger-orange/70">${project.ticker}</span>
               ) : (
-                <span className="text-ivory-light/15">&mdash;</span>
+                <span className="text-ivory-light">&mdash;</span>
               )}
             </span>
           </div>
@@ -172,7 +172,7 @@ export default function IntelCard({ project }: IntelCardProps) {
             {socials.map((s, i) => (
               <span
                 key={i}
-                className={s.active ? 'text-ivory-light/60' : 'text-ivory-light/15'}
+                className={s.active ? 'text-ivory-light' : 'text-ivory-light'}
                 title={s.label}
               >
                 {s.icon}

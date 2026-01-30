@@ -40,6 +40,12 @@ export default function TerminalSidebar() {
   const pathname = usePathname();
   const router = useRouter();
 
+  // Detect if we're on a detail page (e.g. /terminal/project/clarp, /terminal/person/foo, /terminal/org/bar)
+  const isDetailPage =
+    (pathname.startsWith('/terminal/project/')) ||
+    (pathname.startsWith('/terminal/person/')) ||
+    (pathname.startsWith('/terminal/org/'));
+
   const getActiveNavId = () => {
     if (pathname.startsWith('/terminal/project') && !pathname.startsWith('/terminal/projects')) return 'projects';
     if (pathname.startsWith('/terminal/person')) return 'people';
@@ -75,7 +81,7 @@ export default function TerminalSidebar() {
             className="flex items-center gap-2 font-mono font-bold text-sm whitespace-nowrap"
           >
             <span className="text-danger-orange">CLARP</span>
-            <span className="text-ivory-light/60">TERMINAL</span>
+            <span className="text-ivory-light">TERMINAL</span>
           </Link>
         ) : (
           <Link
@@ -104,19 +110,19 @@ export default function TerminalSidebar() {
                   ${isActive
                     ? 'text-danger-orange bg-danger-orange/5 border-r-2 border-danger-orange'
                     : isDisabled
-                    ? 'text-ivory-light/20 cursor-not-allowed'
-                    : 'text-ivory-light/50 hover:text-ivory-light hover:bg-ivory-light/[0.03] cursor-pointer'
+                    ? 'text-ivory-light cursor-not-allowed'
+                    : 'text-ivory-light hover:text-ivory-light hover:bg-ivory-light/[0.03] cursor-pointer'
                   }
                 `}
               >
                 <span className="shrink-0 w-[18px] flex items-center justify-center">
-                  {item.icon}
+                  {isActive && isDetailPage ? <span className="font-mono text-sm">&lt;</span> : item.icon}
                 </span>
                 {expanded && (
                   <span className="truncate whitespace-nowrap">
                     {item.label}
                     {isDisabled && (
-                      <span className="ml-1 text-[9px] text-ivory-light/20 uppercase">soon</span>
+                      <span className="ml-1 text-[9px] text-ivory-light uppercase">soon</span>
                     )}
                   </span>
                 )}
@@ -130,9 +136,9 @@ export default function TerminalSidebar() {
                   whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100
                   transition-opacity duration-150 z-50
                 ">
-                  {item.label}
+                  {isActive && isDetailPage ? `Back to ${item.label}` : item.label}
                   {isDisabled && (
-                    <span className="ml-1 text-ivory-light/30">({item.disabledLabel})</span>
+                    <span className="ml-1 text-ivory-light">({item.disabledLabel})</span>
                   )}
                 </div>
               )}
@@ -152,7 +158,7 @@ export default function TerminalSidebar() {
         {/* Collapse toggle */}
         <button
           onClick={() => setExpanded(!expanded)}
-          className="shrink-0 flex items-center justify-center w-10 h-10 border-l border-ivory-light/10 text-ivory-light/30 hover:text-ivory-light/50 transition-colors cursor-pointer"
+          className="shrink-0 flex items-center justify-center w-10 h-10 border-l border-ivory-light/10 text-ivory-light hover:text-ivory-light transition-colors cursor-pointer"
           title={expanded ? 'Collapse' : 'Expand'}
         >
           {expanded ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}

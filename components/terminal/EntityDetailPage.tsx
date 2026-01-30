@@ -231,7 +231,7 @@ function CardHeader({
     <div className="flex items-center justify-between px-4 py-3 border-b border-ivory-light/5 shrink-0">
       <div className="flex items-center gap-2">
         <Icon size={14} style={{ color: accentColor }} />
-        <h3 className="text-xs font-mono uppercase tracking-wider text-ivory-light/70">{title}</h3>
+        <h3 className="text-xs font-mono uppercase tracking-wider text-ivory-light">{title}</h3>
       </div>
       {action}
     </div>
@@ -297,7 +297,7 @@ function Badge({
   variant?: 'default' | 'success' | 'warning' | 'danger' | 'info';
 }) {
   const styles = {
-    default: 'bg-ivory-light/5 border-ivory-light/10 text-ivory-light/60',
+    default: 'bg-ivory-light/5 border-ivory-light/10 text-ivory-light',
     success: 'bg-larp-green/10 border-larp-green/20 text-larp-green',
     warning: 'bg-larp-yellow/10 border-larp-yellow/20 text-larp-yellow',
     danger: 'bg-larp-red/10 border-larp-red/20 text-larp-red',
@@ -324,7 +324,7 @@ function DataRow({
 }) {
   const content = (
     <div className="flex items-center justify-between py-2 group border-b border-ivory-light/5 last:border-0">
-      <span className="text-xs text-ivory-light/40">{label}</span>
+      <span className="text-xs text-ivory-light">{label}</span>
       <span className={`${mono ? 'font-mono' : ''} text-xs text-ivory-light ${link ? 'group-hover:text-danger-orange transition-colors' : ''}`}>
         {value}
         {link && <ExternalLink size={9} className="inline ml-1 opacity-0 group-hover:opacity-100 transition-opacity" />}
@@ -368,8 +368,8 @@ function DataRowOptional({
 function PlaceholderRow({ label }: { label: string }) {
   return (
     <div className="flex items-center justify-between py-2 border-b border-ivory-light/5 last:border-0">
-      <span className="text-xs text-ivory-light/25">{label}</span>
-      <span className="font-mono text-xs text-ivory-light/15">&mdash;</span>
+      <span className="text-xs text-ivory-light">{label}</span>
+      <span className="font-mono text-xs text-ivory-light">&mdash;</span>
     </div>
   );
 }
@@ -378,7 +378,7 @@ function PlaceholderRow({ label }: { label: string }) {
 function ShowEmptyToggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
     <label className="flex items-center gap-1.5 cursor-pointer select-none group">
-      <span className="text-[10px] font-mono text-ivory-light/30 group-hover:text-ivory-light/50 transition-colors">
+      <span className="text-[10px] font-mono text-ivory-light group-hover:text-ivory-light transition-colors">
         All fields
       </span>
       <button
@@ -423,7 +423,7 @@ function ConfidenceDot({ confidence }: { confidence: 'low' | 'medium' | 'high' }
   return (
     <span className="flex items-center gap-1">
       <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: colors[confidence] }} />
-      <span className="text-[10px] text-ivory-light/40 capitalize">{confidence}</span>
+      <span className="text-[10px] text-ivory-light capitalize">{confidence}</span>
     </span>
   );
 }
@@ -463,7 +463,7 @@ function SectionNav({
               className={`flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-mono transition-all whitespace-nowrap cursor-pointer ${
                 isActive
                   ? 'text-danger-orange border-b-2 border-danger-orange'
-                  : 'text-ivory-light/40 hover:text-ivory-light/70 border-b-2 border-transparent'
+                  : 'text-ivory-light hover:text-ivory-light border-b-2 border-transparent'
               }`}
             >
               <Icon size={12} />
@@ -485,7 +485,7 @@ function GroupHeading({ id, label, icon: Icon }: { id: string; label: string; ic
     <div id={`group-${id}`} className="flex items-center gap-2 pt-8 pb-3 scroll-mt-28">
       <div className="w-6 h-px bg-danger-orange/40" />
       <Icon size={14} className="text-danger-orange/70" />
-      <h2 className="text-xs font-mono uppercase tracking-[0.2em] text-ivory-light/50">{label}</h2>
+      <h2 className="text-xs font-mono uppercase tracking-[0.2em] text-ivory-light">{label}</h2>
       <div className="flex-1 h-px bg-ivory-light/5" />
     </div>
   );
@@ -505,7 +505,7 @@ function AboutSection({ project }: { project: Project }) {
       <CardHeader title="About" icon={Eye} accentColor="#f97316" action={<ShowEmptyToggle checked={showEmpty} onChange={setShowEmpty} />} />
       <CardBody>
         {hasData ? (
-          <p className="text-sm text-ivory-light/70 leading-relaxed">{content}</p>
+          <p className="text-sm text-ivory-light leading-relaxed">{content}</p>
         ) : showEmpty ? (
           <div className="space-y-0">
             <PlaceholderRow label="Narrative" />
@@ -513,7 +513,7 @@ function AboutSection({ project }: { project: Project }) {
             <PlaceholderRow label="AI Summary" />
           </div>
         ) : (
-          <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>
+          <p className="text-xs text-ivory-light font-mono italic">No data available</p>
         )}
       </CardBody>
     </Card>
@@ -533,7 +533,7 @@ function KeyFindingsSection({ findings }: { findings?: string[] | null }) {
             items={findings!}
             previewCount={4}
             renderItem={(finding, idx) => (
-              <li key={idx} className="flex items-start gap-2 text-sm text-ivory-light/70 list-none">
+              <li key={idx} className="flex items-start gap-2 text-sm text-ivory-light list-none">
                 <span className="text-danger-orange mt-0.5 shrink-0">&#8226;</span>
                 <span>{finding}</span>
               </li>
@@ -546,7 +546,7 @@ function KeyFindingsSection({ findings }: { findings?: string[] | null }) {
             <PlaceholderRow label="Finding 3" />
           </div>
         ) : (
-          <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>
+          <p className="text-xs text-ivory-light font-mono italic">No data available</p>
         )}
       </CardBody>
     </Card>
@@ -574,7 +574,7 @@ function TagsSection({ tags }: { tags?: string[] | null }) {
             <PlaceholderRow label="Chain" />
           </div>
         ) : (
-          <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>
+          <p className="text-xs text-ivory-light font-mono italic">No data available</p>
         )}
       </CardBody>
     </Card>
@@ -593,7 +593,7 @@ function SocialMetricsSection({ metrics }: { metrics?: Project['socialMetrics'] 
           <DataRowOptional label="Engagement Rate" value={metrics?.engagement !== undefined ? `${metrics.engagement.toFixed(2)}%` : ''} hasValue={metrics?.engagement !== undefined} showEmpty={showEmpty} />
           <DataRowOptional label="Posts / Week" value={metrics?.postsPerWeek !== undefined ? metrics.postsPerWeek.toFixed(1) : ''} hasValue={metrics?.postsPerWeek !== undefined} showEmpty={showEmpty} />
         </div>
-        {!showEmpty && !metrics && <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>}
+        {!showEmpty && !metrics && <p className="text-xs text-ivory-light font-mono italic">No data available</p>}
       </CardBody>
     </Card>
   );
@@ -644,21 +644,21 @@ function PositiveSignalsSection({ project }: { project: Project }) {
                 {signal.active ? (
                   <CheckCircle2 size={12} className="text-larp-green mt-0.5 shrink-0" />
                 ) : (
-                  <Circle size={12} className="text-ivory-light/15 mt-0.5 shrink-0" />
+                  <Circle size={12} className="text-ivory-light mt-0.5 shrink-0" />
                 )}
                 <div className="min-w-0">
-                  <span className={`text-xs ${signal.active ? 'text-ivory-light' : 'text-ivory-light/25'}`}>
+                  <span className={`text-xs ${signal.active ? 'text-ivory-light' : 'text-ivory-light'}`}>
                     {signal.label}
                   </span>
                   {signal.active && signal.detail && (
-                    <p className="text-[10px] text-ivory-light/50 mt-0.5">{signal.detail}</p>
+                    <p className="text-[10px] text-ivory-light mt-0.5">{signal.detail}</p>
                   )}
                 </div>
               </div>
             )}
           />
         ) : (
-          <p className="text-xs text-ivory-light/20 font-mono italic">No signals confirmed</p>
+          <p className="text-xs text-ivory-light font-mono italic">No signals confirmed</p>
         )}
       </CardBody>
     </Card>
@@ -721,29 +721,29 @@ function NegativeSignalsSection({ project }: { project: Project }) {
                   <XCircle
                     size={12}
                     className={`mt-0.5 shrink-0 ${
-                      signal.severity === 'high' ? 'text-larp-red' : signal.severity === 'medium' ? 'text-larp-yellow' : 'text-ivory-light/40'
+                      signal.severity === 'high' ? 'text-larp-red' : signal.severity === 'medium' ? 'text-larp-yellow' : 'text-ivory-light'
                     }`}
                   />
                 ) : (
-                  <Circle size={12} className="text-ivory-light/15 mt-0.5 shrink-0" />
+                  <Circle size={12} className="text-ivory-light mt-0.5 shrink-0" />
                 )}
                 <div className="min-w-0">
                   <span className={`text-xs ${
                     signal.active
                       ? signal.severity === 'high' ? 'text-larp-red' : 'text-ivory-light'
-                      : 'text-ivory-light/25'
+                      : 'text-ivory-light'
                   }`}>
                     {signal.label}
                   </span>
                   {signal.active && signal.detail && (
-                    <p className="text-[10px] text-ivory-light/50 mt-0.5">{signal.detail}</p>
+                    <p className="text-[10px] text-ivory-light mt-0.5">{signal.detail}</p>
                   )}
                 </div>
               </div>
             )}
           />
         ) : (
-          <p className="text-xs text-ivory-light/20 font-mono italic">No risks detected</p>
+          <p className="text-xs text-ivory-light font-mono italic">No risks detected</p>
         )}
       </CardBody>
     </Card>
@@ -767,7 +767,7 @@ function ControversiesSection({ controversies }: { controversies?: string[] | nu
             renderItem={(item, idx) => (
               <div key={idx} className="flex items-start gap-2 p-3 bg-larp-red/5 border border-larp-red/10">
                 <AlertTriangle size={12} className="text-larp-red mt-0.5 shrink-0" />
-                <span className="text-xs text-ivory-light/70">{item}</span>
+                <span className="text-xs text-ivory-light">{item}</span>
               </div>
             )}
           />
@@ -807,14 +807,14 @@ function SecurityIntelSection({ security }: { security?: SecurityIntel | null })
                   ? <Lock size={14} className="text-larp-green shrink-0" />
                   : <Unlock size={14} className="text-larp-red shrink-0" />
               ) : (
-                <Lock size={14} className="text-ivory-light/15 shrink-0" />
+                <Lock size={14} className="text-ivory-light shrink-0" />
               )}
               <div className="min-w-0">
-                <div className="text-[10px] text-ivory-light/40 uppercase">Mint</div>
+                <div className="text-[10px] text-ivory-light uppercase">Mint</div>
                 <div className={`text-xs font-mono truncate ${
                   security
                     ? security.mintAuthorityEnabled ? 'text-larp-red' : 'text-larp-green'
-                    : 'text-ivory-light/15'
+                    : 'text-ivory-light'
                 }`}>
                   {security ? (security.mintAuthorityEnabled ? 'ENABLED' : 'DISABLED') : '\u2014'}
                 </div>
@@ -831,14 +831,14 @@ function SecurityIntelSection({ security }: { security?: SecurityIntel | null })
                   ? <ShieldCheck size={14} className="text-larp-green shrink-0" />
                   : <Snowflake size={14} className="text-larp-red shrink-0" />
               ) : (
-                <ShieldCheck size={14} className="text-ivory-light/15 shrink-0" />
+                <ShieldCheck size={14} className="text-ivory-light shrink-0" />
               )}
               <div className="min-w-0">
-                <div className="text-[10px] text-ivory-light/40 uppercase">Freeze</div>
+                <div className="text-[10px] text-ivory-light uppercase">Freeze</div>
                 <div className={`text-xs font-mono truncate ${
                   security
                     ? security.freezeAuthorityEnabled ? 'text-larp-red' : 'text-larp-green'
-                    : 'text-ivory-light/15'
+                    : 'text-ivory-light'
                 }`}>
                   {security ? (security.freezeAuthorityEnabled ? 'ENABLED' : 'DISABLED') : '\u2014'}
                 </div>
@@ -855,14 +855,14 @@ function SecurityIntelSection({ security }: { security?: SecurityIntel | null })
                   ? <Lock size={14} className="text-larp-green shrink-0" />
                   : <Unlock size={14} className="text-larp-yellow shrink-0" />
               ) : (
-                <Lock size={14} className="text-ivory-light/15 shrink-0" />
+                <Lock size={14} className="text-ivory-light shrink-0" />
               )}
               <div className="min-w-0">
-                <div className="text-[10px] text-ivory-light/40 uppercase">LP Status</div>
+                <div className="text-[10px] text-ivory-light uppercase">LP Status</div>
                 <div className={`text-xs font-mono truncate ${
                   security
                     ? security.lpLocked ? 'text-larp-green' : 'text-larp-yellow'
-                    : 'text-ivory-light/15'
+                    : 'text-ivory-light'
                 }`}>
                   {security ? (security.lpLocked ? `LOCKED${security.lpLockedPercent ? ` ${security.lpLockedPercent}%` : ''}` : 'UNLOCKED') : '\u2014'}
                 </div>
@@ -870,10 +870,10 @@ function SecurityIntelSection({ security }: { security?: SecurityIntel | null })
             </div>
 
             <div className="flex items-center gap-2 p-3 border border-ivory-light/5 bg-ivory-light/[0.01]">
-              <Users size={14} className={security?.holdersCount ? 'text-ivory-light/50' : 'text-ivory-light/15'} />
+              <Users size={14} className={security?.holdersCount ? 'text-ivory-light' : 'text-ivory-light'} />
               <div className="min-w-0">
-                <div className="text-[10px] text-ivory-light/40 uppercase">Holders</div>
-                <div className={`text-xs font-mono truncate ${security?.holdersCount ? 'text-ivory-light' : 'text-ivory-light/15'}`}>
+                <div className="text-[10px] text-ivory-light uppercase">Holders</div>
+                <div className={`text-xs font-mono truncate ${security?.holdersCount ? 'text-ivory-light' : 'text-ivory-light'}`}>
                   {security?.holdersCount ? formatNumber(security.holdersCount) : '\u2014'}
                 </div>
               </div>
@@ -901,7 +901,7 @@ function SecurityIntelSection({ security }: { security?: SecurityIntel | null })
             </div>
             <ul className="space-y-1.5">
               {security.risks.map((risk, idx) => (
-                <li key={idx} className="flex items-start gap-2 text-xs text-ivory-light/60">
+                <li key={idx} className="flex items-start gap-2 text-xs text-ivory-light">
                   <XCircle size={10} className="text-larp-red mt-0.5 shrink-0" />
                   {risk}
                 </li>
@@ -910,7 +910,7 @@ function SecurityIntelSection({ security }: { security?: SecurityIntel | null })
           </div>
         ) : showEmpty ? (
           <div className="p-3 border border-ivory-light/5">
-            <div className="flex items-center gap-2 text-xs text-ivory-light/25 font-medium">
+            <div className="flex items-center gap-2 text-xs text-ivory-light font-medium">
               <AlertOctagon size={12} />
               Risk Flags: {security ? 'None detected' : '\u2014'}
             </div>
@@ -918,7 +918,7 @@ function SecurityIntelSection({ security }: { security?: SecurityIntel | null })
         ) : null}
 
         {!security && !showEmpty && (
-          <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>
+          <p className="text-xs text-ivory-light font-mono italic">No data available</p>
         )}
       </CardBody>
     </Card>
@@ -979,7 +979,7 @@ function MarketSection({ project }: { project: Project }) {
                 href={`https://dexscreener.com/solana/${project.tokenAddress}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[10px] text-ivory-light/30 hover:text-danger-orange transition-colors flex items-center gap-1"
+                className="text-[10px] text-ivory-light hover:text-danger-orange transition-colors flex items-center gap-1"
               >
                 DexScreener <ExternalLink size={10} />
               </a>
@@ -993,7 +993,7 @@ function MarketSection({ project }: { project: Project }) {
         {(market || showEmpty) && (
           <div className="mb-4 pb-4 border-b border-ivory-light/5">
             <div className="flex items-baseline gap-3">
-              <span className={`text-2xl font-mono font-bold ${market ? 'text-ivory-light' : 'text-ivory-light/15'}`}>
+              <span className={`text-2xl font-mono font-bold ${market ? 'text-ivory-light' : 'text-ivory-light'}`}>
                 {market ? formatPrice(market.price) : '$\u2014'}
               </span>
               {market && market.priceChange24h !== undefined && (
@@ -1011,7 +1011,7 @@ function MarketSection({ project }: { project: Project }) {
           <DataRowOptional label="24h Volume" value={formatCurrency(market?.volume24h)} hasValue={!!market?.volume24h} showEmpty={showEmpty} />
           <DataRowOptional label="Liquidity" value={formatCurrency(market?.liquidity)} hasValue={!!market?.liquidity} showEmpty={showEmpty} />
         </div>
-        {!market && !showEmpty && <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>}
+        {!market && !showEmpty && <p className="text-xs text-ivory-light font-mono italic">No data available</p>}
       </CardBody>
     </Card>
   );
@@ -1067,7 +1067,7 @@ function LiquiditySection({ liquidity }: { liquidity?: LiquidityInfo | null }) {
           />
           <DataRowOptional label="Lock Duration" value={liquidity?.lockDuration || ''} hasValue={!!liquidity?.lockDuration} showEmpty={showEmpty} />
         </div>
-        {!liquidity && !showEmpty && <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>}
+        {!liquidity && !showEmpty && <p className="text-xs text-ivory-light font-mono italic">No data available</p>}
       </CardBody>
     </Card>
   );
@@ -1105,17 +1105,17 @@ function TokenomicsSection({ tokenomics }: { tokenomics?: Tokenomics | null }) {
             <div className="flex items-center gap-1 text-xs text-danger-orange mb-1">
               <Flame size={10} /> Burn Mechanism
             </div>
-            <p className="text-xs text-ivory-light/60">{tokenomics.burnMechanism}</p>
+            <p className="text-xs text-ivory-light">{tokenomics.burnMechanism}</p>
           </div>
         ) : showEmpty ? (
           <div className="mt-4 p-3 border-l-2 border-ivory-light/5">
-            <div className="flex items-center gap-1 text-xs text-ivory-light/20 mb-1">
+            <div className="flex items-center gap-1 text-xs text-ivory-light mb-1">
               <Flame size={10} /> Burn Mechanism
             </div>
-            <p className="text-xs text-ivory-light/15">&mdash;</p>
+            <p className="text-xs text-ivory-light">&mdash;</p>
           </div>
         ) : null}
-        {!tokenomics && !showEmpty && <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>}
+        {!tokenomics && !showEmpty && <p className="text-xs text-ivory-light font-mono italic">No data available</p>}
       </CardBody>
     </Card>
   );
@@ -1145,7 +1145,7 @@ function TechStackSection({ techStack }: { techStack?: TechStack | null }) {
                     <Wifi size={12} /> Yes
                   </span>
                 ) : (
-                  <span className="flex items-center gap-1 text-ivory-light/40">
+                  <span className="flex items-center gap-1 text-ivory-light">
                     <WifiOff size={12} /> No
                   </span>
                 )
@@ -1157,7 +1157,7 @@ function TechStackSection({ techStack }: { techStack?: TechStack | null }) {
         </div>
         {(techStack?.hardwareProducts?.length || showEmpty) && (
           <div className="mt-4 pt-4 border-t border-ivory-light/5">
-            <div className="text-[10px] text-ivory-light/40 uppercase tracking-wider mb-2 flex items-center gap-1">
+            <div className="text-[10px] text-ivory-light uppercase tracking-wider mb-2 flex items-center gap-1">
               <HardDrive size={10} /> Hardware Products
             </div>
             {techStack?.hardwareProducts && techStack.hardwareProducts.length > 0 ? (
@@ -1167,11 +1167,11 @@ function TechStackSection({ techStack }: { techStack?: TechStack | null }) {
                 ))}
               </div>
             ) : (
-              <span className="text-xs text-ivory-light/15 font-mono">&mdash;</span>
+              <span className="text-xs text-ivory-light font-mono">&mdash;</span>
             )}
           </div>
         )}
-        {!techStack && !showEmpty && <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>}
+        {!techStack && !showEmpty && <p className="text-xs text-ivory-light font-mono italic">No data available</p>}
       </CardBody>
     </Card>
   );
@@ -1211,7 +1211,7 @@ function WebsiteIntelSection({ intel, websiteUrl }: { intel?: Project['websiteIn
                 href={websiteUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[10px] text-ivory-light/30 hover:text-danger-orange transition-colors flex items-center gap-1"
+                className="text-[10px] text-ivory-light hover:text-danger-orange transition-colors flex items-center gap-1"
               >
                 Visit <ExternalLink size={10} />
               </a>
@@ -1225,14 +1225,14 @@ function WebsiteIntelSection({ intel, websiteUrl }: { intel?: Project['websiteIn
         {(intel || showEmpty) && (
           <div className="flex items-center justify-between mb-4 p-3 bg-ivory-light/[0.02] border border-ivory-light/10">
             <div>
-              <div className="text-[10px] text-ivory-light/40 uppercase">Quality</div>
+              <div className="text-[10px] text-ivory-light uppercase">Quality</div>
               <div className="text-sm font-mono font-medium capitalize"
                 style={{ color: intel ? (qualityColors[intel.websiteQuality] || '#6b7280') : undefined }}>
                 {intel?.websiteQuality || '\u2014'}
               </div>
             </div>
             <div className="text-right">
-              <div className="text-[10px] text-ivory-light/40 uppercase">Score</div>
+              <div className="text-[10px] text-ivory-light uppercase">Score</div>
               <div className="text-sm font-mono font-bold"
                 style={{ color: intel ? (qualityColors[intel.websiteQuality] || '#6b7280') : undefined }}>
                 {intel?.qualityScore !== undefined ? `${intel.qualityScore}/100` : '\u2014'}
@@ -1249,9 +1249,9 @@ function WebsiteIntelSection({ intel, websiteUrl }: { intel?: Project['websiteIn
                 {item.value ? (
                   <CheckCircle2 size={12} className="text-larp-green shrink-0" />
                 ) : (
-                  <XCircle size={12} className="text-ivory-light/15 shrink-0" />
+                  <XCircle size={12} className="text-ivory-light shrink-0" />
                 )}
-                <span className={`text-xs ${item.value ? 'text-ivory-light/70' : 'text-ivory-light/25'}`}>
+                <span className={`text-xs ${item.value ? 'text-ivory-light' : 'text-ivory-light'}`}>
                   {item.label}
                 </span>
               </div>
@@ -1272,7 +1272,7 @@ function WebsiteIntelSection({ intel, websiteUrl }: { intel?: Project['websiteIn
                 ))}
               </div>
             ) : (
-              <span className="text-xs text-ivory-light/15 font-mono">&mdash;</span>
+              <span className="text-xs text-ivory-light font-mono">&mdash;</span>
             )}
           </div>
         ) : null}
@@ -1290,12 +1290,12 @@ function WebsiteIntelSection({ intel, websiteUrl }: { intel?: Project['websiteIn
                 ))}
               </div>
             ) : (
-              <span className="text-xs text-ivory-light/15 font-mono">&mdash;</span>
+              <span className="text-xs text-ivory-light font-mono">&mdash;</span>
             )}
           </div>
         ) : null}
 
-        {!intel && !showEmpty && <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>}
+        {!intel && !showEmpty && <p className="text-xs text-ivory-light font-mono italic">No data available</p>}
       </CardBody>
     </Card>
   );
@@ -1330,7 +1330,7 @@ function LegalSection({ entity }: { entity?: LegalEntity | null }) {
           />
           <DataRowOptional label="Details" value={entity?.registrationDetails || ''} hasValue={!!entity?.registrationDetails} showEmpty={showEmpty} mono={false} />
         </div>
-        {!entity && !showEmpty && <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>}
+        {!entity && !showEmpty && <p className="text-xs text-ivory-light font-mono italic">No data available</p>}
       </CardBody>
     </Card>
   );
@@ -1345,7 +1345,7 @@ function AffiliationsSection({ affiliations }: { affiliations?: Affiliation[] | 
     vc: 'text-larp-green',
     exchange: 'text-purple-400',
     regulatory: 'text-cyan-400',
-    other: 'text-ivory-light/50',
+    other: 'text-ivory-light',
   };
   const hasData = !!(affiliations && affiliations.length > 0);
 
@@ -1374,7 +1374,7 @@ function AffiliationsSection({ affiliations }: { affiliations?: Affiliation[] | 
             <PlaceholderRow label="Exchanges" />
           </div>
         ) : (
-          <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>
+          <p className="text-xs text-ivory-light font-mono italic">No data available</p>
         )}
       </CardBody>
     </Card>
@@ -1399,7 +1399,7 @@ function GitHubSection({ project }: { project: Project }) {
                 href={project.githubUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[10px] text-ivory-light/30 hover:text-larp-green transition-colors flex items-center gap-1"
+                className="text-[10px] text-ivory-light hover:text-larp-green transition-colors flex items-center gap-1"
               >
                 GitHub <ExternalLink size={10} />
               </a>
@@ -1413,21 +1413,21 @@ function GitHubSection({ project }: { project: Project }) {
         {(intel || showEmpty) && (
           <div className="flex items-center gap-4 mb-4 pb-4 border-b border-ivory-light/5 flex-wrap">
             <span className="flex items-center gap-1 text-xs">
-              <Star size={12} className={intel ? 'text-larp-yellow' : 'text-ivory-light/15'} />
-              <span className={`font-mono ${intel ? 'text-ivory-light' : 'text-ivory-light/15'}`}>{intel ? formatNumber(intel.stars) : '\u2014'}</span>
+              <Star size={12} className={intel ? 'text-larp-yellow' : 'text-ivory-light'} />
+              <span className={`font-mono ${intel ? 'text-ivory-light' : 'text-ivory-light'}`}>{intel ? formatNumber(intel.stars) : '\u2014'}</span>
             </span>
             <span className="flex items-center gap-1 text-xs">
-              <GitFork size={12} className={intel ? 'text-ivory-light/60' : 'text-ivory-light/15'} />
-              <span className={intel ? 'text-ivory-light/60' : 'text-ivory-light/15'}>{intel ? formatNumber(intel.forks) : '\u2014'}</span>
+              <GitFork size={12} className={intel ? 'text-ivory-light' : 'text-ivory-light'} />
+              <span className={intel ? 'text-ivory-light' : 'text-ivory-light'}>{intel ? formatNumber(intel.forks) : '\u2014'}</span>
             </span>
             <span className="flex items-center gap-1 text-xs">
-              <Users size={12} className={intel ? 'text-ivory-light/60' : 'text-ivory-light/15'} />
-              <span className={intel ? 'text-ivory-light/60' : 'text-ivory-light/15'}>{intel?.contributorsCount ?? '\u2014'}</span>
+              <Users size={12} className={intel ? 'text-ivory-light' : 'text-ivory-light'} />
+              <span className={intel ? 'text-ivory-light' : 'text-ivory-light'}>{intel?.contributorsCount ?? '\u2014'}</span>
             </span>
             <span className="flex items-center gap-1 text-xs">
-              <GitCommit size={12} className={intel ? 'text-larp-green' : 'text-ivory-light/15'} />
-              <span className={intel ? 'text-larp-green' : 'text-ivory-light/15'}>{intel?.commitsLast30d ?? '\u2014'}</span>
-              <span className="text-ivory-light/40">in 30d</span>
+              <GitCommit size={12} className={intel ? 'text-larp-green' : 'text-ivory-light'} />
+              <span className={intel ? 'text-larp-green' : 'text-ivory-light'}>{intel?.commitsLast30d ?? '\u2014'}</span>
+              <span className="text-ivory-light">in 30d</span>
             </span>
           </div>
         )}
@@ -1452,7 +1452,7 @@ function GitHubSection({ project }: { project: Project }) {
             showEmpty={showEmpty}
           />
         </div>
-        {!intel && !showEmpty && <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>}
+        {!intel && !showEmpty && <p className="text-xs text-ivory-light font-mono italic">No data available</p>}
       </CardBody>
     </Card>
   );
@@ -1478,7 +1478,7 @@ function TeamSection({ project }: { project: Project }) {
                   <Image src={member.avatarUrl} alt={member.displayName || member.handle} width={36} height={36} className="rounded shrink-0" />
                 ) : (
                   <div className="w-9 h-9 rounded bg-ivory-light/10 flex items-center justify-center shrink-0">
-                    <Users size={14} className="text-ivory-light/30" />
+                    <Users size={14} className="text-ivory-light" />
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
@@ -1492,7 +1492,7 @@ function TeamSection({ project }: { project: Project }) {
                     <span className="text-xs text-danger-orange/70">{member.role}</span>
                   )}
                   {member.previousEmployers && member.previousEmployers.length > 0 && (
-                    <div className="text-[10px] text-ivory-light/40 mt-0.5">
+                    <div className="text-[10px] text-ivory-light mt-0.5">
                       Ex: {member.previousEmployers.slice(0, 2).join(', ')}
                     </div>
                   )}
@@ -1502,7 +1502,7 @@ function TeamSection({ project }: { project: Project }) {
                     href={`https://x.com/${member.handle}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-ivory-light/30 hover:text-ivory-light/60 transition-colors shrink-0"
+                    className="text-ivory-light hover:text-ivory-light transition-colors shrink-0"
                   >
                     <Twitter size={14} />
                   </a>
@@ -1518,7 +1518,7 @@ function TeamSection({ project }: { project: Project }) {
             <PlaceholderRow label="Doxxed Status" />
           </div>
         ) : (
-          <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>
+          <p className="text-xs text-ivory-light font-mono italic">No data available</p>
         )}
       </CardBody>
     </Card>
@@ -1531,7 +1531,7 @@ function RoadmapSection({ roadmap }: { roadmap?: RoadmapMilestone[] | null }) {
   const statusIcons = {
     completed: <CheckCircle2 size={14} className="text-larp-green" />,
     'in-progress': <CircleDot size={14} className="text-larp-yellow" />,
-    planned: <Circle size={14} className="text-ivory-light/30" />,
+    planned: <Circle size={14} className="text-ivory-light" />,
   };
   const hasData = !!(roadmap && roadmap.length > 0);
 
@@ -1549,7 +1549,7 @@ function RoadmapSection({ roadmap }: { roadmap?: RoadmapMilestone[] | null }) {
                 <div className="min-w-0">
                   <div className="text-sm text-ivory-light">{item.milestone}</div>
                   {item.targetDate && (
-                    <div className="text-xs text-ivory-light/40 flex items-center gap-1 mt-1">
+                    <div className="text-xs text-ivory-light flex items-center gap-1 mt-1">
                       <Calendar size={10} /> {item.targetDate}
                     </div>
                   )}
@@ -1565,7 +1565,7 @@ function RoadmapSection({ roadmap }: { roadmap?: RoadmapMilestone[] | null }) {
             <PlaceholderRow label="Target Dates" />
           </div>
         ) : (
-          <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>
+          <p className="text-xs text-ivory-light font-mono italic">No data available</p>
         )}
       </CardBody>
     </Card>
@@ -1593,14 +1593,14 @@ function ShippingHistorySection({ history }: { history?: ShippingMilestone[] | n
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-xs font-mono text-cyan-400">{item.date}</span>
                     {item.evidenceUrl && (
-                      <a href={item.evidenceUrl} target="_blank" rel="noopener noreferrer" className="text-ivory-light/30 hover:text-ivory-light/60 transition-colors">
+                      <a href={item.evidenceUrl} target="_blank" rel="noopener noreferrer" className="text-ivory-light hover:text-ivory-light transition-colors">
                         <ExternalLink size={10} />
                       </a>
                     )}
                   </div>
                   <div className="text-sm text-ivory-light">{item.milestone}</div>
                   {item.details && (
-                    <p className="text-xs text-ivory-light/50 mt-1">{item.details}</p>
+                    <p className="text-xs text-ivory-light mt-1">{item.details}</p>
                   )}
                 </div>
               </div>
@@ -1613,7 +1613,7 @@ function ShippingHistorySection({ history }: { history?: ShippingMilestone[] | n
             <PlaceholderRow label="Evidence URLs" />
           </div>
         ) : (
-          <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>
+          <p className="text-xs text-ivory-light font-mono italic">No data available</p>
         )}
       </CardBody>
     </Card>
@@ -1634,7 +1634,7 @@ function SourceAttributionSection({ attribution }: { attribution?: SourceAttribu
         {hasData ? (
           <div className="space-y-4">
             <div>
-              <div className="grid grid-cols-[1fr_auto_auto] gap-x-3 gap-y-1 text-[10px] text-ivory-light/40 uppercase tracking-wider pb-2 border-b border-ivory-light/10 mb-2">
+              <div className="grid grid-cols-[1fr_auto_auto] gap-x-3 gap-y-1 text-[10px] text-ivory-light uppercase tracking-wider pb-2 border-b border-ivory-light/10 mb-2">
                 <span>Field</span>
                 <span>Source</span>
                 <span>Confidence</span>
@@ -1645,7 +1645,7 @@ function SourceAttributionSection({ attribution }: { attribution?: SourceAttribu
                 gap="space-y-0.5"
                 renderItem={([field, info], idx) => (
                   <div key={field} className="grid grid-cols-[1fr_auto_auto] gap-x-3 items-center py-1.5 border-b border-ivory-light/5">
-                    <span className="text-xs text-ivory-light/60 truncate">{field}</span>
+                    <span className="text-xs text-ivory-light truncate">{field}</span>
                     <SourceBadge source={info.source} />
                     <ConfidenceDot confidence={info.confidence} />
                   </div>
@@ -1667,12 +1667,12 @@ function SourceAttributionSection({ attribution }: { attribution?: SourceAttribu
                         {conflict.sources.map((src, sidx) => (
                           <div key={sidx} className="flex items-center gap-2 text-[10px]">
                             <SourceBadge source={src.source} />
-                            <span className="text-ivory-light/60 truncate">{src.value}</span>
+                            <span className="text-ivory-light truncate">{src.value}</span>
                           </div>
                         ))}
                       </div>
-                      <div className="text-[10px] text-ivory-light/40 mt-1">
-                        Resolution: <span className="text-ivory-light/60">{conflict.resolution.replace('_', ' ')}</span>
+                      <div className="text-[10px] text-ivory-light mt-1">
+                        Resolution: <span className="text-ivory-light">{conflict.resolution.replace('_', ' ')}</span>
                       </div>
                     </div>
                   ))}
@@ -1687,7 +1687,7 @@ function SourceAttributionSection({ attribution }: { attribution?: SourceAttribu
             <PlaceholderRow label="Confidence Levels" />
           </div>
         ) : (
-          <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>
+          <p className="text-xs text-ivory-light font-mono italic">No data available</p>
         )}
       </CardBody>
     </Card>
@@ -1716,16 +1716,16 @@ function PerplexityCitationsSection({ citations }: { citations?: Array<{ url: st
                 rel="noopener noreferrer"
                 className="flex items-start gap-2 p-2 bg-ivory-light/[0.02] border border-ivory-light/5 hover:border-ivory-light/15 hover:bg-ivory-light/[0.04] transition-all group"
               >
-                <span className="text-[10px] font-mono text-ivory-light/30 mt-0.5 shrink-0">[{idx + 1}]</span>
+                <span className="text-[10px] font-mono text-ivory-light mt-0.5 shrink-0">[{idx + 1}]</span>
                 <div className="min-w-0">
                   <div className="text-xs text-ivory-light group-hover:text-danger-orange transition-colors truncate">
                     {cite.title || cite.url}
                   </div>
-                  <div className="text-[10px] text-ivory-light/30 truncate mt-0.5">
+                  <div className="text-[10px] text-ivory-light truncate mt-0.5">
                     {cite.url}
                   </div>
                 </div>
-                <ExternalLink size={10} className="text-ivory-light/20 group-hover:text-ivory-light/50 shrink-0 mt-1" />
+                <ExternalLink size={10} className="text-ivory-light group-hover:text-ivory-light shrink-0 mt-1" />
               </a>
             )}
           />
@@ -1736,7 +1736,7 @@ function PerplexityCitationsSection({ citations }: { citations?: Array<{ url: st
             <PlaceholderRow label="Citation 3" />
           </div>
         ) : (
-          <p className="text-xs text-ivory-light/20 font-mono italic">No data available</p>
+          <p className="text-xs text-ivory-light font-mono italic">No data available</p>
         )}
       </CardBody>
     </Card>
@@ -1749,7 +1749,7 @@ function PerplexityCitationsSection({ citations }: { citations?: Array<{ url: st
 
 function LoadingState() {
   return (
-    <div className="min-h-[60vh] flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center">
       <ClarpLoader size={96} variant="light" label="loading..." />
     </div>
   );
@@ -1760,8 +1760,8 @@ function NotFoundState() {
 
   return (
     <div className="h-full flex flex-col items-center justify-center">
-      <div className="font-mono text-6xl text-ivory-light/10 mb-2">404</div>
-      <div className="font-mono text-sm text-ivory-light/40 mb-6">Entity not found</div>
+      <div className="font-mono text-6xl text-ivory-light mb-2">404</div>
+      <div className="font-mono text-sm text-ivory-light mb-6">Entity not found</div>
       <button
         onClick={() => router.push('/terminal/projects')}
         className="font-mono text-xs text-danger-orange hover:text-danger-orange/80 transition-colors"
@@ -1865,24 +1865,6 @@ export default function EntityDetailPage({ project, isLoading, expectedEntityTyp
         {/* FULL HEADER (scrolls away) */}
         {/* ============================================================ */}
         <div ref={fullHeaderRef} className="px-4 sm:px-6 py-4 sm:py-6 border-b border-ivory-light/5">
-          {/* Entity badge + share row */}
-          <div className="flex items-center justify-between mb-4 gap-2">
-            <div
-              className={`flex items-center gap-1.5 px-2 py-1 border text-xs font-mono ${entityStyle.bgColor} ${entityStyle.borderColor}`}
-              style={{ color: entityStyle.color }}
-            >
-              {entityStyle.icon}
-              <span>{entityStyle.label}</span>
-            </div>
-            <button
-              onClick={handleShare}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-ivory-light/50 border border-ivory-light/10 hover:border-ivory-light/20 hover:text-ivory-light transition-colors cursor-pointer"
-            >
-              <Share2 size={12} />
-              <span className="hidden sm:inline">Share</span>
-            </button>
-          </div>
-
           {/* Avatar + Name + Score */}
           <div className="flex items-start gap-4 sm:gap-6">
             <div className="shrink-0">
@@ -1932,35 +1914,35 @@ export default function EntityDetailPage({ project, isLoading, expectedEntityTyp
               <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
                 {project.xHandle && (
                   <a href={`https://x.com/${project.xHandle}`} target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-xs text-ivory-light/50 hover:text-ivory-light transition-colors">
+                    className="flex items-center gap-1 text-xs text-ivory-light hover:text-ivory-light transition-colors">
                     <Twitter size={12} /> @{project.xHandle}
                   </a>
                 )}
                 {project.websiteUrl && (
                   <a href={project.websiteUrl} target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-xs text-ivory-light/50 hover:text-ivory-light transition-colors">
+                    className="flex items-center gap-1 text-xs text-ivory-light hover:text-ivory-light transition-colors">
                     <Globe size={12} /> <span className="hidden xs:inline">Website</span>
                   </a>
                 )}
                 {project.githubUrl && (
                   <a href={project.githubUrl} target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-xs text-ivory-light/50 hover:text-ivory-light transition-colors">
+                    className="flex items-center gap-1 text-xs text-ivory-light hover:text-ivory-light transition-colors">
                     <GithubIcon size={12} /> <span className="hidden xs:inline">GitHub</span>
                   </a>
                 )}
                 {project.discordUrl && (
                   <a href={project.discordUrl} target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-xs text-ivory-light/50 hover:text-ivory-light transition-colors">
+                    className="flex items-center gap-1 text-xs text-ivory-light hover:text-ivory-light transition-colors">
                     <MessageCircle size={12} /> <span className="hidden xs:inline">Discord</span>
                   </a>
                 )}
                 {project.telegramUrl && (
                   <a href={project.telegramUrl} target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-xs text-ivory-light/50 hover:text-ivory-light transition-colors">
+                    className="flex items-center gap-1 text-xs text-ivory-light hover:text-ivory-light transition-colors">
                     <Send size={12} /> <span className="hidden xs:inline">Telegram</span>
                   </a>
                 )}
-                <span className="text-[10px] text-ivory-light/30 flex items-center gap-1 sm:ml-auto">
+                <span className="text-[10px] text-ivory-light flex items-center gap-1 sm:ml-auto">
                   <Clock size={10} />
                   Scanned {formatDate(project.lastScanAt)}
                 </span>
@@ -1985,7 +1967,7 @@ export default function EntityDetailPage({ project, isLoading, expectedEntityTyp
                   ) : project.tokenAddress ? (
                     <ContractAvatar address={project.tokenAddress} size={24} bgColor="transparent" />
                   ) : (
-                    <div className="w-full h-full bg-slate-medium flex items-center justify-center text-[10px] font-mono text-ivory-light/40">
+                    <div className="w-full h-full bg-slate-medium flex items-center justify-center text-[10px] font-mono text-ivory-light">
                       {project.name.charAt(0)}
                     </div>
                   )}
@@ -2007,7 +1989,7 @@ export default function EntityDetailPage({ project, isLoading, expectedEntityTyp
               </div>
               <button
                 onClick={handleShare}
-                className="flex items-center gap-1 px-2 py-1 text-xs text-ivory-light/50 border border-ivory-light/10 hover:border-ivory-light/20 hover:text-ivory-light transition-colors cursor-pointer shrink-0"
+                className="flex items-center gap-1 px-2 py-1 text-xs text-ivory-light border border-ivory-light/10 hover:border-ivory-light/20 hover:text-ivory-light transition-colors cursor-pointer shrink-0"
               >
                 <Share2 size={11} />
               </button>
@@ -2095,7 +2077,7 @@ export default function EntityDetailPage({ project, isLoading, expectedEntityTyp
           </div>
 
           {/* Scan metadata footer */}
-          <div className="mt-8 pt-4 border-t border-ivory-light/5 flex items-center justify-between text-[10px] text-ivory-light/20 font-mono">
+          <div className="mt-8 pt-4 border-t border-ivory-light/5 flex items-center justify-between text-[10px] text-ivory-light font-mono">
             <span>Created {formatDate(project.createdAt)}</span>
             <span>Last scan {formatDate(project.lastScanAt)}</span>
           </div>

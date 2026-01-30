@@ -43,7 +43,7 @@ function StepIndicator({ step, index, isScanning }: { step: ScanStep; index: num
       <div className="relative z-10 flex-shrink-0">
         {step.status === 'pending' && (
           <div className="w-5 h-5 border border-ivory-light/20 bg-slate-dark/50 flex items-center justify-center">
-            <span className="font-mono text-[9px] text-ivory-light/30">{index + 1}</span>
+            <span className="font-mono text-[9px] text-ivory-light">{index + 1}</span>
           </div>
         )}
         {step.status === 'active' && (
@@ -71,10 +71,10 @@ function StepIndicator({ step, index, isScanning }: { step: ScanStep; index: num
             step.status === 'active'
               ? 'text-ivory-light'
               : step.status === 'complete'
-              ? 'text-ivory-light/50'
+              ? 'text-ivory-light'
               : step.status === 'failed'
               ? 'text-larp-red'
-              : 'text-ivory-light/25'
+              : 'text-ivory-light'
           }`}
         >
           {step.label}
@@ -88,7 +88,7 @@ function StepIndicator({ step, index, isScanning }: { step: ScanStep; index: num
                 ? 'text-larp-green/60'
                 : step.status === 'failed'
                 ? 'text-larp-red/60'
-                : 'text-ivory-light/30'
+                : 'text-ivory-light'
             }`}
           >
             {step.status === 'active' && <span className="inline-block w-1 h-1 bg-danger-orange mr-1.5 animate-pulse" />}
@@ -117,7 +117,7 @@ function ScanLoading() {
       <div className="w-full max-w-[min(500px,90vw)] aspect-square flex items-center justify-center border-2 border-ivory-light/10 bg-slate-dark/50">
         <div className="flex flex-col items-center gap-3">
           <div className="w-6 h-6 border-2 border-danger-orange border-t-transparent animate-spin" />
-          <span className="font-mono text-xs text-ivory-light/40">initializing...</span>
+          <span className="font-mono text-xs text-ivory-light">initializing...</span>
         </div>
       </div>
     </div>
@@ -394,7 +394,7 @@ function ScanPageInner() {
       {/* Back button - positioned absolutely so it doesn't affect centering */}
       <button
         onClick={() => router.push('/terminal/projects')}
-        className="absolute top-4 left-4 flex items-center gap-2 font-mono text-xs text-ivory-light/40 hover:text-danger-orange transition-colors group"
+        className="absolute top-4 left-4 flex items-center gap-2 font-mono text-xs text-ivory-light hover:text-danger-orange transition-colors group"
       >
         <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
         back to terminal
@@ -500,7 +500,7 @@ function ScanPageInner() {
           <div className="relative z-10 mb-4 pb-4 border-b border-ivory-light/10">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-2 h-2 bg-danger-orange animate-pulse" />
-              <span className="font-mono text-[10px] text-ivory-light/40 uppercase tracking-widest">
+              <span className="font-mono text-[10px] text-ivory-light uppercase tracking-widest">
                 {phase === 'scanning' ? 'scanning' : phase === 'complete' ? 'complete' : phase === 'failed' ? 'failed' : 'ready'}
               </span>
             </div>
@@ -529,7 +529,7 @@ function ScanPageInner() {
                     <div className="font-mono text-xs text-larp-red mb-1">{error}</div>
                     <button
                       onClick={startScan}
-                      className="font-mono text-[10px] text-ivory-light/60 hover:text-danger-orange transition-colors underline underline-offset-2"
+                      className="font-mono text-[10px] text-ivory-light hover:text-danger-orange transition-colors underline underline-offset-2"
                     >
                       try again
                     </button>
@@ -545,7 +545,7 @@ function ScanPageInner() {
                   <Check size={14} className="text-larp-green" />
                   <div>
                     <div className="font-mono text-xs text-larp-green">analysis complete</div>
-                    <div className="font-mono text-[10px] text-ivory-light/40 mt-0.5">redirecting...</div>
+                    <div className="font-mono text-[10px] text-ivory-light mt-0.5">redirecting...</div>
                   </div>
                 </div>
               </div>
@@ -554,7 +554,7 @@ function ScanPageInner() {
             {/* Not crypto message */}
             {phase === 'not-crypto' && (
               <div className="mt-4 p-3 bg-ivory-light/5 border border-ivory-light/10">
-                <div className="font-mono text-xs text-ivory-light/60 mb-2">
+                <div className="font-mono text-xs text-ivory-light mb-2">
                   not crypto-related
                 </div>
                 <button
@@ -569,17 +569,17 @@ function ScanPageInner() {
 
           {/* Footer inside box */}
           <div className="relative z-10 mt-4 pt-3 border-t border-ivory-light/10 flex items-center justify-between">
-            <p className="font-mono text-[9px] text-ivory-light/20">
+            <p className="font-mono text-[9px] text-ivory-light">
               ai-powered analysis
             </p>
             {phase === 'scanning' && (
               <div className="flex items-center gap-3">
-                <span className="font-mono text-[9px] text-ivory-light/20 tabular-nums">
+                <span className="font-mono text-[9px] text-ivory-light tabular-nums">
                   {elapsed}s
                 </span>
                 <div className="flex items-center gap-1.5">
                   <div className="w-1 h-1 bg-danger-orange animate-pulse" />
-                  <span className="font-mono text-[9px] text-ivory-light/30">processing</span>
+                  <span className="font-mono text-[9px] text-ivory-light">processing</span>
                 </div>
               </div>
             )}

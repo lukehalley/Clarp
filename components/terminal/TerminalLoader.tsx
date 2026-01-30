@@ -111,7 +111,7 @@ export default function TerminalLoader({ onComplete }: TerminalLoaderProps) {
     if (line.startsWith('[OK]')) return 'text-larp-green';
     if (line === 'READY.') return 'text-danger-orange font-bold';
     if (line.startsWith('CLARP')) return 'text-danger-orange font-bold';
-    return 'text-ivory-light/70';
+    return 'text-ivory-light';
   };
 
   return (
@@ -201,7 +201,7 @@ export default function TerminalLoader({ onComplete }: TerminalLoaderProps) {
                 }}
               />
             </div>
-            <div className="flex justify-between mt-2 sm:mt-3 text-xs sm:text-sm font-mono text-ivory-light/40">
+            <div className="flex justify-between mt-2 sm:mt-3 text-xs sm:text-sm font-mono text-ivory-light">
               <span>SYSTEM BOOT</span>
               <span>{isComplete ? '100' : Math.floor(((currentLineIndex + 1) / BOOT_SEQUENCE.length) * 95)}%</span>
             </div>
@@ -215,7 +215,7 @@ export default function TerminalLoader({ onComplete }: TerminalLoaderProps) {
         <div className="absolute bottom-6 sm:bottom-8 right-6 sm:right-8 w-6 sm:w-8 h-6 sm:h-8 border-r-2 border-b-2 border-danger-orange/30" />
 
         {/* System info */}
-        <div className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 text-[10px] sm:text-xs font-mono text-ivory-light/20 tracking-widest">
+        <div className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 text-[10px] sm:text-xs font-mono text-ivory-light tracking-widest">
           CLARP TRUST INTELLIGENCE SYSTEM
         </div>
       </div>

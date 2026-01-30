@@ -39,7 +39,7 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
               className="flex items-center gap-2 text-ivory-light font-mono font-bold text-sm"
             >
               <span className="text-danger-orange">CLARP</span>
-              <span className="text-ivory-light/60">TERMINAL</span>
+              <span className="text-ivory-light">TERMINAL</span>
             </Link>
             <ConnectWallet compact />
           </div>

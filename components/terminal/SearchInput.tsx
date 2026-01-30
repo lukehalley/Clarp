@@ -189,7 +189,7 @@ export default function SearchInput({ compact, initialValue = '', onSearch }: Se
               : 'border-ivory-light/20 hover:border-ivory-light/40'
           } ${compact ? 'h-full px-1' : 'px-1 py-3'}`}
         >
-          <Search size={compact ? 16 : 18} className="text-ivory-light/40 shrink-0" />
+          <Search size={compact ? 16 : 18} className="text-ivory-light shrink-0" />
 
           {detectedType && (
             <span className="flex items-center gap-1 px-2 py-0.5 bg-danger-orange/20 text-danger-orange text-xs font-mono shrink-0">
@@ -213,7 +213,7 @@ export default function SearchInput({ compact, initialValue = '', onSearch }: Se
             {/* Typewriter placeholder with blinking cursor */}
             {!query && (
               <div
-                className={`absolute inset-0 flex items-center pointer-events-none text-ivory-light/40 font-mono ${
+                className={`absolute inset-0 flex items-center pointer-events-none text-ivory-light font-mono ${
                   compact ? 'text-sm' : 'text-base'
                 }`}
               >
@@ -227,7 +227,7 @@ export default function SearchInput({ compact, initialValue = '', onSearch }: Se
             <button
               type="button"
               onClick={handleClear}
-              className="p-1 text-ivory-light/40 hover:text-ivory-light/60"
+              className="p-1 text-ivory-light hover:text-ivory-light"
             >
               <X size={16} />
             </button>
@@ -244,14 +244,14 @@ export default function SearchInput({ compact, initialValue = '', onSearch }: Se
           {/* Recent searches */}
           {recentSearches.length > 0 && !query && (
             <div className="p-2">
-              <div className="text-[11px] sm:text-xs font-mono text-ivory-light/40 px-2 py-1">Recent</div>
+              <div className="text-[11px] sm:text-xs font-mono text-ivory-light px-2 py-1">Recent</div>
               {recentSearches.map((search, i) => (
                 <button
                   key={i}
                   onClick={() => handleRecentClick(search)}
-                  className="w-full text-left px-2 sm:px-3 py-2 font-mono text-xs sm:text-sm text-ivory-light/70 hover:bg-ivory-light/5 hover:text-ivory-light flex items-center gap-2 overflow-hidden"
+                  className="w-full text-left px-2 sm:px-3 py-2 font-mono text-xs sm:text-sm text-ivory-light hover:bg-ivory-light/5 hover:text-ivory-light flex items-center gap-2 overflow-hidden"
                 >
-                  <Search size={12} className="text-ivory-light/30 shrink-0 sm:w-3.5 sm:h-3.5" />
+                  <Search size={12} className="text-ivory-light shrink-0 sm:w-3.5 sm:h-3.5" />
                   <span className="truncate">{search}</span>
                 </button>
               ))}
@@ -273,8 +273,8 @@ export default function SearchInput({ compact, initialValue = '', onSearch }: Se
 
           {/* Input format hints */}
           <div className="p-2 border-t border-ivory-light/10">
-            <div className="text-[11px] sm:text-xs font-mono text-ivory-light/40 px-2 py-1">Accepted format</div>
-            <div className="text-[10px] sm:text-xs font-mono text-ivory-light/50 px-2">
+            <div className="text-[11px] sm:text-xs font-mono text-ivory-light px-2 py-1">Accepted format</div>
+            <div className="text-[10px] sm:text-xs font-mono text-ivory-light px-2">
               <span className="flex items-center gap-1">{INPUT_ICONS.token_address} Solana token address (32-44 chars)</span>
             </div>
           </div>
