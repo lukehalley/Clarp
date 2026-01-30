@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Filter,
@@ -46,6 +46,15 @@ const CATEGORY_FILTERS: { id: CategoryFilter; label: string; icon: React.ReactNo
   { id: 'high-risk', label: 'High Risk', icon: <AlertTriangle size={14} /> },
   { id: 'low-risk', label: 'Trusted', icon: <Shield size={14} /> },
 ];
+
+function sortOptionToParams(sortBy: SortOption): { orderBy: string; order: string } {
+  switch (sortBy) {
+    case 'score-high': return { orderBy: 'trust_score', order: 'desc' };
+    case 'score-low':  return { orderBy: 'trust_score', order: 'asc' };
+    case 'name-asc':   return { orderBy: 'name', order: 'asc' };
+    case 'recent':     return { orderBy: 'last_scan_at', order: 'desc' };
+  }
+}
 
 
 // ============================================================================
@@ -249,8 +258,15 @@ const ITEMS_PER_PAGE = 10;
 
 export default function TerminalPage() {
   const router = useRouter();
+
+  // Server-fetched data
   const [projects, setProjects] = useState<Project[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [totalCount, setTotalCount] = useState(0);
+  const [entityCounts, setEntityCounts] = useState({ project: 0, person: 0, organization: 0 });
+
+  // UI state
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [isFetching, setIsFetching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -261,36 +277,61 @@ export default function TerminalPage() {
   const [scoreRange, setScoreRange] = useState<[number, number]>([0, 100]);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
 
-  // Calculate entity counts
-  const entityCounts = {
-    project: projects.filter(p => p.entityType === 'project' || !p.entityType).length,
-    person: projects.filter(p => p.entityType === 'person').length,
-    organization: projects.filter(p => p.entityType === 'organization').length,
-  };
+  // AbortController ref for cancelling stale requests
+  const abortRef = useRef<AbortController | null>(null);
 
-  // Fetch projects on mount
-  useEffect(() => {
-    fetchProjects();
-  }, []);
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async (signal?: AbortSignal) => {
     try {
-      setIsLoading(true);
+      setIsFetching(true);
       setError(null);
-      const [res] = await Promise.all([
-        fetch('/api/projects?limit=50&orderBy=last_scan_at&order=desc'),
-        new Promise(r => setTimeout(r, 2000)), // min loader display
-      ]);
+
+      const { orderBy, order } = sortOptionToParams(sortBy);
+      const params = new URLSearchParams({
+        entityType: entityFilter,
+        orderBy,
+        order,
+        limit: String(ITEMS_PER_PAGE),
+        offset: String((currentPage - 1) * ITEMS_PER_PAGE),
+      });
+
+      if (category !== 'all') params.set('category', category);
+      if (verifiedOnly) params.set('verifiedOnly', 'true');
+      if (scoreRange[0] > 0) params.set('minScore', String(scoreRange[0]));
+      if (scoreRange[1] < 100) params.set('maxScore', String(scoreRange[1]));
+
+      const res = await fetch(`/api/projects?${params.toString()}`, { signal });
       if (!res.ok) throw new Error('Failed to fetch projects');
       const data = await res.json();
+
       setProjects(data.projects || []);
+      setTotalCount(data.total || 0);
+      setEntityCounts(data.entityCounts || { project: 0, person: 0, organization: 0 });
     } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return;
       console.error('[TerminalPage] Failed to fetch projects:', err);
       setError('Failed to load projects');
     } finally {
-      setIsLoading(false);
+      setIsFetching(false);
+      setIsInitialLoad(false);
     }
-  };
+  }, [entityFilter, category, sortBy, scoreRange, verifiedOnly, currentPage]);
+
+  // Fetch when any filter/sort/page changes
+  useEffect(() => {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    fetchProjects(controller.signal);
+    return () => controller.abort();
+  }, [fetchProjects]);
+
+  // Reset page to 1 when filters change (not when page itself changes)
+  const handleEntityFilter = (e: EntityFilter) => { setEntityFilter(e); setCurrentPage(1); };
+  const handleCategory = (c: CategoryFilter) => { setCategory(c); setCurrentPage(1); };
+  const handleSortBy = (s: SortOption) => { setSortBy(s); setCurrentPage(1); };
+  const handleVerifiedOnly = (v: boolean) => { setVerifiedOnly(v); setCurrentPage(1); };
 
   const handleRequestScan = () => {
     router.push('/terminal/scan');
@@ -302,6 +343,7 @@ export default function TerminalPage() {
     setSortBy('score-high');
     setScoreRange([0, 100]);
     setVerifiedOnly(false);
+    setCurrentPage(1);
   };
 
   const hasActiveFilters =
@@ -312,87 +354,36 @@ export default function TerminalPage() {
     scoreRange[1] !== 100 ||
     verifiedOnly;
 
-  // Filter and sort projects
-  const filteredProjects = projects
-    .filter((project) => {
-      const score = project.trustScore?.score ?? 50;
-
-      // Entity type filter
-      const projectType = project.entityType || 'project'; // Default to project if not set
-      if (entityFilter !== projectType) return false;
-
-      // Category filter
-      if (category === 'verified' && project.trustScore?.tier !== 'verified') return false;
-      if (category === 'high-risk' && score >= 40) return false;
-      if (category === 'low-risk' && score < 70) return false;
-
-      // Score range filter
-      if (score < scoreRange[0] || score > scoreRange[1]) return false;
-
-      // Verified filter
-      if (verifiedOnly && project.trustScore?.tier !== 'verified') return false;
-
-      return true;
-    })
-    .sort((a, b) => {
-      const scoreA = a.trustScore?.score ?? 50;
-      const scoreB = b.trustScore?.score ?? 50;
-
-      switch (sortBy) {
-        case 'score-high':
-          return scoreB - scoreA;
-        case 'score-low':
-          return scoreA - scoreB;
-        case 'name-asc':
-          return a.name.localeCompare(b.name);
-        case 'recent':
-        default:
-          return new Date(b.lastScanAt).getTime() - new Date(a.lastScanAt).getTime();
-      }
-    });
-
-  // Pagination
-  const totalPages = Math.ceil(filteredProjects.length / ITEMS_PER_PAGE);
-  const paginatedProjects = filteredProjects.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
-
-  // Reset to page 1 when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [entityFilter, category, sortBy, verifiedOnly]);
-
   // Get label for results count
   const getResultsLabel = () => {
-    if (entityFilter === 'person') return filteredProjects.length === 1 ? 'person' : 'people';
-    if (entityFilter === 'organization') return filteredProjects.length === 1 ? 'org' : 'orgs';
-    return filteredProjects.length === 1 ? 'project' : 'projects';
+    if (entityFilter === 'person') return totalCount === 1 ? 'person' : 'people';
+    if (entityFilter === 'organization') return totalCount === 1 ? 'org' : 'orgs';
+    return totalCount === 1 ? 'project' : 'projects';
   };
 
   return (
     <WalletGate showPreview={true}>
       <div className="px-4 sm:px-6 py-6">
         <div className="max-w-7xl mx-auto">
-        {isLoading ? (
+        {isInitialLoad ? (
           <LoadingState />
         ) : (
           <>
           {/* Entity Type Tabs */}
           <EntityTypeTabs
             entityFilter={entityFilter}
-            setEntityFilter={setEntityFilter}
+            setEntityFilter={handleEntityFilter}
             counts={entityCounts}
           />
 
           {/* Filter Bar */}
           <FilterBar
             category={category}
-            setCategory={setCategory}
+            setCategory={handleCategory}
             sortBy={sortBy}
-            setSortBy={setSortBy}
+            setSortBy={handleSortBy}
             verifiedOnly={verifiedOnly}
-            setVerifiedOnly={setVerifiedOnly}
+            setVerifiedOnly={handleVerifiedOnly}
             hasActiveFilters={hasActiveFilters}
             onReset={resetFilters}
           />
@@ -400,7 +391,7 @@ export default function TerminalPage() {
           {/* Results count */}
           <div className="flex items-center justify-between py-4">
             <span className="font-mono text-xs text-ivory-light/40">
-              {filteredProjects.length} {getResultsLabel()}
+              {totalCount} {getResultsLabel()}
             </span>
           </div>
 
@@ -408,18 +399,18 @@ export default function TerminalPage() {
           <div className="py-16 text-center">
             <p className="font-mono text-sm text-larp-red/80">{error}</p>
             <button
-              onClick={fetchProjects}
+              onClick={() => fetchProjects()}
               className="mt-4 font-mono text-xs text-ivory-light/40 hover:text-ivory-light/60 transition-colors"
             >
               Try again
             </button>
           </div>
-        ) : filteredProjects.length === 0 ? (
+        ) : projects.length === 0 ? (
           <EmptyState onRequestScan={handleRequestScan} />
         ) : (
-          <>
+          <div className={`transition-opacity duration-150 ${isFetching ? 'opacity-50 pointer-events-none' : ''}`}>
             <div className="space-y-4">
-              {paginatedProjects.map((project) => (
+              {projects.map((project) => (
                 <IntelCard key={project.id} project={project} />
               ))}
             </div>
@@ -458,7 +449,7 @@ export default function TerminalPage() {
                 </button>
               </div>
             )}
-          </>
+          </div>
         )}
 
         {/* Tokenomics Dashboard */}
@@ -467,7 +458,7 @@ export default function TerminalPage() {
         </div>
 
         {/* Bottom hint */}
-        {filteredProjects.length > 0 && (
+        {totalCount > 0 && (
           <div className="mt-8 pt-6 border-t border-ivory-light/5 text-center">
             <p className="font-mono text-xs text-ivory-light/30">
               Can&apos;t find what you&apos;re looking for?{' '}

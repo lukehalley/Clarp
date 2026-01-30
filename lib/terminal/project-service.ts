@@ -584,6 +584,8 @@ export async function upsertProjectByTokenAddress(
 // LIST & FEED OPERATIONS
 // ============================================================================
 
+export type CategoryFilter = 'all' | 'verified' | 'high-risk' | 'low-risk';
+
 export interface ListProjectsOptions {
   limit?: number;
   offset?: number;
@@ -592,6 +594,57 @@ export interface ListProjectsOptions {
   trustTier?: TrustTier;
   minScore?: number;
   maxScore?: number;
+  entityType?: EntityType;
+  category?: CategoryFilter;
+  verifiedOnly?: boolean;
+}
+
+type FilterOptions = Omit<ListProjectsOptions, 'limit' | 'offset' | 'orderBy' | 'order'>;
+
+/**
+ * Apply shared project filters to a Supabase query builder
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function applyProjectFilters(query: any, options: FilterOptions) {
+  const { entityType, trustTier, minScore, maxScore, category, verifiedOnly } = options;
+
+  // Entity type filter (handle NULL as 'project')
+  if (entityType) {
+    if (entityType === 'project') {
+      query = query.or('entity_type.eq.project,entity_type.is.null');
+    } else {
+      query = query.eq('entity_type', entityType);
+    }
+  }
+
+  // Trust tier filter
+  if (trustTier) {
+    query = query.eq('trust_tier', trustTier);
+  }
+
+  // Score range filters
+  if (minScore !== undefined) {
+    query = query.gte('trust_score', minScore);
+  }
+  if (maxScore !== undefined) {
+    query = query.lte('trust_score', maxScore);
+  }
+
+  // Category shorthand filters
+  if (category === 'verified') {
+    query = query.eq('trust_tier', 'verified');
+  } else if (category === 'high-risk') {
+    query = query.lt('trust_score', 40);
+  } else if (category === 'low-risk') {
+    query = query.gte('trust_score', 70);
+  }
+
+  // Verified-only toggle
+  if (verifiedOnly) {
+    query = query.eq('trust_tier', 'verified');
+  }
+
+  return query;
 }
 
 /**
@@ -606,9 +659,7 @@ export async function listProjects(options: ListProjectsOptions = {}): Promise<P
     offset = 0,
     orderBy = 'last_scan_at',
     order = 'desc',
-    trustTier,
-    minScore,
-    maxScore,
+    ...filterOpts
   } = options;
 
   try {
@@ -616,16 +667,8 @@ export async function listProjects(options: ListProjectsOptions = {}): Promise<P
       .from('projects')
       .select('*');
 
-    // Apply filters
-    if (trustTier) {
-      query = query.eq('trust_tier', trustTier);
-    }
-    if (minScore !== undefined) {
-      query = query.gte('trust_score', minScore);
-    }
-    if (maxScore !== undefined) {
-      query = query.lte('trust_score', maxScore);
-    }
+    // Apply shared filters
+    query = applyProjectFilters(query, filterOpts);
 
     // Apply ordering and pagination
     query = query
@@ -668,7 +711,7 @@ export async function getCautionProjects(limit: number = 10): Promise<Project[]>
 }
 
 /**
- * Count total projects
+ * Count total projects (unfiltered)
  */
 export async function countProjects(): Promise<number> {
   const client = getSupabaseClient();
@@ -688,6 +731,80 @@ export async function countProjects(): Promise<number> {
   } catch (err) {
     console.error('[ProjectService] Failed to count projects:', err);
     return 0;
+  }
+}
+
+/**
+ * Count projects with the same filters as listProjects (for pagination)
+ */
+export async function countFilteredProjects(options: FilterOptions = {}): Promise<number> {
+  const client = getSupabaseClient();
+  if (!client) return 0;
+
+  try {
+    let query = client
+      .from('projects')
+      .select('*', { count: 'exact', head: true });
+
+    query = applyProjectFilters(query, options);
+
+    const { count, error } = await query;
+
+    if (error) {
+      console.error('[ProjectService] Error counting filtered projects:', error.message);
+      return 0;
+    }
+
+    return count || 0;
+  } catch (err) {
+    console.error('[ProjectService] Failed to count filtered projects:', err);
+    return 0;
+  }
+}
+
+/**
+ * Get entity type counts (for tab badges) with shared filters applied.
+ * Excludes entityType itself so all tabs get their own count.
+ */
+export async function getEntityCounts(
+  options: Omit<FilterOptions, 'entityType'> = {}
+): Promise<{ project: number; person: number; organization: number }> {
+  const client = getSupabaseClient();
+  if (!client) return { project: 0, person: 0, organization: 0 };
+
+  try {
+    const buildCountQuery = (entityType: string) => {
+      let query = client
+        .from('projects')
+        .select('*', { count: 'exact', head: true });
+
+      // Apply shared filters (without entityType)
+      query = applyProjectFilters(query, options);
+
+      // Apply entity type (handle NULL as 'project')
+      if (entityType === 'project') {
+        query = query.or('entity_type.eq.project,entity_type.is.null');
+      } else {
+        query = query.eq('entity_type', entityType);
+      }
+
+      return query;
+    };
+
+    const [projectRes, personRes, orgRes] = await Promise.all([
+      buildCountQuery('project'),
+      buildCountQuery('person'),
+      buildCountQuery('organization'),
+    ]);
+
+    return {
+      project: projectRes.count || 0,
+      person: personRes.count || 0,
+      organization: orgRes.count || 0,
+    };
+  } catch (err) {
+    console.error('[ProjectService] Failed to get entity counts:', err);
+    return { project: 0, person: 0, organization: 0 };
   }
 }
 

@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import {
   listProjects,
   searchProjects,
-  countProjects,
+  countFilteredProjects,
+  getEntityCounts,
   type ListProjectsOptions,
+  type CategoryFilter,
 } from '@/lib/terminal/project-service';
-import type { TrustTier } from '@/types/project';
+import type { TrustTier, EntityType } from '@/types/project';
 
 export async function GET(request: NextRequest) {
   try {
@@ -21,7 +23,7 @@ export async function GET(request: NextRequest) {
 
     // Otherwise, list with filters
     const options: ListProjectsOptions = {
-      limit: parseInt(searchParams.get('limit') || '20', 10),
+      limit: parseInt(searchParams.get('limit') || '10', 10),
       offset: parseInt(searchParams.get('offset') || '0', 10),
     };
 
@@ -52,15 +54,47 @@ export async function GET(request: NextRequest) {
       options.maxScore = parseInt(maxScore, 10);
     }
 
-    // Fetch projects and count
-    const [projects, total] = await Promise.all([
+    // Entity type filter
+    const entityType = searchParams.get('entityType');
+    if (entityType && ['project', 'person', 'organization'].includes(entityType)) {
+      options.entityType = entityType as EntityType;
+    }
+
+    // Category filter
+    const category = searchParams.get('category');
+    if (category && ['all', 'verified', 'high-risk', 'low-risk'].includes(category)) {
+      options.category = category as CategoryFilter;
+    }
+
+    // Verified only
+    if (searchParams.get('verifiedOnly') === 'true') {
+      options.verifiedOnly = true;
+    }
+
+    // Build filter-only options for counts (no pagination/sorting)
+    const filterOptions: Omit<ListProjectsOptions, 'limit' | 'offset' | 'orderBy' | 'order'> = {
+      trustTier: options.trustTier,
+      minScore: options.minScore,
+      maxScore: options.maxScore,
+      entityType: options.entityType,
+      category: options.category,
+      verifiedOnly: options.verifiedOnly,
+    };
+
+    // Entity counts need all filters EXCEPT entityType (so each tab gets its own count)
+    const { entityType: _et, ...countFilterOptions } = filterOptions;
+
+    // Fetch projects, filtered count, and entity counts in parallel
+    const [projects, total, entityCounts] = await Promise.all([
       listProjects(options),
-      countProjects(),
+      countFilteredProjects(filterOptions),
+      getEntityCounts(countFilterOptions),
     ]);
 
     return NextResponse.json({
       projects,
       total,
+      entityCounts,
       limit: options.limit,
       offset: options.offset,
     });
