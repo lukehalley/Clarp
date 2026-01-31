@@ -1201,12 +1201,15 @@ async function processRealScan(job: ScanJob): Promise<void> {
       return;
     }
 
-    // Determine if it's a project (use web_search) or person (skip web_search)
-    isProject = classification.entityType === 'project' || classification.entityType === 'company';
-    console.log(`[XIntel] @${job.handle} is a ${classification.entityType}, isProject=${isProject}`);
+    // Force all entities to be treated as projects (person/org scanning disabled)
+    isProject = true;
+    classifiedEntityType = 'project';
+    console.log(`[XIntel] @${job.handle} classified as ${classification.entityType}, overriding to project`);
   } catch (err) {
-    // Classification failed, continue with default (person, no web_search)
-    console.warn(`[XIntel] Classification failed for @${job.handle}, assuming crypto person:`, err);
+    // Classification failed, continue with default (project)
+    console.warn(`[XIntel] Classification failed for @${job.handle}, assuming project:`, err);
+    isProject = true;
+    classifiedEntityType = 'project';
   }
 
   // Stage 3: Fetching profile (UI progress)

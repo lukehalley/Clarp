@@ -4,8 +4,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useTerminalNav } from '@/contexts/TerminalNavContext';
 import {
   Boxes,
-  User,
-  Building2,
   Eye,
   Shield,
   BarChart3,
@@ -32,8 +30,6 @@ interface NavItem {
 
 const MAIN_NAV: NavItem[] = [
   { id: 'projects', label: 'Projects', icon: <Boxes size={20} />, href: '/terminal/projects' },
-  { id: 'people', label: 'People', icon: <User size={20} />, href: '/terminal/people' },
-  { id: 'orgs', label: 'Orgs', icon: <Building2 size={20} />, href: '/terminal/orgs' },
 ];
 
 const DETAIL_NAV: { id: TabId; label: string; icon: React.ReactNode }[] = [
@@ -50,12 +46,6 @@ export default function TerminalBottomNav() {
   const { activeDetailTab, setActiveDetailTab, isDetailPage } = useTerminalNav();
 
   const getActiveNavId = () => {
-    if (pathname.startsWith('/terminal/project') && !pathname.startsWith('/terminal/projects')) return 'projects';
-    if (pathname.startsWith('/terminal/person')) return 'people';
-    if (pathname.startsWith('/terminal/org')) return 'orgs';
-    if (pathname.includes('/projects')) return 'projects';
-    if (pathname.includes('/people')) return 'people';
-    if (pathname.includes('/orgs')) return 'orgs';
     return 'projects';
   };
 

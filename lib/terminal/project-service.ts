@@ -837,10 +837,28 @@ export async function searchProjects(query: string, limit: number = 10): Promise
   if (!client) return [];
 
   try {
+    const trimmed = query.trim();
+    const words = trimmed.split(/\s+/).filter(Boolean);
+    const collapsed = words.join(''); // "pay ai" → "payai"
+
+    // Build OR conditions to search across name, ticker, and x_handle
+    // Also match collapsed version for multi-word queries (e.g. "pay ai" → matches "payai")
+    const orConditions = [
+      `name.ilike.%${trimmed}%`,
+      `ticker.ilike.%${trimmed}%`,
+      `x_handle.ilike.%${trimmed}%`,
+    ];
+
+    // Add collapsed match for multi-word queries
+    if (words.length > 1) {
+      orConditions.push(`name.ilike.%${collapsed}%`);
+      orConditions.push(`ticker.ilike.%${collapsed}%`);
+    }
+
     const { data, error } = await client
       .from('projects')
       .select('*')
-      .ilike('name', `%${query}%`)
+      .or(orConditions.join(','))
       .order('trust_score', { ascending: false })
       .limit(limit);
 

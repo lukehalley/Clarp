@@ -128,8 +128,8 @@ export default function SearchInput({ compact, initialValue = '', onSearch }: Se
     const trimmed = query.trim();
     const detected = getDetectedType(trimmed);
 
-    // Skip suggestions for URLs, addresses, etc — only suggest for name/handle-like queries
-    if (trimmed.length < 2 || detected === 'token_address' || detected === 'x_url' || detected === 'website' || detected === 'github') {
+    // Skip suggestions for URLs etc — only suggest for name/handle-like queries and token addresses
+    if (trimmed.length < 2 || detected === 'x_url' || detected === 'website' || detected === 'github') {
       setSuggestions([]);
       setIsLoadingSuggestions(false);
       return;
@@ -142,12 +142,28 @@ export default function SearchInput({ compact, initialValue = '', onSearch }: Se
       abortRef.current = controller;
 
       try {
-        const res = await fetch(`/api/projects?q=${encodeURIComponent(trimmed)}&limit=${MAX_SUGGESTIONS}`, {
-          signal: controller.signal,
-        });
-        if (!res.ok) throw new Error('fetch failed');
-        const data = await res.json();
-        setSuggestions(data.projects || []);
+        let results: Project[] = [];
+
+        if (detected === 'token_address') {
+          // Look up by contract address via the single-project endpoint
+          const res = await fetch(`/api/projects/${encodeURIComponent(trimmed)}`, {
+            signal: controller.signal,
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.project) results = [data.project];
+          }
+        } else {
+          // Name/handle search
+          const res = await fetch(`/api/projects?q=${encodeURIComponent(trimmed)}&limit=${MAX_SUGGESTIONS}`, {
+            signal: controller.signal,
+          });
+          if (!res.ok) throw new Error('fetch failed');
+          const data = await res.json();
+          results = data.projects || [];
+        }
+
+        setSuggestions(results);
       } catch (err) {
         if (err instanceof DOMException && err.name === 'AbortError') return;
         setSuggestions([]);
@@ -208,7 +224,13 @@ export default function SearchInput({ compact, initialValue = '', onSearch }: Se
   // Handle suggestion click
   const handleSuggestionClick = (project: Project) => {
     setIsFocused(false);
-    router.push(getEntityRoute(project));
+    // If the user searched by CA (token address), always treat result as a project
+    if (detectedType === 'token_address') {
+      const identifier = project.tokenAddress || project.xHandle || project.id;
+      router.push(`/terminal/project/${identifier}`);
+    } else {
+      router.push(getEntityRoute(project));
+    }
   };
 
   // Clear input

@@ -21,6 +21,11 @@ export default function ProjectPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [scanActive, setScanActive] = useState(!!scanJobId);
 
+  // If the ID looks like a contract address, assume it's a project (don't redirect to person/org)
+  const isSolanaAddress = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(projectId || '');
+  const isEvmAddress = /^0x[a-fA-F0-9]{40}$/.test(projectId || '');
+  const isContractAddress = isSolanaAddress || isEvmAddress;
+
   const fetchProject = useCallback(async () => {
     if (!projectId) return;
     try {
@@ -36,13 +41,16 @@ export default function ProjectPage() {
         const data = await res.json();
         if (data.projects && data.projects.length > 0) {
           const entity = data.projects[0];
-          if (entity.entityType === 'person') {
-            router.replace(`/terminal/person/${entity.xHandle || entity.id}`);
-            return;
-          }
-          if (entity.entityType === 'organization') {
-            router.replace(`/terminal/org/${entity.xHandle || entity.id}`);
-            return;
+          // If a CA was provided, always treat as project — skip entity type redirects
+          if (!isContractAddress) {
+            if (entity.entityType === 'person') {
+              router.replace(`/terminal/person/${entity.xHandle || entity.id}`);
+              return;
+            }
+            if (entity.entityType === 'organization') {
+              router.replace(`/terminal/org/${entity.xHandle || entity.id}`);
+              return;
+            }
           }
           setProject(entity);
           return;
@@ -55,13 +63,16 @@ export default function ProjectPage() {
       const data = await res.json();
       const entity = data.project || data;
 
-      if (entity.entityType === 'person') {
-        router.replace(`/terminal/person/${entity.xHandle || entity.id}`);
-        return;
-      }
-      if (entity.entityType === 'organization') {
-        router.replace(`/terminal/org/${entity.xHandle || entity.id}`);
-        return;
+      // If a CA was provided, always treat as project — skip entity type redirects
+      if (!isContractAddress) {
+        if (entity.entityType === 'person') {
+          router.replace(`/terminal/person/${entity.xHandle || entity.id}`);
+          return;
+        }
+        if (entity.entityType === 'organization') {
+          router.replace(`/terminal/org/${entity.xHandle || entity.id}`);
+          return;
+        }
       }
 
       setProject(entity);
@@ -71,7 +82,7 @@ export default function ProjectPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [projectId, router]);
+  }, [projectId, router, isContractAddress]);
 
   // Wait for scan to complete before fetching project data
   useEffect(() => {

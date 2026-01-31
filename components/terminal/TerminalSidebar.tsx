@@ -6,8 +6,6 @@ import Link from 'next/link';
 import ConnectWallet from '@/components/ConnectWallet';
 import {
   Boxes,
-  User,
-  Building2,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
@@ -23,8 +21,6 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { id: 'projects', label: 'Projects', icon: <Boxes size={18} />, href: '/terminal/projects' },
-  { id: 'people', label: 'People', icon: <User size={18} />, href: '/terminal/people' },
-  { id: 'orgs', label: 'Orgs', icon: <Building2 size={18} />, href: '/terminal/orgs' },
 ];
 
 export default function TerminalSidebar() {
@@ -32,19 +28,10 @@ export default function TerminalSidebar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  // Detect if we're on a detail page (e.g. /terminal/project/clarp, /terminal/person/foo, /terminal/org/bar)
-  const isDetailPage =
-    (pathname.startsWith('/terminal/project/')) ||
-    (pathname.startsWith('/terminal/person/')) ||
-    (pathname.startsWith('/terminal/org/'));
+  // Detect if we're on a detail page (e.g. /terminal/project/clarp)
+  const isDetailPage = pathname.startsWith('/terminal/project/');
 
   const getActiveNavId = () => {
-    if (pathname.startsWith('/terminal/project') && !pathname.startsWith('/terminal/projects')) return 'projects';
-    if (pathname.startsWith('/terminal/person')) return 'people';
-    if (pathname.startsWith('/terminal/org')) return 'orgs';
-    if (pathname.includes('/projects')) return 'projects';
-    if (pathname.includes('/people')) return 'people';
-    if (pathname.includes('/orgs')) return 'orgs';
     return 'projects';
   };
 

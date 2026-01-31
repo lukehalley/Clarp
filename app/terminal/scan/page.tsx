@@ -139,6 +139,7 @@ function ScanPageInner() {
   const [error, setError] = useState<string | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
   const [resolvedHandle, setResolvedHandle] = useState<string | null>(null);
+  const [displayName, setDisplayName] = useState<string | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const scanStartRef = useRef<number | null>(null);
 
@@ -234,26 +235,31 @@ function ScanPageInner() {
       // Move past queued stage
       updateStagesFromBackend('fetching', 10, `detected: ${data.inputType || 'unknown'}`);
 
-      // If we got immediate OSINT data, show progress and redirect early
+      // If we got immediate OSINT data, check if there's still a real AI job running
       if (data.osintData) {
+        // Update display name from resolved OSINT data (e.g. CA -> token name)
+        if (data.osintData.name) {
+          setDisplayName(data.osintData.name);
+        }
 
-        // If we have OSINT data, redirect immediately - don't wait for AI analysis
-        // The project page will show OSINT data and poll for AI analysis completion
+        const hasRealAiJob = data.jobId && data.jobId.startsWith('job_');
+
+        if (hasRealAiJob) {
+          // AI analysis still running - stay on scan page and poll for completion
+          setJobId(data.jobId);
+          if (data.canonicalId) {
+            setResolvedHandle(data.canonicalId);
+          }
+          return;
+        }
+
+        // No AI job running (osint-only or cached) - scan is fully complete
         const projectId = data.canonicalId || query.replace('@', '').toLowerCase();
-
         setSteps((prev) =>
           prev.map((s) => ({ ...s, status: 'complete', detail: s.detail || 'complete' }))
         );
         setPhase('complete');
-
-        // Only pass jobId for real AI analysis jobs (job_* prefix)
-        // Don't show indicator for osint_* or cached_* - they have no background processing
-        const hasRealAiJob = data.jobId && data.jobId.startsWith('job_');
-        const redirectUrl = hasRealAiJob
-          ? `/terminal/project/${projectId}?scanJob=${data.jobId}`
-          : `/terminal/project/${projectId}`;
-
-        setTimeout(() => router.push(redirectUrl), 1200);
+        setTimeout(() => router.push(`/terminal/project/${projectId}`), 1200);
         return;
       }
 
@@ -301,7 +307,6 @@ function ScanPageInner() {
 
         if (data.status === 'complete') {
           setPhase('complete');
-          // Redirect to project page using canonicalId (resolvedHandle) - token address for tokens
           const projectId = resolvedHandle || query.replace('@', '').toLowerCase();
           setTimeout(() => router.push(`/terminal/project/${projectId}`), 1200);
         } else if (data.status === 'failed') {
@@ -505,8 +510,13 @@ function ScanPageInner() {
               </span>
             </div>
             <h1 className="font-mono text-lg sm:text-xl text-ivory-light text-flicker truncate">
-              {query}
+              {displayName || query}
             </h1>
+            {displayName && displayName !== query && (
+              <p className="font-mono text-[10px] text-ivory-light/40 truncate mt-0.5">
+                {query}
+              </p>
+            )}
           </div>
 
           {/* Steps */}
@@ -545,7 +555,7 @@ function ScanPageInner() {
                   <Check size={14} className="text-larp-green" />
                   <div>
                     <div className="font-mono text-xs text-larp-green">analysis complete</div>
-                    <div className="font-mono text-[10px] text-ivory-light mt-0.5">redirecting...</div>
+                    <div className="font-mono text-[10px] text-ivory-light mt-0.5">loading project...</div>
                   </div>
                 </div>
               </div>
