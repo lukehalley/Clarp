@@ -169,7 +169,7 @@ export default function Footer() {
         {/* Copyright */}
         <div className="pt-4 border-t border-slate-light/10">
           <p className="text-[10px] sm:text-xs text-ivory-light/40 text-center">
-            © 2025 clarp. all rights reserved.
+            © {new Date().getFullYear()} clarp. all rights reserved.
           </p>
         </div>
       </div>

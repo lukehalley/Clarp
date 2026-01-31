@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import Terminal from './Terminal';
 
+const currentYear = new Date().getFullYear();
+
 const DOCS_TABS = [
   {
     id: 'quickstart',
@@ -108,7 +110,7 @@ a: others check one thing
    we check everything
 
 q: wen launch?
-a: Q1 2025. actually.
+a: Q1 ${currentYear}. actually.
    check the roadmap.
 
 q: is this real?

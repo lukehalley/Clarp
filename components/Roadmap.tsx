@@ -1,5 +1,7 @@
 'use client';
 
+const currentYear = new Date().getFullYear();
+
 const ROADMAP_PHASES = [
   {
     phase: 'shipped',
@@ -18,7 +20,7 @@ const ROADMAP_PHASES = [
     crossedDates: [],
   },
   {
-    phase: 'q1 2025',
+    phase: `q1 ${currentYear}`,
     title: 'Staking Program',
     items: ['stake $CLARP, earn fee share', 'tier-based access (7/30/90 day locks)', 'on-chain Anchor program'],
     status: 'upcoming',
@@ -26,7 +28,7 @@ const ROADMAP_PHASES = [
     crossedDates: [],
   },
   {
-    phase: 'q1/q2 2025',
+    phase: `q1/q2 ${currentYear}`,
     title: 'Rebrand Detection',
     items: ['serial rugger database', 'team wallet tracking across projects', 'KOL accountability tracker'],
     status: 'upcoming',
@@ -159,7 +161,7 @@ export default function Roadmap() {
                 <div className="font-mono text-xs text-slate-dark/70">RE: Product Development Timeline</div>
               </div>
               <div className="font-mono text-xs text-slate-dark/70">
-                DATE: Jan 2025
+                DATE: Jan {currentYear}
               </div>
             </div>
           </div>
@@ -167,7 +169,7 @@ export default function Roadmap() {
           {/* Opening paragraph */}
           <div className="relative mb-8">
             <p className="font-mono text-sm text-slate-dark leading-relaxed">
-              This document outlines our <span className="font-bold">CLARP</span> development roadmap for <span className="font-bold">2025</span>.
+              This document outlines our <span className="font-bold">CLARP</span> development roadmap for <span className="font-bold">{currentYear}</span>.
               Trust intelligence for crypto projects and people. OSINT + AI analysis.
               Scan anything. Get a trust score with receipts.
             </p>

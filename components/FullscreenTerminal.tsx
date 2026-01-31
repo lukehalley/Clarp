@@ -16,6 +16,8 @@ interface FileSystemNode {
 }
 
 // The satirical filesystem - deadpan crypto humor
+const currentYear = new Date().getFullYear();
+
 const FILESYSTEM: Record<string, FileSystemNode> = {
   home: {
     type: 'directory',
@@ -166,32 +168,32 @@ exit`,
           rugs: {
             type: 'directory',
             children: {
-              'rug_2024_001.log': {
+              [`rug_${currentYear}_001.log`]: {
                 type: 'file',
-                content: `[2024-01-15 03:42:17] INFO: New token deployed: $DEFINITELY_NOT_A_RUG
-[2024-01-15 03:42:18] INFO: Liquidity added: $50,000
-[2024-01-15 03:42:19] INFO: Twitter raid initiated
-[2024-01-15 03:42:20] INFO: "STEALTH LAUNCH" announced to 47 telegram groups
-[2024-01-15 03:45:00] INFO: Market cap: $2.3M
-[2024-01-15 03:47:33] WARN: Dev wallet moving
-[2024-01-15 03:47:34] ERROR: Liquidity removed
-[2024-01-15 03:47:34] FATAL: Token value: $0.00
-[2024-01-15 03:47:35] INFO: Dev tweets "sorry fam, got hacked"
-[2024-01-15 03:47:36] INFO: Dev launches new token
-[2024-01-15 03:47:37] INFO: You buy the new token`,
+                content: `[${currentYear}-01-15 03:42:17] INFO: New token deployed: $DEFINITELY_NOT_A_RUG
+[${currentYear}-01-15 03:42:18] INFO: Liquidity added: $50,000
+[${currentYear}-01-15 03:42:19] INFO: Twitter raid initiated
+[${currentYear}-01-15 03:42:20] INFO: "STEALTH LAUNCH" announced to 47 telegram groups
+[${currentYear}-01-15 03:45:00] INFO: Market cap: $2.3M
+[${currentYear}-01-15 03:47:33] WARN: Dev wallet moving
+[${currentYear}-01-15 03:47:34] ERROR: Liquidity removed
+[${currentYear}-01-15 03:47:34] FATAL: Token value: $0.00
+[${currentYear}-01-15 03:47:35] INFO: Dev tweets "sorry fam, got hacked"
+[${currentYear}-01-15 03:47:36] INFO: Dev launches new token
+[${currentYear}-01-15 03:47:37] INFO: You buy the new token`,
               },
-              'rug_2024_002.log': {
+              [`rug_${currentYear}_002.log`]: {
                 type: 'file',
-                content: `[2024-02-03 14:20:00] INFO: "AI AGENT" token launched
-[2024-02-03 14:20:01] INFO: Whitepaper: ChatGPT API wrapped in mystery
-[2024-02-03 14:20:02] INFO: Claims: "41% win rate" (source: trust me)
-[2024-02-03 14:20:03] INFO: Executes: 0 actual trades
-[2024-02-03 14:25:00] INFO: Market cap: $50M
-[2024-02-03 14:30:00] WARN: Someone reads the code
-[2024-02-03 14:30:01] WARN: It's literally console.log("thinking...")
-[2024-02-03 14:30:02] ERROR: Price discovery: initiated
-[2024-02-03 14:35:00] INFO: Team announces "V2 coming Q2"
-[2024-02-03 14:35:01] INFO: It's still Q2. It's always Q2.`,
+                content: `[${currentYear}-02-03 14:20:00] INFO: "AI AGENT" token launched
+[${currentYear}-02-03 14:20:01] INFO: Whitepaper: ChatGPT API wrapped in mystery
+[${currentYear}-02-03 14:20:02] INFO: Claims: "41% win rate" (source: trust me)
+[${currentYear}-02-03 14:20:03] INFO: Executes: 0 actual trades
+[${currentYear}-02-03 14:25:00] INFO: Market cap: $50M
+[${currentYear}-02-03 14:30:00] WARN: Someone reads the code
+[${currentYear}-02-03 14:30:01] WARN: It's literally console.log("thinking...")
+[${currentYear}-02-03 14:30:02] ERROR: Price discovery: initiated
+[${currentYear}-02-03 14:35:00] INFO: Team announces "V2 coming Q2"
+[${currentYear}-02-03 14:35:01] INFO: It's still Q2. It's always Q2.`,
               },
               'rug_pattern.log': {
                 type: 'file',
@@ -243,23 +245,23 @@ Anyone read it: No`,
         content: `$CLARP OFFICIAL ROADMAP
 ========================
 
-Q1 2025: Launch
+Q1 ${currentYear}: Launch
   [x] Deploy token
   [x] Make website
   [x] Post on twitter
   [x] Exist
 
-Q2 2025: Growth
+Q2 ${currentYear}: Growth
   [ ] Partnerships (pending)
   [ ] Exchange listings (pending)
   [ ] Product development (pending)
   [ ] Everything else (pending)
 
-Q3 2025: See Q2 2025
+Q3 ${currentYear}: See Q2 ${currentYear}
 
-Q4 2025: See Q3 2025
+Q4 ${currentYear}: See Q3 ${currentYear}
 
-Q∞ 2025: Ship actual product
+Q∞ ${currentYear}: Ship actual product
   Status: Coming Q2
 
 Note: This roadmap will not be updated.
