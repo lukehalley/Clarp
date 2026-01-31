@@ -341,16 +341,18 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
   }
 
   // Step 3: Run X analysis via existing scan flow
-  console.log(`[UniversalScan] X handle found (@${entity.xHandle}), running X analysis...`);
+  // xHandle is guaranteed non-undefined after the guard at the top of this block
+  const xHandle = entity.xHandle!;
+  console.log(`[UniversalScan] X handle found (@${xHandle}), running X analysis...`);
 
   // Enrich bare X handle entities with existing DB data (token address, etc.)
   // When rescanning by X handle, the entity resolver returns a bare entity.
   // If we already have this project in the DB with a token address, use it for OSINT.
   if (!entity.tokenAddresses?.length && isSupabaseAvailable()) {
     try {
-      const existingProject = await getProjectByHandle(entity.xHandle);
+      const existingProject = await getProjectByHandle(xHandle);
       if (existingProject?.tokenAddress) {
-        console.log(`[UniversalScan] Found existing project in DB for @${entity.xHandle} with token ${existingProject.tokenAddress.slice(0, 8)}...`);
+        console.log(`[UniversalScan] Found existing project in DB for @${xHandle} with token ${existingProject.tokenAddress.slice(0, 8)}...`);
         // Run OSINT enrichment with the known token address
         const [rugCheck, marketIntel, tokenData] = await Promise.allSettled([
           fetchRugCheckReport(existingProject.tokenAddress),
@@ -375,17 +377,15 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
           marketIntel: marketResult || undefined,
           tokenData: tokenResult?.found ? tokenResult.token : undefined,
         };
-        console.log(`[UniversalScan] Enriched @${entity.xHandle} from DB: security=${!!rugCheckResult}, market=${!!marketResult}, token=${!!tokenResult?.found}`);
+        console.log(`[UniversalScan] Enriched @${xHandle} from DB: security=${!!rugCheckResult}, market=${!!marketResult}, token=${!!tokenResult?.found}`);
       }
     } catch (err) {
-      console.warn(`[UniversalScan] DB enrichment failed for @${entity.xHandle}:`, err);
+      console.warn(`[UniversalScan] DB enrichment failed for @${xHandle}:`, err);
     }
   }
 
   // Store OSINT entity for the scan processor to use for gap-filling
-  if (entity.xHandle) {
-    osintEntityCache.set(entity.xHandle.toLowerCase(), entity);
-  }
+  osintEntityCache.set(xHandle.toLowerCase(), entity);
 
   // Save OSINT project immediately so user can see data while AI analyzes
   // This will be enriched later when the X analysis completes
@@ -398,7 +398,7 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
       avatarUrl: entity.imageUrl || undefined,
       tokenAddress,
       ticker: entity.symbol || undefined,
-      xHandle: entity.xHandle,
+      xHandle,
       websiteUrl: entity.website || undefined,
       githubUrl: entity.github || undefined,
       telegramUrl: entity.telegram || undefined,
@@ -447,7 +447,7 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
   }
 
   const xScanResult = await submitScan({
-    handle: entity.xHandle,
+    handle: xHandle,
     depth,
     force,
   });
@@ -455,7 +455,7 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
   // If cached, get the cached report and merge with OSINT
   if (xScanResult.status === 'cached') {
     try {
-      const cachedReport = await getCachedReport(entity.xHandle);
+      const cachedReport = await getCachedReport(xHandle);
       return {
         jobId: xScanResult.jobId,
         inputType,
