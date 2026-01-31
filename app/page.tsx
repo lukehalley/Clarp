@@ -618,14 +618,14 @@ export default function Home() {
             {/* Left: Lock info */}
             <div className="text-center lg:text-left">
               <span className="badge badge-success mb-4 sm:mb-6">locked supply</span>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-ivory-light mb-4 sm:mb-6 font-display">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-dark mb-4 sm:mb-6 font-display">
                 15M <span className="text-danger-orange">$CLARP</span> locked.
               </h2>
-              <p className="text-lg sm:text-xl text-ivory-light/90 mb-2">
+              <p className="text-lg sm:text-xl text-slate-dark/90 mb-2">
                 immutable. non-cancellable. verified on Streamflow.
               </p>
               <div className="w-32 sm:w-48 h-1 bg-larp-green mb-6 mx-auto lg:mx-0" />
-              <p className="text-base sm:text-lg text-ivory-light/70 mb-6 sm:mb-8 max-w-md mx-auto lg:mx-0">
+              <p className="text-base sm:text-lg text-slate-light mb-6 sm:mb-8 max-w-md mx-auto lg:mx-0">
                 15,024,200 CLARP locked via Streamflow Finance until April 21, 2026. the contract is immutable and cannot be canceled. 0% unlocked. 0 claimed.
               </p>
               <ul className="space-y-2 sm:space-y-3 mb-6 sm:mb-8 text-left max-w-md mx-auto lg:mx-0">
@@ -635,7 +635,7 @@ export default function Home() {
                   '0% unlocked. 0 tokens claimed. fully locked.',
                   'audited by 4 major auditors via Streamflow.',
                 ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-2 sm:gap-3 text-sm sm:text-base text-ivory-light/80">
+                  <li key={i} className="flex items-start gap-2 sm:gap-3 text-sm sm:text-base text-slate-light">
                     <span className="text-larp-green shrink-0">▸</span>
                     {item}
                   </li>
