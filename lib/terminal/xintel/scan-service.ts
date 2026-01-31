@@ -9,7 +9,7 @@ import {
   SCAN_STATUS_PROGRESS,
 } from '@/types/xintel';
 import { getGrokClient, isGrokAvailable } from '@/lib/grok/client';
-import { grokAnalysisToReport, enrichShilledEntitiesWithTokenData } from './transformers';
+import { grokAnalysisToReport, enrichShilledEntitiesWithTokenData, calculateRiskScore } from './transformers';
 import {
   isSupabaseAvailable,
   getCachedReportFromSupabase,
@@ -1319,7 +1319,8 @@ async function processRealScan(job: ScanJob): Promise<void> {
     updateJobStatus(job, 'scoring', 75, 'Compiling evidence...');
     await sleep(200);
     updateJobStatus(job, 'scoring', 80, 'Generating key findings...');
-    let report = grokAnalysisToReport(analysis);
+    const osintEntityForScoring = osintEntityCache.get(job.handle.toLowerCase());
+    let report = grokAnalysisToReport(analysis, osintEntityForScoring);
     await sleep(200);
 
     // Stage 6: Enriching token data
@@ -2243,11 +2244,20 @@ async function upsertProjectFromAnalysis(
       `  findings=${crossRef.keyFindings.length}, controversies=${crossRef.controversies.length}`);
   }
 
+  // ========================================================================
+  // OSINT-vs-AI CONSISTENCY CHECK
+  // Detect when AI narrative contradicts OSINT signals.
+  // e.g. AI says "no credible information" while OSINT shows CoinGecko listing,
+  // 16K holders, exchange data. In such cases, regenerate description from OSINT.
+  // ========================================================================
+  const aiDescription = crossRef?.theStory || analysis.theStory || analysis.overallAssessment;
+  const validatedDescription = validateDescriptionAgainstOsint(aiDescription, osintEntity, name);
+
   // Build project data with comprehensive OSINT + multi-source verification
   const projectData = {
     name,
     entityType: normalizedEntityType,
-    description: crossRef?.theStory || analysis.theStory || osintEntity?.description || analysis.overallAssessment || undefined,
+    description: validatedDescription || osintEntity?.description || undefined,
     avatarUrl: osintEntity?.imageUrl || analysis.profile?.avatarUrl || await fetchXAvatarUrl(normalizedHandle),
     tags: extractTags(analysis, githubIntelData, osintEntity),
     aiSummary: analysis.verdict?.summary || analysis.overallAssessment || undefined,
@@ -2258,13 +2268,24 @@ async function upsertProjectFromAnalysis(
     ticker,
     discordUrl: osintEntity?.discord || undefined,
     telegramUrl: osintEntity?.telegram || undefined,
-    trustScore: {
-      score: report.score.overall,
-      tier: report.score.riskLevel === 'low' ? 'trusted' as const :
-            report.score.riskLevel === 'medium' ? 'neutral' as const : 'caution' as const,
-      confidence: report.score.confidence,
-      lastUpdated: new Date(),
-    },
+    trustScore: (() => {
+      // Recalculate score with enriched OSINT data (entity may have been enriched
+      // after the initial report score was computed)
+      const enrichedScore = osintEntity
+        ? calculateRiskScore(analysis, osintEntity)
+        : report.score.overall;
+      const tier = enrichedScore >= 75 ? 'trusted' as const :
+                   enrichedScore >= 45 ? 'neutral' as const : 'caution' as const;
+      if (enrichedScore !== report.score.overall) {
+        console.log(`[XIntel] Trust score recalculated with enriched OSINT: ${report.score.overall} → ${enrichedScore}`);
+      }
+      return {
+        score: enrichedScore,
+        tier,
+        confidence: report.score.confidence,
+        lastUpdated: new Date(),
+      };
+    })(),
     // Use cross-referenced team when available (merges OSINT + Perplexity + Grok, deduped)
     team: crossRef?.teamMembers.length ? crossRef.teamMembers.map(m => ({
       handle: m.handle,
@@ -2420,6 +2441,82 @@ function extractTags(
   }
 
   return [...new Set(tags)]; // Deduplicate
+}
+
+/**
+ * Validate AI-generated description against OSINT signals.
+ * Detects contradictions like "no credible information" when OSINT shows
+ * CoinGecko listing, thousands of holders, or exchange data.
+ * When contradictions are found, generates a factual description from OSINT.
+ */
+function validateDescriptionAgainstOsint(
+  aiDescription: string | undefined,
+  osintEntity: ResolvedEntity | undefined,
+  projectName: string,
+): string | undefined {
+  if (!aiDescription || !osintEntity) return aiDescription;
+
+  // Phrases that indicate AI thinks project has no presence
+  const noInfoPhrases = [
+    'no credible information',
+    'no verifiable information',
+    'no reliable information',
+    'no factual data',
+    'could not find',
+    'could not be identified',
+    'could not be verified',
+    'no web presence',
+    'no online presence',
+    'no information available',
+    'unable to find',
+    'does not appear to exist',
+    'no evidence of',
+    'virtually no information',
+    'no significant information',
+    'no substantial information',
+    'appears to be unknown',
+    'no data available',
+    'no results found',
+  ];
+
+  const descLower = aiDescription.toLowerCase();
+  const aiSaysNoInfo = noInfoPhrases.some(phrase => descLower.includes(phrase));
+
+  if (!aiSaysNoInfo) return aiDescription;
+
+  // Check if OSINT contradicts the "no info" narrative
+  const osintSignals: string[] = [];
+
+  if (osintEntity.marketIntel?.isListed) {
+    osintSignals.push('listed on CoinGecko');
+  }
+  const holderCount = osintEntity.securityIntel?.totalHolders || osintEntity.marketIntel?.totalHolders || 0;
+  if (holderCount > 1000) {
+    osintSignals.push(`${(holderCount / 1000).toFixed(0)}K+ holders`);
+  }
+  if (osintEntity.marketIntel?.liquidity && osintEntity.marketIntel.liquidity > 10000) {
+    osintSignals.push(`$${(osintEntity.marketIntel.liquidity / 1000).toFixed(0)}K liquidity`);
+  }
+  if (osintEntity.website) {
+    osintSignals.push(`website at ${osintEntity.website}`);
+  }
+  if (osintEntity.githubIntel?.repo) {
+    osintSignals.push('active GitHub repository');
+  }
+  if (osintEntity.securityIntel?.isAccessible) {
+    osintSignals.push(`RugCheck score: ${osintEntity.securityIntel.normalizedScore}/10`);
+  }
+
+  // If OSINT has significant signals but AI says "no info", override with OSINT-based description
+  if (osintSignals.length >= 2) {
+    const ticker = osintEntity.symbol ? ` ($${osintEntity.symbol})` : '';
+    const chain = osintEntity.tokenAddresses?.[0]?.chain || 'Solana';
+    const osintDescription = `${projectName}${ticker} is a ${chain} token with verified on-chain presence: ${osintSignals.join(', ')}. AI narrative was overridden due to contradiction with OSINT data.`;
+    console.log(`[XIntel] OSINT-vs-AI consistency override for ${projectName}: AI said "${descLower.slice(0, 60)}..." but OSINT found: ${osintSignals.join(', ')}`);
+    return osintDescription;
+  }
+
+  return aiDescription;
 }
 
 // ============================================================================

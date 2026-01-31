@@ -3,12 +3,14 @@
 
 import type { GrokAnalysisResult, GrokEvidenceItem } from '@/lib/grok/types';
 import type { XIntelReport, XIntelEvidence, ShilledEntity, BacklashEvent, KeyFinding, BacklashCategory, BacklashSeverity, XIntelEvidenceLabel } from '@/types/xintel';
+import type { ResolvedEntity } from '@/lib/terminal/entity-resolver';
 import { lookupToken } from './tokenLookup';
 
 /**
  * Convert Grok's analysis response to an XIntel report
+ * @param osintEntity - Optional OSINT entity for OSINT-informed scoring adjustments
  */
-export function grokAnalysisToReport(analysis: GrokAnalysisResult): XIntelReport {
+export function grokAnalysisToReport(analysis: GrokAnalysisResult, osintEntity?: ResolvedEntity): XIntelReport {
   const reportId = `report_${analysis.handle}_${Date.now()}`;
 
   // Build evidence array from Grok's findings
@@ -77,8 +79,8 @@ export function grokAnalysisToReport(analysis: GrokAnalysisResult): XIntelReport
     });
   }
 
-  // Calculate risk score based on indicators
-  const riskScore = calculateRiskScore(analysis);
+  // Calculate risk score based on indicators + OSINT signals
+  const riskScore = calculateRiskScore(analysis, osintEntity);
 
   return {
     id: reportId,
@@ -184,7 +186,7 @@ export async function enrichShilledEntitiesWithTokenData(report: XIntelReport): 
 // HELPERS
 // ============================================================================
 
-function calculateRiskScore(analysis: GrokAnalysisResult): number {
+export function calculateRiskScore(analysis: GrokAnalysisResult, osintEntity?: ResolvedEntity): number {
   // Start at 50 (neutral) and adjust based on indicators
   let score = 50;
 
@@ -279,7 +281,72 @@ function calculateRiskScore(analysis: GrokAnalysisResult): number {
   if (analysis.riskLevel === 'high') score -= 10;
   if (analysis.riskLevel === 'low') score += 5;
 
-  return Math.max(0, Math.min(100, Math.round(score)));
+  // Clamp before applying overrides
+  score = Math.max(0, Math.min(100, Math.round(score)));
+
+  // ==========================================================================
+  // SEVERITY OVERRIDES — Hard caps for critical allegations
+  // These override the calculated score when critical red flags are present.
+  // A rug admission or confirmed scam should never result in a neutral/trusted score.
+  // ==========================================================================
+  const hasRug = !!(neg?.hasRugHistory) || !!(osintEntity?.securityIntel?.isRugged);
+  const hasScam = !!(neg?.hasScamAllegations);
+
+  if (hasRug && hasScam) {
+    // Both rug history AND scam allegations — hard cap at 15 (avoid tier)
+    score = Math.min(score, 15);
+    console.log(`[Scoring] Severity override: rug + scam → capped at ${score}`);
+  } else if (hasRug) {
+    // Rug history alone — hard cap at 25 (avoid tier)
+    score = Math.min(score, 25);
+    console.log(`[Scoring] Severity override: rug history → capped at ${score}`);
+  } else if (hasScam && (analysis.confidence === 'low' || analysis.confidence === 'medium')) {
+    // Scam allegations with low/medium confidence — cap at 40 (caution tier)
+    score = Math.min(score, 40);
+    console.log(`[Scoring] Severity override: scam allegations (${analysis.confidence} confidence) → capped at ${score}`);
+  }
+
+  // ==========================================================================
+  // OSINT-INFORMED FLOOR/CEILING — Trust OSINT data over AI narrative
+  // On-chain data and API-verified signals are more reliable than AI inference.
+  // ==========================================================================
+  if (osintEntity) {
+    const sec = osintEntity.securityIntel;
+    const market = osintEntity.marketIntel;
+    const holderCount = sec?.totalHolders || market?.totalHolders || 0;
+    const hasExchangeListings = !!(market?.isListed);
+    const hasCoinGecko = !!(market?.isListed);
+
+    // CEILING: RugCheck danger tokens can't score high
+    if (sec?.isAccessible && sec.normalizedScore !== undefined) {
+      if (sec.normalizedScore === 0 || sec.riskLevel === 'Danger') {
+        // RugCheck 0/10 danger — ceiling of 55
+        const prevScore = score;
+        score = Math.min(score, 55);
+        if (score < prevScore) {
+          console.log(`[Scoring] OSINT ceiling: RugCheck ${sec.normalizedScore}/10 (${sec.riskLevel}) → capped at ${score}`);
+        }
+      } else if (sec.normalizedScore <= 3) {
+        // RugCheck <=3/10 — ceiling of 65
+        const prevScore = score;
+        score = Math.min(score, 65);
+        if (score < prevScore) {
+          console.log(`[Scoring] OSINT ceiling: RugCheck ${sec.normalizedScore}/10 → capped at ${score}`);
+        }
+      }
+    }
+
+    // FLOOR: CoinGecko listed + significant holders + exchange presence can't score too low
+    if (hasCoinGecko && holderCount > 5000 && hasExchangeListings) {
+      const prevScore = score;
+      score = Math.max(score, 25);
+      if (score > prevScore) {
+        console.log(`[Scoring] OSINT floor: CoinGecko + ${holderCount} holders + exchange listings → floor at ${score}`);
+      }
+    }
+  }
+
+  return score;
 }
 
 function extractTweetId(url?: string): string | null {

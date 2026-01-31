@@ -18,6 +18,7 @@ export function buildResearchPrompt(
   osintContext?: OsintContext
 ): string {
   let contextBlock = '';
+  let disambiguationBlock = '';
 
   if (osintContext?.found) {
     const f = osintContext.found;
@@ -34,11 +35,25 @@ export function buildResearchPrompt(
       lines.push(`- Known Team: ${f.teamMembers.map(m => m.name || m.github || 'Unknown').join(', ')}`);
     }
     contextBlock = lines.join('\n') + '\n\nFocus on information NOT listed above.\n\n';
+
+    // Build disambiguation anchors from OSINT identifiers
+    const anchors: string[] = [];
+    if (f.xHandle) anchors.push(`X/Twitter handle: @${f.xHandle}`);
+    if (f.tokenAddress) anchors.push(`Token contract address: ${f.tokenAddress}`);
+    if (f.website) anchors.push(`Official website: ${f.website}`);
+    if (anchors.length > 0) {
+      disambiguationBlock = `## DISAMBIGUATION — MANDATORY IDENTITY ANCHORS
+You MUST research the project associated with these verified identifiers:
+${anchors.map(a => `- ${a}`).join('\n')}
+Do NOT confuse this with similarly-named projects. If you find conflicting identifiers (different token address, different website), you are likely looking at the WRONG project. Only report information that matches the identifiers above.
+
+`;
+    }
   }
 
   return `Research the cryptocurrency/blockchain project "${query}" and return structured factual data.
 
-${contextBlock}## INSTRUCTIONS
+${disambiguationBlock}${contextBlock}## INSTRUCTIONS
 - Search for: "${query}" crypto project, team, funding, audit, controversies
 - CRITICAL — Search for identifiers on these specific sites:
   - "${query}" site:dexscreener.com OR site:coingecko.com OR site:coinmarketcap.com (to find token address, chain, ticker)

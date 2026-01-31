@@ -84,7 +84,7 @@ export function projectToInsert(project: Partial<Project> & { name: string }): P
     ticker: project.ticker || null,
     discord_url: project.discordUrl || null,
     telegram_url: project.telegramUrl || null,
-    trust_score: project.trustScore?.score || 50,
+    trust_score: project.trustScore?.score ?? 50,
     trust_confidence: project.trustScore?.confidence || 'low',
     team: (project.team || []) as unknown as ProjectInsert['team'],
     market_data: (project.marketData || null) as unknown as ProjectInsert['market_data'],

@@ -231,6 +231,27 @@ export function crossReference(input: CrossReferenceInput): CrossReferenceOutput
   }
 
   // --------------------------------------------------------------------------
+  // CONTRACT ADDRESS CROSS-VALIDATION
+  // OSINT (on-chain) is ground truth. When Perplexity returns a different
+  // address, always prefer OSINT and log a conflict.
+  // --------------------------------------------------------------------------
+  const osintTokenAddress = osintEntity?.tokenAddresses?.[0]?.address;
+  const perplexityTokenAddress = perplexityResult?.identifiers?.tokenAddress;
+
+  if (osintTokenAddress && perplexityTokenAddress &&
+      osintTokenAddress.toLowerCase() !== perplexityTokenAddress.toLowerCase()) {
+    conflicts.push({
+      field: 'identifiers.tokenAddress',
+      sources: [
+        { source: 'osint', value: osintTokenAddress },
+        { source: 'perplexity', value: perplexityTokenAddress },
+      ],
+      resolution: 'osint_wins',
+    });
+    console.log(`[CrossRef] ⚠️ Contract address mismatch: OSINT=${osintTokenAddress.slice(0, 12)}... vs Perplexity=${perplexityTokenAddress.slice(0, 12)}... — using OSINT (on-chain ground truth)`);
+  }
+
+  // --------------------------------------------------------------------------
   // CONTROVERSIES — Union of all sources
   // Perplexity controversies have web citations, Grok has X-based allegations
   // --------------------------------------------------------------------------
@@ -244,6 +265,12 @@ export function crossReference(input: CrossReferenceInput): CrossReferenceOutput
   // --------------------------------------------------------------------------
   const keyFindings = mergeKeyFindings(osintEntity, perplexityResult, grokAnalysis);
   fieldSources['keyFindings'] = { source: 'perplexity', confidence: 'medium', retrievedAt: now };
+
+  // Add contract address mismatch finding if detected
+  if (osintTokenAddress && perplexityTokenAddress &&
+      osintTokenAddress.toLowerCase() !== perplexityTokenAddress.toLowerCase()) {
+    keyFindings.unshift('⚠️ Contract address mismatch between sources — using verified on-chain address');
+  }
 
   // --------------------------------------------------------------------------
   // THE STORY — Perplexity preferred (grounded narrative with citations)
@@ -408,25 +435,31 @@ function mergeControversies(
 ): string[] {
   const seen = new Set<string>();
   const result: string[] = [];
+  const perplexityKeys = new Set<string>();
 
-  // Perplexity controversies (web-sourced, cited)
+  // Perplexity controversies (web-sourced, cited) — keep as-is
   if (perplexity?.controversies) {
     for (const c of perplexity.controversies) {
       const key = c.toLowerCase().slice(0, 50); // Rough dedup
       if (!seen.has(key)) {
         seen.add(key);
+        perplexityKeys.add(key);
         result.push(c);
       }
     }
   }
 
-  // Grok controversies (X-sourced)
+  // Grok controversies (X-sourced) — tag as [Unverified] unless corroborated by Perplexity
   if (grok?.controversies) {
     for (const c of grok.controversies) {
       const key = c.toLowerCase().slice(0, 50);
       if (!seen.has(key)) {
         seen.add(key);
-        result.push(c);
+        // Check if Perplexity corroborates this claim (fuzzy match on first 30 chars)
+        const isCorroborated = Array.from(perplexityKeys).some(pk =>
+          pk.includes(key.slice(0, 30)) || key.includes(pk.slice(0, 30))
+        );
+        result.push(isCorroborated ? c : `[Unverified] ${c}`);
       }
     }
   }
@@ -440,23 +473,30 @@ function mergeKeyFindings(
   grok?: GrokAnalysisResult
 ): string[] {
   const result: string[] = [];
+  const perplexityFindings: string[] = [];
 
-  // Perplexity findings first (grounded)
+  // Perplexity findings first (grounded, cited — keep as-is)
   if (perplexity?.keyFindings) {
+    perplexityFindings.push(...perplexity.keyFindings);
     result.push(...perplexity.keyFindings);
   }
 
-  // Grok findings (behavioral)
+  // Grok findings (behavioral, uncited) — tag as [Unverified] unless corroborated by Perplexity
   if (grok?.keyFindings) {
     for (const f of grok.keyFindings) {
       // Avoid duplicates (rough check)
       if (!result.some(existing => existing.toLowerCase().includes(f.toLowerCase().slice(0, 30)))) {
-        result.push(f);
+        // Check if Perplexity corroborates this finding
+        const isCorroborated = perplexityFindings.some(pf =>
+          pf.toLowerCase().includes(f.toLowerCase().slice(0, 30)) ||
+          f.toLowerCase().includes(pf.toLowerCase().slice(0, 30))
+        );
+        result.push(isCorroborated ? f : `[Unverified] ${f}`);
       }
     }
   }
 
-  // OSINT risk/legitimacy signals
+  // OSINT risk/legitimacy signals (API-verified — keep [OSINT] prefix)
   if (osint?.riskFlags) {
     for (const flag of osint.riskFlags) {
       if (!result.some(existing => existing.toLowerCase().includes(flag.toLowerCase().slice(0, 20)))) {

@@ -256,6 +256,7 @@ export default function TerminalEntityPage() {
   // UI state
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [isFetching, setIsFetching] = useState(false);
+  const [hasFetched, setHasFetched] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // AbortController ref for cancelling stale requests
@@ -271,10 +272,10 @@ export default function TerminalEntityPage() {
   }, [entitySlug, router]);
 
   const fetchProjects = useCallback(async (signal?: AbortSignal) => {
-    try {
-      setIsFetching(true);
-      setError(null);
+    setIsFetching(true);
+    setError(null);
 
+    try {
       const { orderBy, order } = sortOptionToParams(sortBy);
       const apiParams = new URLSearchParams({
         entityType: entityFilter,
@@ -294,13 +295,16 @@ export default function TerminalEntityPage() {
       setTotalCount(data.total || 0);
       setEntityCounts(data.entityCounts || { project: 0, person: 0, organization: 0 });
     } catch (err) {
+      // Aborted fetches (e.g. StrictMode remount) should not touch state
       if (err instanceof DOMException && err.name === 'AbortError') return;
       console.error('[TerminalPage] Failed to fetch projects:', err);
       setError('Failed to load projects');
-    } finally {
-      setIsFetching(false);
-      setIsInitialLoad(false);
     }
+
+    // Only reached if the fetch was NOT aborted
+    setIsFetching(false);
+    setIsInitialLoad(false);
+    setHasFetched(true);
   }, [entityFilter, category, sortBy, currentPage, itemsPerPage]);
 
   // Fetch when any filter/sort/page changes
@@ -373,6 +377,10 @@ export default function TerminalEntityPage() {
                       Try again
                     </button>
                   </div>
+                </div>
+              ) : (!hasFetched || isFetching) && projects.length === 0 ? (
+                <div className="flex-1 flex items-center justify-center">
+                  <ClarpLoader size={80} variant="light" label="loading projects..." />
                 </div>
               ) : projects.length === 0 ? (
                 <div className="flex-1 flex items-center justify-center">
