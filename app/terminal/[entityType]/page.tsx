@@ -192,7 +192,7 @@ function EmptyState() {
 // ============================================================================
 
 // Estimated card height (px): card padding + content + border + gap between cards
-const CARD_HEIGHT_ESTIMATE = 86;
+const CARD_HEIGHT_ESTIMATE = 80;
 // Toolbar + padding overhead in the scrollable area (px)
 const TOOLBAR_OVERHEAD = 60;
 const MIN_ITEMS = 4;
@@ -387,7 +387,7 @@ export default function TerminalEntityPage() {
                   <EmptyState />
                 </div>
               ) : (
-                <div className={`flex-1 flex flex-col justify-evenly py-2 transition-opacity duration-150 ${isFetching ? 'opacity-50 pointer-events-none' : ''}`}>
+                <div className={`flex-1 flex flex-col justify-evenly py-1 transition-opacity duration-150 ${isFetching ? 'opacity-50 pointer-events-none' : ''}`}>
                   {projects.map((project) => (
                     <IntelCard key={project.id} project={project} />
                   ))}

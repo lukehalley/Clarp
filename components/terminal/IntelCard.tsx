@@ -122,6 +122,7 @@ export default function IntelCard({ project }: IntelCardProps) {
     >
       <div className={`
         flex items-stretch border bg-ivory-light/[0.02] transition-all duration-200 overflow-hidden
+        h-[56px] sm:h-[72px]
         ${isPerson
           ? 'border-larp-purple/15 hover:border-larp-purple/30'
           : isOrganization

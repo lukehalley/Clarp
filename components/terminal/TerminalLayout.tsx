@@ -27,7 +27,7 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
     <TerminalNavProvider>
       {/* Persistent background */}
       <div className="fixed inset-0 bg-slate-dark -z-10" />
-      <div className="h-screen bg-slate-dark flex flex-col overflow-hidden">
+      <div className="h-dvh bg-slate-dark flex flex-col overflow-hidden">
         {/* Construction stripe */}
         <div className="construction-stripe h-1 shrink-0" />
 
