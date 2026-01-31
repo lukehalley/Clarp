@@ -6,6 +6,8 @@ import {
   Filter,
   ArrowUpDown,
   RotateCcw,
+  Loader2,
+  SlidersHorizontal,
 } from 'lucide-react';
 import IntelCard from '@/components/terminal/IntelCard';
 import SearchInput from '@/components/terminal/SearchInput';
@@ -21,7 +23,6 @@ type EntityFilter = 'project' | 'person' | 'organization';
 type CategoryFilter = 'all' | 'verified' | 'high-risk' | 'low-risk';
 type SortOption = 'score-high' | 'score-low' | 'recent' | 'name-asc';
 
-// URL slug <-> internal entity type mapping
 const SLUG_TO_ENTITY: Record<string, EntityFilter> = {
   projects: 'project',
   people: 'person',
@@ -51,6 +52,8 @@ const CATEGORY_FILTERS: { id: CategoryFilter; label: string }[] = [
   { id: 'low-risk', label: 'Trusted' },
 ];
 
+const PAGE_SIZE = 20;
+
 function sortOptionToParams(sortBy: SortOption): { orderBy: string; order: string } {
   switch (sortBy) {
     case 'score-high': return { orderBy: 'trust_score', order: 'desc' };
@@ -67,13 +70,11 @@ function sortOptionToParams(sortBy: SortOption): { orderBy: string; order: strin
 function buildUrl(entitySlug: string, filters: {
   category?: CategoryFilter;
   sort?: SortOption;
-  page?: number;
 }): string {
   const params = new URLSearchParams();
 
   if (filters.category && filters.category !== 'all') params.set('category', filters.category);
   if (filters.sort && filters.sort !== 'score-high') params.set('sort', filters.sort);
-  if (filters.page && filters.page > 1) params.set('page', String(filters.page));
 
   const qs = params.toString();
   return `/terminal/${entitySlug}${qs ? `?${qs}` : ''}`;
@@ -98,68 +99,105 @@ function ToolBar({
   hasActiveFilters: boolean;
   onReset: () => void;
 }) {
-  const activeCategoryLabel = CATEGORY_FILTERS.find(f => f.id === category)?.label || 'All';
-  const activeSortLabel = SORT_OPTIONS.find(s => s.id === sortBy)?.label || 'Trust: High to Low';
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const popoverRef = useRef<HTMLDivElement | null>(null);
+
+  // Close popover on outside click
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
+        setMobileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [mobileOpen]);
+
+  const selectBgStyle = { backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'10\' height=\'10\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%239ca3af\' stroke-width=\'2\'%3E%3Cpath d=\'M6 9l6 6 6-6\'/%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0 center' } as const;
+
+  const filterControls = (
+    <>
+      {/* Category dropdown */}
+      <div className="flex items-center gap-1.5">
+        <Filter size={12} className="text-ivory-light shrink-0" />
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value as CategoryFilter)}
+          className="bg-transparent text-ivory-light font-mono text-[11px] focus:outline-none cursor-pointer appearance-none pr-3"
+          style={selectBgStyle}
+        >
+          {CATEGORY_FILTERS.map((filter) => (
+            <option key={filter.id} value={filter.id} className="bg-slate-dark">
+              {filter.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Sort dropdown */}
+      <div className="flex items-center gap-1.5">
+        <ArrowUpDown size={12} className="text-ivory-light shrink-0" />
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as SortOption)}
+          className="bg-transparent text-ivory-light font-mono text-[11px] focus:outline-none cursor-pointer appearance-none pr-3"
+          style={selectBgStyle}
+        >
+          {SORT_OPTIONS.map((option) => (
+            <option key={option.id} value={option.id} className="bg-slate-dark">
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Reset */}
+      {hasActiveFilters && (
+        <>
+          <div className="w-px h-4 bg-ivory-light/15" />
+          <button
+            onClick={onReset}
+            className="text-ivory-light hover:text-ivory-light transition-colors"
+            title="Reset filters"
+          >
+            <RotateCcw size={12} />
+          </button>
+        </>
+      )}
+    </>
+  );
 
   return (
     <div className="flex items-stretch gap-2 h-12">
-      {/* Search — takes remaining space */}
-      <div className="flex-1 min-w-[180px]">
+      {/* Search */}
+      <div className="flex-1 min-w-0">
         <SearchInput compact />
       </div>
 
-      {/* Right side: Filter | Sort | Reset — visible on sm+ */}
-      <div className="shrink-0 hidden sm:flex items-center gap-0">
-        {/* Category dropdown */}
-        <div className="flex items-center gap-1.5">
-          <Filter size={12} className="text-ivory-light" />
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value as CategoryFilter)}
-            className="bg-transparent text-ivory-light font-mono text-[11px] focus:outline-none cursor-pointer appearance-none pr-3"
-            style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'10\' height=\'10\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%239ca3af\' stroke-width=\'2\'%3E%3Cpath d=\'M6 9l6 6 6-6\'/%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0 center' }}
-          >
-            {CATEGORY_FILTERS.map((filter) => (
-              <option key={filter.id} value={filter.id} className="bg-slate-dark">
-                {filter.label}
-              </option>
-            ))}
-          </select>
-        </div>
+      {/* Mobile: filter button + popover */}
+      <div className="relative sm:hidden shrink-0 flex items-center" ref={popoverRef}>
+        <button
+          onClick={() => setMobileOpen((v) => !v)}
+          className={`w-10 h-10 flex items-center justify-center border transition-colors ${
+            mobileOpen || hasActiveFilters
+              ? 'border-danger-orange/50 text-danger-orange'
+              : 'border-ivory-light/20 text-ivory-light/60'
+          }`}
+        >
+          <SlidersHorizontal size={16} />
+        </button>
 
-        {/* Separator */}
-        <div className="w-px h-4 bg-ivory-light/20 mx-3" />
-
-        {/* Sort dropdown */}
-        <div className="flex items-center gap-1.5">
-          <ArrowUpDown size={12} className="text-ivory-light" />
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as SortOption)}
-            className="bg-transparent text-ivory-light font-mono text-[11px] focus:outline-none cursor-pointer appearance-none pr-3"
-            style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'10\' height=\'10\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%239ca3af\' stroke-width=\'2\'%3E%3Cpath d=\'M6 9l6 6 6-6\'/%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0 center' }}
-          >
-            {SORT_OPTIONS.map((option) => (
-              <option key={option.id} value={option.id} className="bg-slate-dark">
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Reset */}
-        {hasActiveFilters && (
-          <>
-            <div className="w-px h-4 bg-ivory-light/15 mx-3" />
-            <button
-              onClick={onReset}
-              className="text-ivory-light hover:text-ivory-light transition-colors"
-              title="Reset filters"
-            >
-              <RotateCcw size={12} />
-            </button>
-          </>
+        {mobileOpen && (
+          <div className="absolute right-0 top-full mt-2 z-50 bg-slate-dark border border-ivory-light/15 p-3 flex flex-col gap-3 min-w-[200px] shadow-lg">
+            {filterControls}
+          </div>
         )}
+      </div>
+
+      {/* Desktop: inline filters */}
+      <div className="shrink-0 hidden sm:flex items-center gap-3">
+        {filterControls}
       </div>
     </div>
   );
@@ -191,44 +229,10 @@ function EmptyState() {
 // PAGE
 // ============================================================================
 
-// Estimated card height (px): card padding + content + border + gap between cards
-const CARD_HEIGHT_ESTIMATE = 80;
-// Toolbar + padding overhead in the scrollable area (px)
-const TOOLBAR_OVERHEAD = 60;
-const MIN_ITEMS = 4;
-const MAX_ITEMS = 30;
-
-function useItemsPerPage(containerRef: React.RefObject<HTMLDivElement | null>) {
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-
-    const calculate = () => {
-      const available = el.clientHeight - TOOLBAR_OVERHEAD;
-      const count = Math.floor(available / CARD_HEIGHT_ESTIMATE);
-      setItemsPerPage(Math.max(MIN_ITEMS, Math.min(MAX_ITEMS, count)));
-    };
-
-    calculate();
-
-    const observer = new ResizeObserver(calculate);
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [containerRef]);
-
-  return itemsPerPage;
-}
-
 export default function TerminalEntityPage() {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
-
-  // Ref for measuring available content height
-  const contentRef = useRef<HTMLDivElement | null>(null);
-  const itemsPerPage = useItemsPerPage(contentRef);
 
   // Derive entity type from URL slug
   const entitySlug = params.entityType as string;
@@ -245,24 +249,30 @@ export default function TerminalEntityPage() {
     ? sortParam as SortOption
     : 'score-high';
 
-  const pageParam = searchParams.get('page');
-  const currentPage = pageParam ? Math.max(1, parseInt(pageParam, 10) || 1) : 1;
-
-  // Server-fetched data
+  // Server-fetched data — accumulated for infinite scroll
   const [projects, setProjects] = useState<Project[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [entityCounts, setEntityCounts] = useState({ project: 0, person: 0, organization: 0 });
 
   // UI state
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [isFetching, setIsFetching] = useState(false);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [hasFetched, setHasFetched] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Track current offset for infinite scroll
+  const offsetRef = useRef(0);
+  const hasMore = projects.length < totalCount;
+
+  // Sentinel ref for intersection observer
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   // AbortController ref for cancelling stale requests
   const abortRef = useRef<AbortController | null>(null);
 
-  const totalPages = Math.ceil(totalCount / itemsPerPage);
+  // Track current filter key to detect changes
+  const filterKey = `${entityFilter}:${category}:${sortBy}`;
+  const prevFilterKeyRef = useRef(filterKey);
 
   // Redirect invalid slugs to /terminal/projects
   useEffect(() => {
@@ -271,8 +281,11 @@ export default function TerminalEntityPage() {
     }
   }, [entitySlug, router]);
 
-  const fetchProjects = useCallback(async (signal?: AbortSignal) => {
-    setIsFetching(true);
+  // Fetch a page of projects, optionally appending to existing list
+  const fetchProjects = useCallback(async (offset: number, append: boolean, signal?: AbortSignal) => {
+    if (append) {
+      setIsFetchingMore(true);
+    }
     setError(null);
 
     try {
@@ -281,8 +294,8 @@ export default function TerminalEntityPage() {
         entityType: entityFilter,
         orderBy,
         order,
-        limit: String(itemsPerPage),
-        offset: String((currentPage - 1) * itemsPerPage),
+        limit: String(PAGE_SIZE),
+        offset: String(offset),
       });
 
       if (category !== 'all') apiParams.set('category', category);
@@ -291,51 +304,81 @@ export default function TerminalEntityPage() {
       if (!res.ok) throw new Error('Failed to fetch projects');
       const data = await res.json();
 
-      setProjects(data.projects || []);
+      const newProjects: Project[] = data.projects || [];
+
+      if (append) {
+        setProjects((prev) => [...prev, ...newProjects]);
+      } else {
+        setProjects(newProjects);
+      }
+
       setTotalCount(data.total || 0);
       setEntityCounts(data.entityCounts || { project: 0, person: 0, organization: 0 });
+      offsetRef.current = offset + newProjects.length;
     } catch (err) {
-      // Aborted fetches (e.g. StrictMode remount) should not touch state
       if (err instanceof DOMException && err.name === 'AbortError') return;
       console.error('[TerminalPage] Failed to fetch projects:', err);
       setError('Failed to load projects');
     }
 
-    // Only reached if the fetch was NOT aborted
-    setIsFetching(false);
+    setIsFetchingMore(false);
     setIsInitialLoad(false);
     setHasFetched(true);
-  }, [entityFilter, category, sortBy, currentPage, itemsPerPage]);
+  }, [entityFilter, category, sortBy]);
 
-  // Fetch when any filter/sort/page changes
+  // Reset and fetch from the beginning when filters change
   useEffect(() => {
+    const filtersChanged = prevFilterKeyRef.current !== filterKey;
+    prevFilterKeyRef.current = filterKey;
+
+    if (filtersChanged) {
+      setProjects([]);
+      setIsInitialLoad(true);
+      setHasFetched(false);
+    }
+
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
-    fetchProjects(controller.signal);
+    offsetRef.current = 0;
+    fetchProjects(0, false, controller.signal);
     return () => controller.abort();
-  }, [fetchProjects]);
+  }, [filterKey, fetchProjects]);
+
+  // Infinite scroll — observe sentinel element
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry.isIntersecting && hasMore && !isFetchingMore && !isInitialLoad) {
+          fetchProjects(offsetRef.current, true);
+        }
+      },
+      { rootMargin: '200px' },
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, isFetchingMore, isInitialLoad, fetchProjects]);
 
   // URL update helper — replaces URL without full navigation
   const updateUrl = useCallback((slug: string, filters: {
     category?: CategoryFilter;
     sort?: SortOption;
-    page?: number;
   }) => {
     router.replace(buildUrl(slug, filters), { scroll: false });
   }, [router]);
 
-  // Filter change handlers — update URL (state is derived from URL)
+  // Filter change handlers
   const handleCategory = (c: CategoryFilter) => {
     updateUrl(ENTITY_TO_SLUG[entityFilter], { category: c, sort: sortBy });
   };
 
   const handleSortBy = (s: SortOption) => {
     updateUrl(ENTITY_TO_SLUG[entityFilter], { category, sort: s });
-  };
-
-  const handlePageChange = (page: number) => {
-    updateUrl(ENTITY_TO_SLUG[entityFilter], { category, sort: sortBy, page });
   };
 
   const resetFilters = () => {
@@ -349,7 +392,7 @@ export default function TerminalEntityPage() {
   return (
     <WalletGate showPreview={true}>
       <div className="absolute inset-0 flex flex-col">
-        <div ref={contentRef} className="flex-1 flex flex-col overflow-hidden px-4 sm:px-6">
+        <div className="flex-1 flex flex-col overflow-hidden px-4 sm:px-6">
           {isInitialLoad ? (
             <LoadingState />
           ) : (
@@ -371,14 +414,17 @@ export default function TerminalEntityPage() {
                   <div className="text-center">
                     <p className="font-mono text-sm text-larp-red/80">{error}</p>
                     <button
-                      onClick={() => fetchProjects()}
+                      onClick={() => {
+                        offsetRef.current = 0;
+                        fetchProjects(0, false);
+                      }}
                       className="mt-4 font-mono text-xs text-ivory-light hover:text-ivory-light transition-colors"
                     >
                       Try again
                     </button>
                   </div>
                 </div>
-              ) : (!hasFetched || isFetching) && projects.length === 0 ? (
+              ) : !hasFetched && projects.length === 0 ? (
                 <div className="flex-1 flex items-center justify-center">
                   <ClarpLoader size={80} variant="light" label="loading projects..." />
                 </div>
@@ -387,52 +433,27 @@ export default function TerminalEntityPage() {
                   <EmptyState />
                 </div>
               ) : (
-                <div className={`flex-1 flex flex-col justify-evenly py-1 transition-opacity duration-150 ${isFetching ? 'opacity-50 pointer-events-none' : ''}`}>
-                  {projects.map((project) => (
-                    <IntelCard key={project.id} project={project} />
-                  ))}
+                <div className="flex-1 overflow-y-auto py-1">
+                  <div className="flex flex-col gap-2">
+                    {projects.map((project) => (
+                      <IntelCard key={project.id} project={project} />
+                    ))}
+                  </div>
+
+                  {/* Sentinel for infinite scroll */}
+                  <div ref={sentinelRef} className="h-1" />
+
+                  {/* Loading more indicator */}
+                  {isFetchingMore && (
+                    <div className="flex items-center justify-center py-4">
+                      <Loader2 size={20} className="animate-spin text-ivory-light/40" />
+                    </div>
+                  )}
                 </div>
               )}
             </>
           )}
         </div>
-
-        {/* Pagination — pinned to bottom */}
-        {!isInitialLoad && totalPages > 1 && (
-          <div className="shrink-0 border-t border-ivory-light/10 bg-slate-dark px-4 sm:px-6 py-3 z-10">
-            <div className="flex items-center justify-center gap-2">
-              <button
-                onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                disabled={currentPage === 1}
-                className="px-3 py-1.5 font-mono text-xs border border-ivory-light/20 text-ivory-light hover:text-ivory-light hover:border-ivory-light/40 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-              >
-                ← Prev
-              </button>
-              <div className="flex items-center gap-1">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <button
-                    key={page}
-                    onClick={() => handlePageChange(page)}
-                    className={`w-8 h-8 font-mono text-xs transition-colors ${
-                      currentPage === page
-                        ? 'bg-danger-orange text-black font-bold'
-                        : 'border border-ivory-light/20 text-ivory-light hover:text-ivory-light hover:border-ivory-light/40'
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
-              </div>
-              <button
-                onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-                disabled={currentPage === totalPages}
-                className="px-3 py-1.5 font-mono text-xs border border-ivory-light/20 text-ivory-light hover:text-ivory-light hover:border-ivory-light/40 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-              >
-                Next →
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     </WalletGate>
   );
