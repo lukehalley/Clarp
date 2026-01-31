@@ -10,7 +10,6 @@ import {
   Building2,
   ChevronLeft,
   ChevronRight,
-  Search,
 } from 'lucide-react';
 
 interface NavItem {
@@ -26,7 +25,6 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'projects', label: 'Projects', icon: <Boxes size={18} />, href: '/terminal/projects' },
   { id: 'people', label: 'People', icon: <User size={18} />, href: '/terminal/people' },
   { id: 'orgs', label: 'Orgs', icon: <Building2 size={18} />, href: '/terminal/orgs' },
-  { id: 'scan', label: 'Scan', icon: <Search size={18} />, href: '/terminal/scan' },
 ];
 
 export default function TerminalSidebar() {
@@ -44,8 +42,6 @@ export default function TerminalSidebar() {
     if (pathname.startsWith('/terminal/project') && !pathname.startsWith('/terminal/projects')) return 'projects';
     if (pathname.startsWith('/terminal/person')) return 'people';
     if (pathname.startsWith('/terminal/org')) return 'orgs';
-    if (pathname.startsWith('/terminal/scan')) return 'scan';
-    if (pathname.startsWith('/terminal/tokenomics')) return 'tokenomics';
     if (pathname.includes('/projects')) return 'projects';
     if (pathname.includes('/people')) return 'people';
     if (pathname.includes('/orgs')) return 'orgs';

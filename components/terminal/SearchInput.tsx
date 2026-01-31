@@ -2,7 +2,8 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, X, AtSign, Link as LinkIcon, Coins, Github } from 'lucide-react';
+import { Search, X, AtSign, Link as LinkIcon, Coins, Github, Loader2, User, Building2, Boxes } from 'lucide-react';
+import type { Project } from '@/types/project';
 
 interface SearchInputProps {
   compact?: boolean;
@@ -30,6 +31,8 @@ const INPUT_LABELS: Record<InputType, string> = {
 
 const RECENT_SEARCHES_KEY = 'clarp-recent-searches';
 const MAX_RECENT_SEARCHES = 5;
+const SUGGESTION_DEBOUNCE = 300;
+const MAX_SUGGESTIONS = 5;
 
 const PLACEHOLDER_OPTIONS = [
   'Paste a Solana token address...',
@@ -39,6 +42,31 @@ const PLACEHOLDER_OPTIONS = [
   'Search for any token name...',
 ];
 
+function getTrustDotColor(score: number): string {
+  if (score >= 85) return '#22c55e';
+  if (score >= 70) return '#84cc16';
+  if (score >= 50) return '#6b7280';
+  if (score >= 30) return '#f97316';
+  return '#dc2626';
+}
+
+function getEntityIcon(entityType?: string) {
+  switch (entityType) {
+    case 'person': return <User size={14} className="text-larp-purple" />;
+    case 'organization': return <Building2 size={14} className="text-larp-yellow" />;
+    default: return <Boxes size={14} className="text-danger-orange" />;
+  }
+}
+
+function getEntityRoute(project: Project): string {
+  const identifier = project.xHandle || project.id;
+  switch (project.entityType) {
+    case 'person': return `/terminal/person/${identifier}`;
+    case 'organization': return `/terminal/org/${identifier}`;
+    default: return `/terminal/project/${identifier}`;
+  }
+}
+
 export default function SearchInput({ compact, initialValue = '', onSearch }: SearchInputProps) {
   const router = useRouter();
   const [query, setQuery] = useState(initialValue);
@@ -47,36 +75,38 @@ export default function SearchInput({ compact, initialValue = '', onSearch }: Se
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [displayedPlaceholder, setDisplayedPlaceholder] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
+  const [suggestions, setSuggestions] = useState<Project[]>([]);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Typewriter effect for placeholder
+  // Typewriter effect for placeholder — pauses when focused
   useEffect(() => {
+    if (isFocused) return;
+
     const currentText = PLACEHOLDER_OPTIONS[placeholderIndex];
 
     const timeout = setTimeout(() => {
       if (!isDeleting) {
-        // Typing
         if (displayedPlaceholder.length < currentText.length) {
           setDisplayedPlaceholder(currentText.slice(0, displayedPlaceholder.length + 1));
         } else {
-          // Pause at end, then start deleting
           setTimeout(() => setIsDeleting(true), 2000);
         }
       } else {
-        // Deleting
         if (displayedPlaceholder.length > 0) {
           setDisplayedPlaceholder(displayedPlaceholder.slice(0, -1));
         } else {
-          // Move to next placeholder
           setIsDeleting(false);
           setPlaceholderIndex((prev) => (prev + 1) % PLACEHOLDER_OPTIONS.length);
         }
       }
-    }, isDeleting ? 30 : 80); // Faster deletion, slower typing
+    }, isDeleting ? 30 : 80);
 
     return () => clearTimeout(timeout);
-  }, [displayedPlaceholder, isDeleting, placeholderIndex]);
+  }, [displayedPlaceholder, isDeleting, placeholderIndex, isFocused]);
 
   // Load recent searches from localStorage
   useEffect(() => {
@@ -89,6 +119,56 @@ export default function SearchInput({ compact, initialValue = '', onSearch }: Se
       }
     }
   }, []);
+
+  // Debounced suggestion fetch
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    abortRef.current?.abort();
+
+    const trimmed = query.trim();
+    const detected = getDetectedType(trimmed);
+
+    // Skip suggestions for URLs, addresses, etc — only suggest for name/handle-like queries
+    if (trimmed.length < 2 || detected === 'token_address' || detected === 'x_url' || detected === 'website' || detected === 'github') {
+      setSuggestions([]);
+      setIsLoadingSuggestions(false);
+      return;
+    }
+
+    setIsLoadingSuggestions(true);
+
+    debounceRef.current = setTimeout(async () => {
+      const controller = new AbortController();
+      abortRef.current = controller;
+
+      try {
+        const res = await fetch(`/api/projects?q=${encodeURIComponent(trimmed)}&limit=${MAX_SUGGESTIONS}`, {
+          signal: controller.signal,
+        });
+        if (!res.ok) throw new Error('fetch failed');
+        const data = await res.json();
+        setSuggestions(data.projects || []);
+      } catch (err) {
+        if (err instanceof DOMException && err.name === 'AbortError') return;
+        setSuggestions([]);
+      } finally {
+        setIsLoadingSuggestions(false);
+      }
+    }, SUGGESTION_DEBOUNCE);
+
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [query]);
+
+  // Clear suggestions on blur
+  useEffect(() => {
+    if (!isFocused) {
+      // Small delay so click on suggestion registers before clearing
+      const t = setTimeout(() => setSuggestions([]), 150);
+      return () => clearTimeout(t);
+    }
+  }, [isFocused]);
 
   // Save search to recent
   const saveRecentSearch = useCallback((search: string) => {
@@ -123,6 +203,12 @@ export default function SearchInput({ compact, initialValue = '', onSearch }: Se
   const handleRecentClick = (search: string) => {
     setQuery(search);
     handleSearch(search);
+  };
+
+  // Handle suggestion click
+  const handleSuggestionClick = (project: Project) => {
+    setIsFocused(false);
+    router.push(getEntityRoute(project));
   };
 
   // Clear input
@@ -178,6 +264,7 @@ export default function SearchInput({ compact, initialValue = '', onSearch }: Se
   };
 
   const detectedType = getDetectedType(query);
+  const showDropdown = isFocused && (recentSearches.length > 0 || query);
 
   return (
     <div className={`relative ${compact ? 'h-full' : ''}`}>
@@ -210,8 +297,8 @@ export default function SearchInput({ compact, initialValue = '', onSearch }: Se
                 compact ? 'text-sm' : 'text-base'
               }`}
             />
-            {/* Typewriter placeholder with blinking cursor */}
-            {!query && (
+            {/* Typewriter placeholder */}
+            {!query && !isFocused && (
               <div
                 className={`absolute inset-0 flex items-center pointer-events-none text-ivory-light font-mono ${
                   compact ? 'text-sm' : 'text-base'
@@ -236,7 +323,7 @@ export default function SearchInput({ compact, initialValue = '', onSearch }: Se
       </form>
 
       {/* Dropdown */}
-      {isFocused && (recentSearches.length > 0 || query) && (
+      {showDropdown && (
         <div
           ref={dropdownRef}
           className="absolute top-full left-0 right-0 mt-1 bg-slate-dark border border-ivory-light/20 z-50 max-h-[35vh] sm:max-h-64 overflow-y-auto shadow-xl"
@@ -268,6 +355,59 @@ export default function SearchInput({ compact, initialValue = '', onSearch }: Se
                 <Search size={12} className="text-danger-orange shrink-0 sm:w-3.5 sm:h-3.5" />
                 <span className="truncate">Search for &quot;{query.slice(0, 30)}{query.length > 30 ? '...' : ''}&quot;</span>
               </button>
+            </div>
+          )}
+
+          {/* Suggestions */}
+          {query && (suggestions.length > 0 || isLoadingSuggestions) && (
+            <div className="p-2 border-t border-ivory-light/10">
+              <div className="flex items-center gap-2 px-2 py-1">
+                <span className="text-[11px] sm:text-xs font-mono text-ivory-light">Suggestions</span>
+                {isLoadingSuggestions && <Loader2 size={10} className="animate-spin text-ivory-light" />}
+              </div>
+              {suggestions.map((project) => (
+                <button
+                  key={project.id}
+                  onClick={() => handleSuggestionClick(project)}
+                  className="w-full text-left px-2 sm:px-3 py-2 font-mono text-xs sm:text-sm text-ivory-light hover:bg-ivory-light/5 hover:text-ivory-light flex items-center gap-2.5 overflow-hidden"
+                >
+                  {/* Entity type icon */}
+                  <span className="shrink-0">{getEntityIcon(project.entityType)}</span>
+
+                  {/* Avatar */}
+                  {project.avatarUrl ? (
+                    <img
+                      src={project.avatarUrl}
+                      alt=""
+                      className="w-5 h-5 rounded-full shrink-0 object-cover"
+                    />
+                  ) : (
+                    <div className="w-5 h-5 rounded-full shrink-0 bg-ivory-light/10 flex items-center justify-center text-[9px] text-ivory-light font-bold">
+                      {project.name?.[0]?.toUpperCase() || '?'}
+                    </div>
+                  )}
+
+                  {/* Name + secondary info */}
+                  <div className="flex-1 min-w-0 flex items-center gap-1.5">
+                    <span className="truncate text-ivory-light">{project.name}</span>
+                    {project.ticker && (
+                      <span className="text-[10px] text-ivory-light shrink-0">${project.ticker}</span>
+                    )}
+                    {!project.ticker && project.xHandle && (
+                      <span className="text-[10px] text-ivory-light shrink-0">@{project.xHandle}</span>
+                    )}
+                  </div>
+
+                  {/* Trust score dot */}
+                  {project.trustScore && (
+                    <span
+                      className="w-2 h-2 rounded-full shrink-0"
+                      style={{ backgroundColor: getTrustDotColor(project.trustScore.score) }}
+                      title={`Trust: ${project.trustScore.score}`}
+                    />
+                  )}
+                </button>
+              ))}
             </div>
           )}
 

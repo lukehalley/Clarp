@@ -6,7 +6,6 @@ import {
   Boxes,
   User,
   Building2,
-  Search,
   Eye,
   Shield,
   BarChart3,
@@ -35,7 +34,6 @@ const MAIN_NAV: NavItem[] = [
   { id: 'projects', label: 'Projects', icon: <Boxes size={20} />, href: '/terminal/projects' },
   { id: 'people', label: 'People', icon: <User size={20} />, href: '/terminal/people' },
   { id: 'orgs', label: 'Orgs', icon: <Building2 size={20} />, href: '/terminal/orgs' },
-  { id: 'scan', label: 'Scan', icon: <Search size={20} />, href: '/terminal/scan' },
 ];
 
 const DETAIL_NAV: { id: TabId; label: string; icon: React.ReactNode }[] = [
@@ -55,7 +53,6 @@ export default function TerminalBottomNav() {
     if (pathname.startsWith('/terminal/project') && !pathname.startsWith('/terminal/projects')) return 'projects';
     if (pathname.startsWith('/terminal/person')) return 'people';
     if (pathname.startsWith('/terminal/org')) return 'orgs';
-    if (pathname.startsWith('/terminal/scan')) return 'scan';
     if (pathname.includes('/projects')) return 'projects';
     if (pathname.includes('/people')) return 'people';
     if (pathname.includes('/orgs')) return 'orgs';
