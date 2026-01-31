@@ -8,6 +8,7 @@ import DocsSection from '@/components/DocsSection';
 import Footer from '@/components/Footer';
 import ActivityNotifications from '@/components/ActivityNotifications';
 import HallOfShame from '@/components/HallOfShame';
+import MeetTheDev from '@/components/MeetTheDev';
 import WarningTicker from '@/components/WarningTicker';
 import { FileText } from 'lucide-react';
 import ParallaxMascots from '@/components/ParallaxMascots';
@@ -762,8 +763,14 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ticker: roadmap → cta */}
+      {/* ticker: roadmap → meet the dev */}
       <WarningTicker messages={WARNING_TICKERS[6].messages} direction={WARNING_TICKERS[6].direction as 'left' | 'right'} />
+
+      {/* meet the dev section */}
+      <MeetTheDev />
+
+      {/* ticker: meet the dev → cta */}
+      <WarningTicker messages={['DOXXED DEV', 'NIGHTS & WEEKENDS', '13+ YEARS EXPERIENCE', 'SHIPS WEEKLY', 'NOT ANON', 'VERIFY ON LUKEHALLEY.COM', 'ONE DEV. REAL PRODUCT.', 'CLARP SPOTS LARP']} direction="right" />
 
       {/* cta section */}
       <section className="py-16 sm:py-24 px-4 sm:px-6 relative bg-slate-dark">

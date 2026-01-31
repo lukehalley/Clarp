@@ -139,16 +139,16 @@ export default function TerminalSidebar() {
       </nav>
 
       {/* Bottom section: Wallet + Collapse toggle */}
-      <div className="shrink-0 border-t border-ivory-light/10 overflow-hidden flex items-center h-10">
+      <div className={`shrink-0 border-t border-ivory-light/10 overflow-hidden ${expanded ? 'flex items-center h-10' : 'flex flex-col'}`}>
         {/* Wallet — always rendered with compact mode */}
-        <div className="flex-1 overflow-hidden">
+        <div className={expanded ? 'flex-1 overflow-hidden' : ''}>
           <ConnectWallet compact showLabel={expanded} />
         </div>
 
         {/* Collapse toggle */}
         <button
           onClick={() => setExpanded(!expanded)}
-          className="shrink-0 flex items-center justify-center w-10 h-10 border-l border-ivory-light/10 text-ivory-light hover:text-ivory-light transition-colors cursor-pointer"
+          className={`shrink-0 flex items-center justify-center w-full h-10 text-ivory-light hover:text-ivory-light transition-colors cursor-pointer ${expanded ? 'w-10 border-l border-ivory-light/10' : 'border-t border-ivory-light/10'}`}
           title={expanded ? 'Collapse' : 'Expand'}
         >
           {expanded ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}

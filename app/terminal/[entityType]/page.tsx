@@ -398,7 +398,7 @@ export default function TerminalEntityPage() {
           ) : (
             <>
               {/* Search + Filters + Sort — single horizontal bar */}
-              <div className="shrink-0">
+              <div className="shrink-0 pt-12 pb-4">
                 <ToolBar
                   category={category}
                   setCategory={handleCategory}
@@ -434,7 +434,7 @@ export default function TerminalEntityPage() {
                 </div>
               ) : (
                 <div className="flex-1 overflow-y-auto py-1">
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-7">
                     {projects.map((project) => (
                       <IntelCard key={project.id} project={project} />
                     ))}

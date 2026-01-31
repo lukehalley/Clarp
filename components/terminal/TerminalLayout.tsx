@@ -51,7 +51,7 @@ export default function TerminalLayout({ children }: TerminalLayoutProps) {
           <TerminalSidebar />
 
           {/* Main Content — full width */}
-          <main className="flex-1 overflow-y-auto pb-16 lg:pb-0 relative">
+          <main className="flex-1 overflow-y-auto overflow-x-hidden pb-16 lg:pb-0 relative">
             {children}
           </main>
         </div>
