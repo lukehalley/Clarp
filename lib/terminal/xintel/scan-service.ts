@@ -383,7 +383,9 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
   }
 
   // Store OSINT entity for the scan processor to use for gap-filling
-  osintEntityCache.set(entity.xHandle.toLowerCase(), entity);
+  if (entity.xHandle) {
+    osintEntityCache.set(entity.xHandle.toLowerCase(), entity);
+  }
 
   // Save OSINT project immediately so user can see data while AI analyzes
   // This will be enriched later when the X analysis completes
