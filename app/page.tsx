@@ -9,7 +9,7 @@ import Footer from '@/components/Footer';
 import ActivityNotifications from '@/components/ActivityNotifications';
 import HallOfShame from '@/components/HallOfShame';
 import WarningTicker from '@/components/WarningTicker';
-import Roadmap from '@/components/Roadmap';
+import { FileText } from 'lucide-react';
 import ParallaxMascots from '@/components/ParallaxMascots';
 import ClarpLoader from '@/components/ClarpLoader';
 import TERMINAL_CONVERSATIONS from '@/data/terminal-conversations.json';
@@ -627,8 +627,28 @@ export default function Home() {
       {/* ticker: hall of shame → roadmap */}
       <WarningTicker messages={WARNING_TICKERS[5].messages} direction={WARNING_TICKERS[5].direction as 'left' | 'right'} />
 
-      {/* roadmap section */}
-      <Roadmap />
+      {/* roadmap cta */}
+      <section id="roadmap" className="py-16 sm:py-24 px-4 sm:px-6">
+        <div className="max-w-2xl mx-auto text-center">
+          <span className="inline-block px-3 py-1 text-xs font-mono bg-danger-orange text-white mb-4 border border-black">
+            leaked document
+          </span>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-dark mb-3 sm:mb-4 font-display">
+            internal roadmap memo
+          </h2>
+          <p className="text-sm sm:text-base text-slate-light max-w-xl mx-auto mb-8">
+            what we shipped. what we&apos;re building. what&apos;s next.
+          </p>
+          <a
+            href="/roadmap"
+            onClick={(e) => { e.preventDefault(); navigateWithFade('/roadmap'); }}
+            className="btn-primary inline-flex items-center justify-center gap-2 text-base px-8 py-4 cursor-pointer"
+          >
+            <FileText size={20} />
+            VIEW ROADMAP
+          </a>
+        </div>
+      </section>
 
       {/* ticker: roadmap → cta */}
       <WarningTicker messages={WARNING_TICKERS[6].messages} direction={WARNING_TICKERS[6].direction as 'left' | 'right'} />
