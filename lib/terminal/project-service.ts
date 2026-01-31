@@ -469,6 +469,36 @@ export async function upsertProjectByHandle(
   }
 
   try {
+    // Check if project exists first — use partial update to preserve existing data
+    const existing = await getProjectByHandle(normalizedHandle);
+
+    if (existing) {
+      // Update only the fields that are provided (non-undefined)
+      const updateData = {
+        ...projectToUpdate({
+          ...project,
+          lastScanAt: new Date(),
+        }),
+        x_handle: normalizedHandle,
+      };
+
+      const { data, error } = await client
+        .from('projects')
+        .update(updateData)
+        .eq('id', existing.id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('[ProjectService] Error updating project by handle:', error.message);
+        return null;
+      }
+
+      console.log(`[ProjectService] Updated project: @${normalizedHandle}`);
+      return rowToProject(data as ProjectRow);
+    }
+
+    // No existing project — create new one
     const insert = {
       ...projectToInsert(project),
       x_handle: normalizedHandle,
@@ -477,16 +507,16 @@ export async function upsertProjectByHandle(
 
     const { data, error } = await client
       .from('projects')
-      .upsert(insert, { onConflict: 'x_handle' })
+      .insert(insert)
       .select()
       .single();
 
     if (error) {
-      console.error('[ProjectService] Error upserting project:', error.message);
+      console.error('[ProjectService] Error inserting project:', error.message);
       return null;
     }
 
-    console.log(`[ProjectService] Upserted project: @${normalizedHandle}`);
+    console.log(`[ProjectService] Created project: @${normalizedHandle}`);
     return rowToProject(data as ProjectRow);
   } catch (err) {
     console.error('[ProjectService] Failed to upsert project:', err);

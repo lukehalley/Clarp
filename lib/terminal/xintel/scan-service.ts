@@ -368,6 +368,12 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
           ...entity,
           name: existingProject.name || entity.name,
           symbol: existingProject.ticker || entity.symbol,
+          description: existingProject.description || entity.description,
+          imageUrl: existingProject.avatarUrl || entity.imageUrl,
+          website: existingProject.websiteUrl || entity.website,
+          github: existingProject.githubUrl || entity.github,
+          telegram: existingProject.telegramUrl || entity.telegram,
+          discord: existingProject.discordUrl || entity.discord,
           tokenAddresses: [{
             chain: 'solana',
             address: existingProject.tokenAddress,
