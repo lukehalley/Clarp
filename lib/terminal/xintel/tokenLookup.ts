@@ -34,6 +34,7 @@ export interface TokenData {
   // Token info
   imageUrl?: string;
   websiteUrl?: string;
+  githubUrl?: string;
   twitterUrl?: string;
   telegramUrl?: string;
   // Age - timestamp when first trading pair was created
@@ -234,7 +235,8 @@ export async function lookupTokenByAddress(tokenAddress: string): Promise<TokenS
         buys24h: pair.txns?.h24?.buys,
         sells24h: pair.txns?.h24?.sells,
         imageUrl: pair.info?.imageUrl,
-        websiteUrl: pair.info?.websites?.[0]?.url,
+        websiteUrl: pair.info?.websites?.find((w: any) => !w.url?.includes('github.com'))?.url || pair.info?.websites?.[0]?.url,
+        githubUrl: pair.info?.websites?.find((w: any) => w.url?.includes('github.com'))?.url,
         twitterUrl: pair.info?.socials?.find((s: any) => s.type === 'twitter')?.url,
         telegramUrl: pair.info?.socials?.find((s: any) => s.type === 'telegram')?.url,
         pairCreatedAt: pair.pairCreatedAt,

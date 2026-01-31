@@ -364,15 +364,18 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
         const marketResult = marketIntel.status === 'fulfilled' ? marketIntel.value : null;
         const tokenResult = tokenData.status === 'fulfilled' ? tokenData.value : null;
 
+        // Use DexScreener token data for image/website/social links (most reliable source)
+        const dexToken = tokenResult?.found ? tokenResult.token : null;
+
         entity = {
           ...entity,
           name: existingProject.name || entity.name,
           symbol: existingProject.ticker || entity.symbol,
           description: existingProject.description || entity.description,
-          imageUrl: existingProject.avatarUrl || entity.imageUrl,
-          website: existingProject.websiteUrl || entity.website,
-          github: existingProject.githubUrl || entity.github,
-          telegram: existingProject.telegramUrl || entity.telegram,
+          imageUrl: dexToken?.imageUrl || existingProject.avatarUrl || entity.imageUrl,
+          website: dexToken?.websiteUrl || existingProject.websiteUrl || entity.website,
+          github: dexToken?.githubUrl || existingProject.githubUrl || entity.github,
+          telegram: dexToken?.telegramUrl || existingProject.telegramUrl || entity.telegram,
           discord: existingProject.discordUrl || entity.discord,
           tokenAddresses: [{
             chain: 'solana',
@@ -381,7 +384,7 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
           }],
           securityIntel: rugCheckResult || undefined,
           marketIntel: marketResult || undefined,
-          tokenData: tokenResult?.found ? tokenResult.token : undefined,
+          tokenData: dexToken || undefined,
         };
         console.log(`[UniversalScan] Enriched @${xHandle} from DB: security=${!!rugCheckResult}, market=${!!marketResult}, token=${!!tokenResult?.found}`);
       }
