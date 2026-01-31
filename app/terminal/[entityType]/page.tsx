@@ -398,7 +398,7 @@ export default function TerminalEntityPage() {
           ) : (
             <>
               {/* Search + Filters + Sort — single horizontal bar */}
-              <div className="shrink-0 pt-12 pb-4">
+              <div className="shrink-0 pt-4 pb-4">
                 <ToolBar
                   category={category}
                   setCategory={handleCategory}

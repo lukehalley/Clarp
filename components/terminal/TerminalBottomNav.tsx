@@ -1,9 +1,7 @@
 'use client';
 
-import { usePathname, useRouter } from 'next/navigation';
 import { useTerminalNav } from '@/contexts/TerminalNavContext';
 import {
-  Boxes,
   Eye,
   Shield,
   BarChart3,
@@ -21,17 +19,6 @@ function GithubIcon({ size = 16, className = '' }: { size?: number; className?: 
 
 type TabId = 'overview' | 'security' | 'market' | 'intel' | 'development';
 
-interface NavItem {
-  id: string;
-  label: string;
-  icon: React.ReactNode;
-  href?: string;
-}
-
-const MAIN_NAV: NavItem[] = [
-  { id: 'projects', label: 'Projects', icon: <Boxes size={20} />, href: '/terminal/projects' },
-];
-
 const DETAIL_NAV: { id: TabId; label: string; icon: React.ReactNode }[] = [
   { id: 'overview', label: 'Overview', icon: <Eye size={20} /> },
   { id: 'security', label: 'Security', icon: <Shield size={20} /> },
@@ -41,54 +28,20 @@ const DETAIL_NAV: { id: TabId; label: string; icon: React.ReactNode }[] = [
 ];
 
 export default function TerminalBottomNav() {
-  const pathname = usePathname();
-  const router = useRouter();
   const { activeDetailTab, setActiveDetailTab, isDetailPage } = useTerminalNav();
 
-  const getActiveNavId = () => {
-    return 'projects';
-  };
-
-  const activeNavId = getActiveNavId();
-
-  // On detail pages, show detail tabs instead of main nav
-  if (isDetailPage) {
-    return (
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-dark border-t border-ivory-light/10">
-        <div className="flex items-center justify-around h-16">
-          {DETAIL_NAV.map((tab) => {
-            const isActive = activeDetailTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveDetailTab(tab.id)}
-                className={`
-                  flex flex-col items-center justify-center gap-0.5 flex-1 h-full min-w-[44px] font-mono transition-colors cursor-pointer
-                  ${isActive
-                    ? 'text-danger-orange'
-                    : 'text-ivory-light active:text-ivory-light'
-                  }
-                `}
-              >
-                {tab.icon}
-                <span className="text-[10px]">{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </nav>
-    );
-  }
+  // Only show on detail pages (mobile) — list pages don't need bottom nav
+  if (!isDetailPage) return null;
 
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-dark border-t border-ivory-light/10">
       <div className="flex items-center justify-around h-16">
-        {MAIN_NAV.map((item) => {
-          const isActive = activeNavId === item.id;
+        {DETAIL_NAV.map((tab) => {
+          const isActive = activeDetailTab === tab.id;
           return (
             <button
-              key={item.id}
-              onClick={() => item.href && router.push(item.href)}
+              key={tab.id}
+              onClick={() => setActiveDetailTab(tab.id)}
               className={`
                 flex flex-col items-center justify-center gap-0.5 flex-1 h-full min-w-[44px] font-mono transition-colors cursor-pointer
                 ${isActive
@@ -97,8 +50,8 @@ export default function TerminalBottomNav() {
                 }
               `}
             >
-              {item.icon}
-              <span className="text-[10px]">{item.label}</span>
+              {tab.icon}
+              <span className="text-[10px]">{tab.label}</span>
             </button>
           );
         })}
