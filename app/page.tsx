@@ -608,8 +608,120 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ticker: charity → docs */}
+      {/* ticker: tokenomics → locked supply */}
       <WarningTicker messages={WARNING_TICKERS[3].messages} direction={WARNING_TICKERS[3].direction as 'left' | 'right'} />
+
+      {/* locked supply section */}
+      <section className="py-16 sm:py-24 px-4 sm:px-6 overflow-hidden">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            {/* Left: Lock info */}
+            <div className="text-center lg:text-left">
+              <span className="badge badge-success mb-4 sm:mb-6">locked supply</span>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-ivory-light mb-4 sm:mb-6 font-display">
+                15M <span className="text-danger-orange">$CLARP</span> locked.
+              </h2>
+              <p className="text-lg sm:text-xl text-ivory-light/90 mb-2">
+                immutable. non-cancellable. verified on Streamflow.
+              </p>
+              <div className="w-32 sm:w-48 h-1 bg-larp-green mb-6 mx-auto lg:mx-0" />
+              <p className="text-base sm:text-lg text-ivory-light/70 mb-6 sm:mb-8 max-w-md mx-auto lg:mx-0">
+                15,024,200 CLARP locked via Streamflow Finance until April 21, 2026. the contract is immutable and cannot be canceled. 0% unlocked. 0 claimed.
+              </p>
+              <ul className="space-y-2 sm:space-y-3 mb-6 sm:mb-8 text-left max-w-md mx-auto lg:mx-0">
+                {[
+                  'contract is immutable — cannot be canceled or modified.',
+                  'cliff unlock: Apr 21, 2026 at 12:00 AM GMT+8.',
+                  '0% unlocked. 0 tokens claimed. fully locked.',
+                  'audited by 4 major auditors via Streamflow.',
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 sm:gap-3 text-sm sm:text-base text-ivory-light/80">
+                    <span className="text-larp-green shrink-0">▸</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <a
+                href="https://app.streamflow.finance/contract/solana/mainnet/2S2LATwiG3EZpTbpAPmyKrYpu5r8zQuQRatYCiDdWWpC"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-primary inline-flex items-center gap-2"
+              >
+                verify on Streamflow
+                <span>↗</span>
+              </a>
+            </div>
+
+            {/* Right: Lock status card */}
+            <div className="flex justify-center order-first lg:order-last">
+              <div
+                className="relative bg-ivory-light border-2 sm:border-3 border-slate-dark w-full max-w-sm"
+                style={{ boxShadow: '4px 4px 0 #0a0a09' }}
+              >
+                {/* Card header */}
+                <div className="bg-slate-dark px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+                  <p className="text-ivory-light font-mono text-sm sm:text-base">SUPPLY LOCK</p>
+                  <span className="inline-block bg-larp-green text-black font-mono text-xs px-3 py-1 font-bold">
+                    LOCKED
+                  </span>
+                </div>
+
+                {/* Card content */}
+                <div className="p-4 sm:p-6 space-y-4">
+                  <div>
+                    <p className="text-slate-light font-mono text-xs mb-1">LOCKED AMOUNT:</p>
+                    <p className="text-slate-dark font-mono text-lg font-bold">15,024,200 CLARP</p>
+                  </div>
+
+                  <div className="border-t border-dashed border-slate-light/30" />
+
+                  <div>
+                    <p className="text-slate-light font-mono text-xs mb-1">UNLOCK DATE:</p>
+                    <p className="text-slate-dark font-mono text-sm font-bold">Apr 21, 2026 — 12:00 AM GMT+8</p>
+                  </div>
+
+                  <div className="border-t border-dashed border-slate-light/30" />
+
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-sm text-slate-dark">unlocked</span>
+                      <span className="font-mono text-lg font-bold text-slate-dark">0%</span>
+                    </div>
+                    <div className="h-2 bg-slate-light/20 overflow-hidden">
+                      <div className="h-full bg-larp-green" style={{ width: '0%' }} />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-sm text-slate-dark">locked</span>
+                      <span className="font-mono text-lg font-bold text-larp-green">100%</span>
+                    </div>
+                    <div className="h-2 bg-slate-light/20 overflow-hidden">
+                      <div className="h-full bg-larp-green" style={{ width: '100%' }} />
+                    </div>
+                  </div>
+
+                  <div className="border-t border-dashed border-slate-light/30" />
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-slate-light font-mono text-xs mb-1">CONTRACT:</p>
+                      <span className="font-mono text-xs text-slate-dark">2S2LA...dWWpC</span>
+                    </div>
+                    <span className="text-larp-green text-3xl">🔒</span>
+                  </div>
+
+                  <p className="text-slate-light/60 font-mono text-[10px] text-center pt-2">
+                    verified on streamflow finance — audited by 4 firms
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ticker: locked supply → docs */}
+      <WarningTicker messages={['SUPPLY LOCKED', '15M CLARP LOCKED', 'IMMUTABLE CONTRACT', 'VERIFIED ON STREAMFLOW', 'ZERO UNLOCKED', 'CLIFF: APR 2026', 'NO RUG. LOCKED.', 'AUDITED BY 4 FIRMS']} direction="right" />
 
       {/* documentation section */}
       <section id="docs" className="py-16 sm:py-24 px-4 sm:px-6">
