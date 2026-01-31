@@ -602,7 +602,7 @@ export default function ClarpAgent() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="https://x.com/i/communities/2013904367188132011"
+              href="https://x.com/ClarpXYZ"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-primary"

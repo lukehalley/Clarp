@@ -66,7 +66,7 @@ export default function Navbar() {
                 <Send size={16} />
               </a>
               <a
-                href="https://x.com/i/communities/2013904367188132011"
+                href="https://x.com/ClarpXYZ"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 flex items-center justify-center border-2 border-slate-dark bg-white hover:bg-slate-dark hover:text-white text-slate-dark transition-all group"
@@ -146,7 +146,7 @@ export default function Navbar() {
                   telegram
                 </a>
                 <a
-                  href="https://x.com/i/communities/2013904367188132011"
+                  href="https://x.com/ClarpXYZ"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex-1 flex items-center justify-center gap-2 py-3 border-2 border-slate-dark bg-white text-slate-dark font-mono text-sm"

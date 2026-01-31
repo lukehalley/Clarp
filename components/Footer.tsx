@@ -63,7 +63,7 @@ export default function Footer() {
                 <Send size={16} />
               </a>
               <a
-                href="https://x.com/i/communities/2013904367188132011"
+                href="https://x.com/ClarpXYZ"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 bg-slate-medium flex items-center justify-center text-ivory-light/60 hover:text-danger-orange hover:bg-slate-light/20 transition-colors border border-slate-light/20"
