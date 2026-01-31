@@ -21,7 +21,7 @@ import {
   getScanJobFromDb,
   getActiveScanJobByHandle,
 } from '@/lib/supabase/client';
-import { upsertProjectByHandle, upsertProjectByTokenAddress } from '@/lib/terminal/project-service';
+import { upsertProjectByHandle, upsertProjectByTokenAddress, getProjectByHandle } from '@/lib/terminal/project-service';
 import type { GrokAnalysisResult, GrokCommunityAnalysisResult } from '@/lib/grok/types';
 import { BEHAVIORAL_ANALYSIS_PROMPT } from '@/lib/grok/prompts';
 import { getPerplexityClient, isPerplexityAvailable } from '@/lib/perplexity/client';
@@ -184,7 +184,7 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
     };
   }
 
-  const entity = resolutionResult.entity;
+  let entity = resolutionResult.entity;
   console.log(`[UniversalScan] Entity resolved: ${entity.canonicalId}, confidence: ${entity.confidence}`);
 
   // Log what OSINT data we found (for debugging)
@@ -342,6 +342,45 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
 
   // Step 3: Run X analysis via existing scan flow
   console.log(`[UniversalScan] X handle found (@${entity.xHandle}), running X analysis...`);
+
+  // Enrich bare X handle entities with existing DB data (token address, etc.)
+  // When rescanning by X handle, the entity resolver returns a bare entity.
+  // If we already have this project in the DB with a token address, use it for OSINT.
+  if (!entity.tokenAddresses?.length && isSupabaseAvailable()) {
+    try {
+      const existingProject = await getProjectByHandle(entity.xHandle);
+      if (existingProject?.tokenAddress) {
+        console.log(`[UniversalScan] Found existing project in DB for @${entity.xHandle} with token ${existingProject.tokenAddress.slice(0, 8)}...`);
+        // Run OSINT enrichment with the known token address
+        const [rugCheck, marketIntel, tokenData] = await Promise.allSettled([
+          fetchRugCheckReport(existingProject.tokenAddress),
+          fetchMarketIntel(existingProject.tokenAddress),
+          lookupTokenByAddress(existingProject.tokenAddress),
+        ]);
+
+        const rugCheckResult = rugCheck.status === 'fulfilled' ? rugCheck.value : null;
+        const marketResult = marketIntel.status === 'fulfilled' ? marketIntel.value : null;
+        const tokenResult = tokenData.status === 'fulfilled' ? tokenData.value : null;
+
+        entity = {
+          ...entity,
+          name: existingProject.name || entity.name,
+          symbol: existingProject.ticker || entity.symbol,
+          tokenAddresses: [{
+            chain: 'solana',
+            address: existingProject.tokenAddress,
+            symbol: existingProject.ticker || '',
+          }],
+          securityIntel: rugCheckResult || undefined,
+          marketIntel: marketResult || undefined,
+          tokenData: tokenResult?.found ? tokenResult.token : undefined,
+        };
+        console.log(`[UniversalScan] Enriched @${entity.xHandle} from DB: security=${!!rugCheckResult}, market=${!!marketResult}, token=${!!tokenResult?.found}`);
+      }
+    } catch (err) {
+      console.warn(`[UniversalScan] DB enrichment failed for @${entity.xHandle}:`, err);
+    }
+  }
 
   // Store OSINT entity for the scan processor to use for gap-filling
   osintEntityCache.set(entity.xHandle.toLowerCase(), entity);
@@ -1128,83 +1167,102 @@ async function processRealScan(job: ScanJob): Promise<void> {
 
   let isProject = false;
   let classifiedEntityType: 'project' | 'person' | 'company' | 'unknown' = 'unknown';
+
+  // Check if OSINT already proved this is crypto-related (token address, market data, etc.)
+  // If so, skip the classification call entirely to avoid false negatives
+  const cachedOsintEntity = osintEntityCache.get(job.handle.toLowerCase());
+  const osintProvesCrypto = cachedOsintEntity && (
+    (cachedOsintEntity.tokenAddresses && cachedOsintEntity.tokenAddresses.length > 0) ||
+    cachedOsintEntity.marketIntel?.priceUsd ||
+    cachedOsintEntity.securityIntel?.isAccessible
+  );
+
+  if (osintProvesCrypto) {
+    console.log(`[XIntel] OSINT data proves @${job.handle} is crypto-related (has token/market data), skipping classification`);
+    classifiedEntityType = 'project';
+    isProject = true;
+  }
+
   try {
-    const classification = await grokClient.classifyHandle(job.handle);
-    console.log(`[XIntel] Classification result: crypto=${classification.isCryptoRelated}, type=${classification.entityType}`);
-    classifiedEntityType = classification.entityType;
+    if (!osintProvesCrypto) {
+      const classification = await grokClient.classifyHandle(job.handle);
+      console.log(`[XIntel] Classification result: crypto=${classification.isCryptoRelated}, type=${classification.entityType}`);
+      classifiedEntityType = classification.entityType;
 
-    // Early exit if not crypto-related
-    if (!classification.isCryptoRelated) {
-      console.log(`[XIntel] @${job.handle} is not crypto-related, creating minimal report`);
-      updateJobStatus(job, 'complete', 100, 'Not crypto-related');
-      job.completedAt = new Date();
-      scanJobs.set(job.id, job);
+      // Early exit if not crypto-related
+      if (!classification.isCryptoRelated) {
+        console.log(`[XIntel] @${job.handle} is not crypto-related, creating minimal report`);
+        updateJobStatus(job, 'complete', 100, 'Not crypto-related');
+        job.completedAt = new Date();
+        scanJobs.set(job.id, job);
 
-      // Create a minimal "not relevant" report
-      const notRelevantReport: XIntelReport = {
-        id: `report_${job.handle}_${Date.now()}`,
-        profile: {
-          handle: job.handle,
-          verified: false,
-          languagesDetected: ['en'],
-        },
-        score: {
-          overall: 100,
-          riskLevel: 'low',
-          factors: [],
-          confidence: 'high',
-        },
-        keyFindings: [{
-          id: 'kf_not_crypto',
-          title: 'Not Crypto-Related',
-          description: classification.reason || 'This account does not appear to be involved in cryptocurrency.',
-          severity: 'info',
-          evidenceIds: [],
-        }],
-        shilledEntities: [],
-        backlashEvents: [],
-        behaviorMetrics: {
-          toxicity: { score: 0, examples: [] },
-          vulgarity: { score: 0, examples: [] },
-          hype: { score: 0, examples: [], keywords: [] },
-          aggression: { score: 0, examples: [], targetPatterns: [] },
-          consistency: { score: 100, topicDrift: 0, contradictions: [] },
-          spamBurst: { detected: false, burstPeriods: [] },
-        },
-        networkMetrics: {
-          topInteractions: [],
-          mentionList: [],
-          engagementHeuristics: {
-            replyRatio: 0,
-            retweetRatio: 0,
-            avgEngagementRate: 0,
-            suspiciousPatterns: [],
+        // Create a minimal "not relevant" report
+        const notRelevantReport: XIntelReport = {
+          id: `report_${job.handle}_${Date.now()}`,
+          profile: {
+            handle: job.handle,
+            verified: false,
+            languagesDetected: ['en'],
           },
-        },
-        linkedEntities: [],
-        evidence: [],
-        scanTime: new Date(),
-        postsAnalyzed: 0,
-        cached: false,
-        disclaimer: `AI-powered classification. Tokens used: ${classification.tokensUsed || 0}. This account was determined to not be crypto-related.`,
-      };
+          score: {
+            overall: 100,
+            riskLevel: 'low',
+            factors: [],
+            confidence: 'high',
+          },
+          keyFindings: [{
+            id: 'kf_not_crypto',
+            title: 'Not Crypto-Related',
+            description: classification.reason || 'This account does not appear to be involved in cryptocurrency.',
+            severity: 'info',
+            evidenceIds: [],
+          }],
+          shilledEntities: [],
+          backlashEvents: [],
+          behaviorMetrics: {
+            toxicity: { score: 0, examples: [] },
+            vulgarity: { score: 0, examples: [] },
+            hype: { score: 0, examples: [], keywords: [] },
+            aggression: { score: 0, examples: [], targetPatterns: [] },
+            consistency: { score: 100, topicDrift: 0, contradictions: [] },
+            spamBurst: { detected: false, burstPeriods: [] },
+          },
+          networkMetrics: {
+            topInteractions: [],
+            mentionList: [],
+            engagementHeuristics: {
+              replyRatio: 0,
+              retweetRatio: 0,
+              avgEngagementRate: 0,
+              suspiciousPatterns: [],
+            },
+          },
+          linkedEntities: [],
+          evidence: [],
+          scanTime: new Date(),
+          postsAnalyzed: 0,
+          cached: false,
+          disclaimer: `AI-powered classification. Tokens used: ${classification.tokensUsed || 0}. This account was determined to not be crypto-related.`,
+        };
 
-      // Cache the report
-      reportCache.set(job.handle, { report: notRelevantReport, cachedAt: new Date() });
-      if (isSupabaseAvailable()) {
-        cacheReportInSupabase(
-          job.handle,
-          notRelevantReport as unknown as Record<string, unknown>,
-          CACHE_TTL_MS
-        ).catch(err => console.error('[XIntel] Failed to cache to Supabase:', err));
+        // Cache the report
+        reportCache.set(job.handle, { report: notRelevantReport, cachedAt: new Date() });
+        if (isSupabaseAvailable()) {
+          cacheReportInSupabase(
+            job.handle,
+            notRelevantReport as unknown as Record<string, unknown>,
+            CACHE_TTL_MS
+          ).catch(err => console.error('[XIntel] Failed to cache to Supabase:', err));
+        }
+        return;
       }
-      return;
+
+      console.log(`[XIntel] @${job.handle} classified as ${classification.entityType}, overriding to project`);
     }
 
     // Force all entities to be treated as projects (person/org scanning disabled)
     isProject = true;
     classifiedEntityType = 'project';
-    console.log(`[XIntel] @${job.handle} classified as ${classification.entityType}, overriding to project`);
   } catch (err) {
     // Classification failed, continue with default (project)
     console.warn(`[XIntel] Classification failed for @${job.handle}, assuming project:`, err);
@@ -2477,9 +2535,13 @@ function validateDescriptionAgainstOsint(
     'virtually no information',
     'no significant information',
     'no substantial information',
+    'no substantive details',
+    'no verifiable details',
     'appears to be unknown',
     'no data available',
     'no results found',
+    'minimal documented information',
+    'beyond price data',
   ];
 
   const descLower = aiDescription.toLowerCase();

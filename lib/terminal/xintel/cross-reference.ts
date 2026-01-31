@@ -202,9 +202,9 @@ export function crossReference(input: CrossReferenceInput): CrossReferenceOutput
       fieldSources['techStack'] = { source: 'osint', confidence: 'high', retrievedAt: now };
     }
   }
-  if (!techStack && perplexityResult?.techStack) {
+  if (!techStack && perplexityResult?.techStack && perplexityResult.techStack.blockchain && perplexityResult.techStack.blockchain !== 'unknown') {
     techStack = {
-      blockchain: perplexityResult.techStack.blockchain || 'unknown',
+      blockchain: perplexityResult.techStack.blockchain,
       offlineCapability: false,
     };
     fieldSources['techStack'] = { source: 'perplexity', confidence: 'medium', retrievedAt: now };
@@ -212,6 +212,11 @@ export function crossReference(input: CrossReferenceInput): CrossReferenceOutput
   if (!techStack && grokAnalysis.techStack) {
     techStack = grokAnalysis.techStack;
     fieldSources['techStack'] = { source: 'grok', confidence: 'low', retrievedAt: now };
+  }
+  // If techStack blockchain is still unknown but we have OSINT token data on Solana, set it
+  if (techStack && techStack.blockchain === 'unknown' && osintEntity?.tokenAddresses?.[0]?.chain) {
+    techStack.blockchain = osintEntity.tokenAddresses[0].chain;
+    fieldSources['techStack'] = { source: 'osint', confidence: 'high', retrievedAt: now };
   }
 
   // --------------------------------------------------------------------------
@@ -273,15 +278,21 @@ export function crossReference(input: CrossReferenceInput): CrossReferenceOutput
   }
 
   // --------------------------------------------------------------------------
-  // THE STORY — Perplexity preferred (grounded narrative with citations)
+  // THE STORY — Perplexity preferred IF it has substantive content
+  // Fall back to Grok if Perplexity essentially says "no info found"
   // --------------------------------------------------------------------------
   let theStory: string | undefined;
-  if (perplexityResult?.theStory) {
+  const perplexityStoryIsEmpty = perplexityResult?.theStory && isLowInfoContent(perplexityResult.theStory);
+  if (perplexityResult?.theStory && !perplexityStoryIsEmpty) {
     theStory = perplexityResult.theStory;
     fieldSources['theStory'] = { source: 'perplexity', confidence: 'high', retrievedAt: now };
   } else if (grokAnalysis.theStory) {
     theStory = grokAnalysis.theStory;
     fieldSources['theStory'] = { source: 'grok', confidence: 'medium', retrievedAt: now };
+  } else if (perplexityResult?.theStory) {
+    // Use Perplexity's low-info story as last resort
+    theStory = perplexityResult.theStory;
+    fieldSources['theStory'] = { source: 'perplexity', confidence: 'low', retrievedAt: now };
   }
 
   // --------------------------------------------------------------------------
@@ -475,10 +486,11 @@ function mergeKeyFindings(
   const result: string[] = [];
   const perplexityFindings: string[] = [];
 
-  // Perplexity findings first (grounded, cited — keep as-is)
+  // Perplexity findings first (grounded, cited — keep as-is, but filter out "no info" findings)
   if (perplexity?.keyFindings) {
-    perplexityFindings.push(...perplexity.keyFindings);
-    result.push(...perplexity.keyFindings);
+    const usefulFindings = perplexity.keyFindings.filter(f => !isLowInfoContent(f));
+    perplexityFindings.push(...usefulFindings);
+    result.push(...usefulFindings);
   }
 
   // Grok findings (behavioral, uncited) — tag as [Unverified] unless corroborated by Perplexity
@@ -513,6 +525,30 @@ function mergeKeyFindings(
   }
 
   return result;
+}
+
+/**
+ * Detect when Perplexity returns a "we couldn't find anything" response.
+ * These are technically non-empty strings but contain no useful information.
+ */
+function isLowInfoContent(text: string): boolean {
+  const lower = text.toLowerCase();
+  const noInfoPatterns = [
+    'no verifiable details',
+    'no substantive details',
+    'no detailed',
+    'could not be verified',
+    'no information available',
+    'no matches found',
+    'no relevant information',
+    'beyond price data',
+    'no further details',
+    'minimal documented information',
+    'low-visibility token',
+    'no identifiers found',
+    'not enough information',
+  ];
+  return noInfoPatterns.some(p => lower.includes(p));
 }
 
 function normalizeAffiliationType(type: string): Affiliation['type'] {
