@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { after } from 'next/server';
 import { submitUniversalScan, getScanJob, getActiveScanByHandle } from '@/lib/terminal/xintel/scan-service';
+
+// Allow up to 5 minutes for scan processing (Grok + Perplexity + OSINT enrichment)
+export const maxDuration = 300;
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,6 +39,14 @@ export async function POST(request: NextRequest) {
         { error: result.error },
         { status: 429 }
       );
+    }
+
+    // Keep the serverless function alive for background scan processing
+    // after() ensures the function doesn't terminate until the scan completes
+    if (result.processingPromise) {
+      after(async () => {
+        await result.processingPromise;
+      });
     }
 
     return NextResponse.json({

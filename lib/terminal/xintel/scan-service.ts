@@ -122,6 +122,8 @@ export interface SubmitScanResult {
   cached: boolean;
   error?: string;
   useRealApi?: boolean;
+  // Promise for background processing - pass to after() to keep function alive
+  processingPromise?: Promise<void>;
 }
 
 // ============================================================================
@@ -146,6 +148,8 @@ export interface UniversalScanResult {
   osintData?: ResolvedEntity;
   // Full data (after X analysis)
   fullReport?: XIntelReport;
+  // Promise for background processing - pass to after() to keep function alive
+  processingPromise?: Promise<void>;
 }
 
 /**
@@ -434,6 +438,7 @@ export async function submitUniversalScan(options: UniversalScanOptions): Promis
     cached: xScanResult.cached,
     error: xScanResult.error,
     osintData: entity,
+    processingPromise: xScanResult.processingPromise,
   };
 }
 
@@ -897,8 +902,8 @@ export async function submitScan(options: SubmitScanOptions): Promise<SubmitScan
     }).catch(err => console.error('[XIntel] Failed to persist scan job:', err));
   }
 
-  // Start processing asynchronously
-  processScanJob(jobId);
+  // Start processing asynchronously - capture promise for after()
+  const processingPromise = processScanJob(jobId);
 
   return {
     jobId,
@@ -906,6 +911,7 @@ export async function submitScan(options: SubmitScanOptions): Promise<SubmitScan
     status: 'queued',
     cached: false,
     useRealApi: USE_REAL_API,
+    processingPromise,
   };
 }
 
